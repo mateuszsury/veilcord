@@ -7,6 +7,7 @@ Provides WebSocket client for presence and P2P connection establishment.
 from src.network.signaling_client import SignalingClient, ConnectionState
 from src.network.auth import create_auth_response, verify_challenge
 from src.network.stun import get_ice_servers, DEFAULT_STUN_SERVERS
+from src.network.presence import PresenceManager, UserStatus
 
 __all__ = [
     "SignalingClient",
@@ -15,4 +16,6 @@ __all__ = [
     "verify_challenge",
     "get_ice_servers",
     "DEFAULT_STUN_SERVERS",
+    "PresenceManager",
+    "UserStatus",
 ]
