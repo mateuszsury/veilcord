@@ -22,6 +22,11 @@ from .models import (
     CallEvent
 )
 
+from .audio_track import (
+    MicrophoneAudioTrack,
+    AudioPlaybackTrack
+)
+
 __all__ = [
     # Device management
     'AudioDeviceManager',
@@ -36,4 +41,7 @@ __all__ = [
     'VoiceCall',
     'VoiceMessageMetadata',
     'CallEvent',
+    # Audio tracks
+    'MicrophoneAudioTrack',
+    'AudioPlaybackTrack',
 ]
