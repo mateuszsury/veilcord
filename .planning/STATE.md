@@ -21,7 +21,7 @@ See: .planning/PROJECT.md
 | Phase | Name | Status | Plans | Requirements |
 |-------|------|--------|-------|--------------|
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
-| 2 | Signaling Infrastructure & Presence | In Progress | 1/? | 12 |
+| 2 | Signaling Infrastructure & Presence | In Progress | 2/? | 12 |
 | 3 | P2P Text Messaging | Pending | 0/? | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 8
+- Plans completed: 9
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -68,6 +68,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | API methods return JSON-serializable dicts | Complex Python objects converted to dicts for JavaScript consumption | Clean API bridge pattern |
 | 2026-01-30 | ed25519_private_key property on Identity | SignalingClient needs key object, not PEM bytes; added property to Identity class | Clean access to signing key |
 | 2026-01-30 | websockets>=15.0 (not 16.0) | v15.0.1 already installed, API compatible with requirements | No additional install needed |
+| 2026-01-30 | Settings stored as strings | All setting values are strings; callers handle type conversion | Simple key-value API |
+| 2026-01-30 | Database migration via ALTER TABLE | Use try/except OperationalError pattern for column additions | Safe for existing databases |
 
 ### Active TODOs
 
@@ -80,7 +82,7 @@ See: .planning/PROJECT.md
 - [x] Execute 01-06-PLAN.md (Settings panel and identity UI)
 - [x] Execute 01-07-PLAN.md (PyInstaller packaging) - PHASE 1 COMPLETE
 - [x] Execute 02-01-PLAN.md (WebSocket signaling client)
-- [ ] Execute 02-02-PLAN.md (presence system)
+- [x] Execute 02-02-PLAN.md (presence system)
 - [ ] Research aiortc data channels before Phase 3 planning
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
@@ -105,32 +107,33 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 02-01-PLAN.md
+**Last session:** 2026-01-30 - Completed 02-02-PLAN.md
 
 **What we were doing:**
-- Executed Phase 2 Plan 01: WebSocket Signaling Client
-- Created SignalingClient with auto-reconnect and Ed25519 auth
-- Created STUN configuration for P2P
+- Executed Phase 2 Plan 02: Presence State Management
+- Created settings key-value storage
+- Added online_status to contacts
+- Built PresenceManager for user/contact status
 
 **What's next:**
-- Execute 02-02-PLAN.md (presence system)
-- Presence broadcasting and contact status
+- Execute remaining Phase 2 plans
+- Integrate PresenceManager with SignalingClient
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/network/__init__.py
-- src/network/signaling_client.py
-- src/network/auth.py
-- src/network/stun.py
-- .planning/phases/02-signaling-infrastructure--presence/02-01-SUMMARY.md
+- src/storage/settings.py
+- src/network/presence.py
+- .planning/phases/02-signaling-infrastructure--presence/02-02-SUMMARY.md
 
 **Files modified this session:**
-- src/crypto/identity.py (ed25519_private_key property)
-- requirements.txt (websockets>=15.0)
+- src/storage/db.py (settings table, online_status column)
+- src/storage/contacts.py (online_status field and functions)
+- src/storage/__init__.py (settings exports)
+- src/network/__init__.py (presence exports)
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 02-01-PLAN.md execution*
+*Last updated: 2026-01-30 after 02-02-PLAN.md execution*
