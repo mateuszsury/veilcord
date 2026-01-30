@@ -33,3 +33,11 @@ aiortc>=1.14.0
 # Signal Protocol for E2E encryption
 DoubleRatchet>=1.3.0
 X3DH>=1.1.0
+
+# Phase 4: File Transfer
+
+# Image processing for thumbnails
+Pillow>=10.0.0
+
+# Video thumbnail extraction
+ffmpeg-python>=0.2.0
