@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[====================================================>                  ] 69% (Phase 5 In Progress - 2/8 plans)
+[====================================================>                  ] 69% (Phase 5 In Progress - 3/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
-| 5 | Voice Calls (1-on-1) | In Progress | 2/8 | 9 |
+| 5 | Voice Calls (1-on-1) | In Progress | 3/8 | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
@@ -120,6 +120,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Thread-safe async queue for audio | Use loop.call_soon_threadsafe() to bridge sounddevice callback thread to asyncio | Safe audio data transfer between threads |
 | 2026-01-30 | Mute returns silence instead of stopping | When muted, track returns zero-filled frames instead of stopping capture | Allows instant unmute without stream restart |
 | 2026-01-30 | Drop frames on queue full | Prevent memory bloat by dropping oldest frames when buffer exceeds 100 | Better than blocking callback thread |
+| 2026-01-30 | PyOgg libopusenc for voice messages | Use low-level libopusenc bindings instead of high-level API | Streams Opus directly to Ogg files, no memory bloat |
+| 2026-01-30 | ctypes to numpy via as_array() | Use np.ctypeslib.as_array() for OpusFile buffer conversion | PyOgg returns LP_c_short pointer, not buffer protocol |
 
 ### Active TODOs
 
@@ -153,6 +155,7 @@ See: .planning/PROJECT.md
 - [x] Execute 04-08-PLAN.md (file transfer resume API & UI) - PHASE 4 COMPLETE
 - [x] Execute 05-01-PLAN.md (audio device foundation)
 - [x] Execute 05-02-PLAN.md (audio tracks)
+- [x] Execute 05-04-PLAN.md (voice message recording)
 - [ ] Execute 05-03-PLAN.md (call signaling)
 - [ ] Execute remaining Phase 5 plans
 
@@ -173,15 +176,17 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 05-02-PLAN.md (audio tracks)
+**Last session:** 2026-01-30 - Completed 05-04-PLAN.md (voice message recording)
 
 **What we just completed:**
-- Executed plan 05-02 (audio tracks)
-- Created src/voice/audio_track.py with MicrophoneAudioTrack and AudioPlaybackTrack
-- MicrophoneAudioTrack captures from microphone, produces av.AudioFrame for WebRTC
-- AudioPlaybackTrack plays received audio through speakers
-- 20ms frames at 48kHz (960 samples) for Opus codec compatibility
-- Thread-safe queue bridging sounddevice callback to asyncio
+- Executed plan 05-04 (voice message recording)
+- Created src/voice/voice_message.py with VoiceMessageRecorder and VoiceMessagePlayer
+- VoiceMessageRecorder captures microphone audio to Opus-encoded .ogg files
+- Uses PyOgg libopusenc for streaming directly to disk (no memory bloat)
+- 5-minute maximum duration enforced (300 seconds)
+- VoiceMessagePlayer loads and plays .ogg files with pause/resume/seek
+- Added get_voice_messages_dir() to paths.py
+- Added PyOgg>=0.6.14 to requirements.txt
 
 **What's next:**
 - Execute 05-03-PLAN.md (call signaling)
@@ -191,14 +196,16 @@ See: .planning/PROJECT.md
 - None
 
 **Files created this session:**
-- src/voice/audio_track.py
-- .planning/phases/05-voice-calls/05-02-SUMMARY.md
+- src/voice/voice_message.py
+- .planning/phases/05-voice-calls/05-04-SUMMARY.md
 
 **Files modified this session:**
+- requirements.txt
+- src/storage/paths.py
 - src/voice/__init__.py
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after completing 05-02-PLAN.md*
+*Last updated: 2026-01-30 after completing 05-04-PLAN.md*
