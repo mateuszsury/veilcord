@@ -258,6 +258,152 @@ class API:
         service = get_network_service()
         service.send_typing_indicator(contact_id, active)
 
+    def edit_message(
+        self,
+        contact_id: int,
+        message_id: str,
+        new_body: str
+    ) -> Dict[str, Any]:
+        """
+        Edit a previously sent message.
+
+        Args:
+            contact_id: Contact database ID
+            message_id: ID of message to edit
+            new_body: New message text
+
+        Returns:
+            Dict with success status and optional error
+        """
+        service = get_network_service()
+        if not service._loop or not service._messaging:
+            return {"success": False, "error": "Service not ready"}
+
+        import asyncio
+        future = asyncio.run_coroutine_threadsafe(
+            service._messaging.edit_message(contact_id, message_id, new_body),
+            service._loop
+        )
+        try:
+            result = future.result(timeout=10.0)
+            return {"success": result}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def delete_message(
+        self,
+        contact_id: int,
+        message_id: str
+    ) -> Dict[str, Any]:
+        """
+        Delete a message (soft delete).
+
+        Args:
+            contact_id: Contact database ID
+            message_id: ID of message to delete
+
+        Returns:
+            Dict with success status and optional error
+        """
+        service = get_network_service()
+        if not service._loop or not service._messaging:
+            return {"success": False, "error": "Service not ready"}
+
+        import asyncio
+        future = asyncio.run_coroutine_threadsafe(
+            service._messaging.delete_message(contact_id, message_id),
+            service._loop
+        )
+        try:
+            result = future.result(timeout=10.0)
+            return {"success": result}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def add_reaction(
+        self,
+        contact_id: int,
+        message_id: str,
+        emoji: str
+    ) -> Dict[str, Any]:
+        """
+        Add an emoji reaction to a message.
+
+        Args:
+            contact_id: Contact database ID
+            message_id: ID of message to react to
+            emoji: Unicode emoji character
+
+        Returns:
+            Dict with success status
+        """
+        service = get_network_service()
+        if not service._loop or not service._messaging:
+            return {"success": False, "error": "Service not ready"}
+
+        import asyncio
+        future = asyncio.run_coroutine_threadsafe(
+            service._messaging.send_reaction(contact_id, message_id, emoji, "add"),
+            service._loop
+        )
+        try:
+            result = future.result(timeout=10.0)
+            return {"success": result}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def remove_reaction(
+        self,
+        contact_id: int,
+        message_id: str,
+        emoji: str
+    ) -> Dict[str, Any]:
+        """
+        Remove an emoji reaction from a message.
+
+        Args:
+            contact_id: Contact database ID
+            message_id: ID of message to unreact
+            emoji: Unicode emoji character to remove
+
+        Returns:
+            Dict with success status
+        """
+        service = get_network_service()
+        if not service._loop or not service._messaging:
+            return {"success": False, "error": "Service not ready"}
+
+        import asyncio
+        future = asyncio.run_coroutine_threadsafe(
+            service._messaging.send_reaction(contact_id, message_id, emoji, "remove"),
+            service._loop
+        )
+        try:
+            result = future.result(timeout=10.0)
+            return {"success": result}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_reactions(self, message_id: str) -> List[Dict[str, Any]]:
+        """
+        Get all reactions for a message.
+
+        Args:
+            message_id: ID of message
+
+        Returns:
+            List of reaction dicts with emoji, senderId, timestamp
+        """
+        from src.storage.messages import get_reactions as storage_get_reactions
+        reactions = storage_get_reactions(message_id)
+        return [{
+            "id": r.id,
+            "messageId": r.message_id,
+            "senderId": r.sender_id,
+            "emoji": r.emoji,
+            "timestamp": r.timestamp
+        } for r in reactions]
+
     # ========== System Methods ==========
 
     def ping(self) -> str:

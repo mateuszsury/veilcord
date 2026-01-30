@@ -41,6 +41,11 @@ export interface PyWebViewAPI {
   get_messages(contact_id: number, limit?: number, before?: number): Promise<MessageResponse[]>;
   get_p2p_state(contact_id: number): Promise<P2PConnectionState>;
   send_typing(contact_id: number, active?: boolean): Promise<void>;
+  edit_message(contact_id: number, message_id: string, new_body: string): Promise<ApiResult>;
+  delete_message(contact_id: number, message_id: string): Promise<ApiResult>;
+  add_reaction(contact_id: number, message_id: string, emoji: string): Promise<ApiResult>;
+  remove_reaction(contact_id: number, message_id: string, emoji: string): Promise<ApiResult>;
+  get_reactions(message_id: string): Promise<ReactionResponse[]>;
 
   // System
   ping(): Promise<string>;
@@ -79,6 +84,19 @@ export interface MessageResponse {
   deleted: boolean;
   timestamp: number;
   receivedAt: number | null;
+}
+
+export interface ApiResult {
+  success: boolean;
+  error?: string;
+}
+
+export interface ReactionResponse {
+  id: number;
+  messageId: string;
+  senderId: string;
+  emoji: string;
+  timestamp: number;
 }
 
 // Event payload types for incoming messages
