@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 3 - P2P Text Messaging
-**Status:** In Progress (Plan 3/7 complete)
+**Status:** In Progress (Plan 4/7 complete)
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -22,7 +22,7 @@ See: .planning/PROJECT.md
 |-------|------|--------|-------|--------------|
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
-| 3 | P2P Text Messaging | In Progress | 3/7 | 10 |
+| 3 | P2P Text Messaging | In Progress | 4/7 | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 15
+- Plans completed: 16
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -80,6 +80,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | No trickle ICE for aiortc | Wait for iceGatheringState == "complete" before returning SDP | Simpler SDP exchange via signaling |
 | 2026-01-30 | Data channel before offer | aiortc requires data channel creation before createOffer() | Proper SDP negotiation |
 | 2026-01-30 | 3-second typing throttle | Prevents typing indicator spam while maintaining UX | Max 1 typing event per 3 seconds |
+| 2026-01-30 | Simplified X3DH key exchange | Use ephemeral + identity DH only (no pre-key bundles) | P2P connections exchange keys synchronously |
+| 2026-01-30 | Async Signal encryption | All encrypt/decrypt methods are async (with sync wrappers) | Underlying doubleratchet library is fully async |
 
 ### Active TODOs
 
@@ -127,29 +129,30 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 03-03-PLAN.md (WebRTC peer connections)
+**Last session:** 2026-01-30 - Completed 03-02-PLAN.md (Signal Protocol)
 
 **What we were doing:**
-- Executed plan 03-03 (WebRTC peer connections)
-- Installed aiortc 1.14.0 for Python WebRTC support
-- Created PeerConnectionManager and MessageChannel abstractions
+- Executed plan 03-02 (Signal Protocol encryption)
+- Installed DoubleRatchet 1.3.0 and X3DH 1.3.0 for E2E encryption
+- Created SignalSession and message_crypto modules
 
 **What's next:**
 - Execute 03-04-PLAN.md (message protocol integration)
-- Continue with remaining Phase 3 plans (04-07)
+- Continue with remaining Phase 3 plans (05-07)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/network/peer_connection.py
-- src/network/data_channel.py
+- src/crypto/signal_session.py
+- src/crypto/message_crypto.py
 
 **Files modified this session:**
-- requirements.txt (added aiortc>=1.14.0)
-- src/network/__init__.py (exported new P2P modules)
+- requirements.txt (added DoubleRatchet>=1.3.0, X3DH>=1.1.0)
+- src/crypto/__init__.py (export new modules)
+- src/crypto/identity.py (x25519_private_key property)
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 03-03 completion*
+*Last updated: 2026-01-30 after 03-02 completion*
