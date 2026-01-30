@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[==================================>                                    ] 46% (Phase 4 - 5/7 plans)
+[=====================================>                                 ] 49% (Phase 4 - 6/7 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -23,18 +23,18 @@ See: .planning/PROJECT.md
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
-| 4 | File Transfer | In Progress | 5/7 | 7 |
+| 4 | File Transfer | In Progress | 6/7 | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 39/73 requirements completed (53%)
+**Total:** 40/73 requirements completed (55%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 24
+- Plans completed: 25
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -107,6 +107,10 @@ See: .planning/PROJECT.md
 | 2026-01-30 | ffmpeg frame at 1 second | Extract video thumbnail at 1-second mark | Avoids blank/black first frames, configurable if needed |
 | 2026-01-30 | Base64 preview transmission | Encode thumbnails as base64 for JSON-safe API responses | Simple data URI construction in frontend |
 | 2026-01-30 | MIME-type-based component routing | FileMessage routes to ImagePreview, VideoPreview, or generic download based on MIME prefix | Clear separation of concerns, extensible for future types |
+| 2026-01-30 | Transfer store uses Map for state | O(1) lookups by transferId, easier iteration over active transfers | Better performance than array filter/find |
+| 2026-01-30 | Event-driven transfer updates | Transfer store listens to file_progress/file_received/transfer_complete/transfer_error events | Consistent with messages.ts pattern, automatic UI updates |
+| 2026-01-30 | TransferProgress filters by contactId | Each chat shows only its own transfers, not all active transfers | Clean per-chat UX |
+| 2026-01-30 | MessageInput restructured for composition | FileUpload button sits alongside input in ChatPanel wrapper | Removed MessageInput's border wrapper for cleaner integration |
 
 ### Active TODOs
 
@@ -134,6 +138,10 @@ See: .planning/PROJECT.md
 - [x] Execute 04-02-PLAN.md (file chunking and sender)
 - [x] Execute 04-03-PLAN.md (file receiver and service orchestration)
 - [x] Execute 04-04-PLAN.md (network and API integration)
+- [x] Execute 04-05-PLAN.md (image and video previews)
+- [x] Execute 04-07-PLAN.md (file transfer UI)
+- [x] Execute 04-03-PLAN.md (file receiver and service orchestration)
+- [x] Execute 04-04-PLAN.md (network and API integration)
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
 
@@ -156,34 +164,31 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 04-05-PLAN.md (image and video previews)
+**Last session:** 2026-01-30 - Completed 04-07-PLAN.md (file transfer UI)
 
 **What we just completed:**
-- Executed plan 04-05 (image and video preview generation)
-- Created preview.py with Pillow/ffmpeg thumbnail generation
-- Added get_file_preview API method
-- Created ImagePreview component with lightbox modal
-- Created VideoPreview component with inline playback
-- Created FileMessage router component for MIME-type-based display
-- All components compiled successfully, 2 commits created
+- Executed plan 04-07 (file transfer UI components)
+- Created transfer store with event listeners for file_progress/file_received/transfer_complete/transfer_error
+- Created FileUpload button triggering native file dialog
+- Created TransferProgress component with progress bars showing bytes/speed/ETA
+- Integrated components into ChatPanel
+- All tasks compiled successfully, 3 commits created
 
 **What's next:**
-- Continue Phase 4: Execute 04-06-PLAN.md (file transfer UI integration)
+- Continue Phase 4: One more plan remaining (04-08 or integration/testing)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/file_transfer/preview.py
-- frontend/src/components/chat/ImagePreview.tsx
-- frontend/src/components/chat/VideoPreview.tsx
-- frontend/src/components/chat/FileMessage.tsx
-- .planning/phases/04-file-transfer/04-05-SUMMARY.md
+- frontend/src/stores/transfers.ts
+- frontend/src/components/chat/FileUpload.tsx
+- frontend/src/components/chat/TransferProgress.tsx
+- .planning/phases/04-file-transfer/04-07-SUMMARY.md
 
 **Files modified this session:**
-- requirements.txt
-- src/api/bridge.py
-- frontend/src/lib/pywebview.ts
+- frontend/src/components/chat/ChatPanel.tsx
+- frontend/src/components/chat/MessageInput.tsx
 - .planning/STATE.md
 
 ---
