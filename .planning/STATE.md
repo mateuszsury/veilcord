@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[========================================================>              ] 74% (Phase 5 In Progress - 5/8 plans)
+[===========================================================>           ] 77% (Phase 5 In Progress - 6/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -24,17 +24,17 @@ See: .planning/PROJECT.md
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
-| 5 | Voice Calls (1-on-1) | In Progress | 5/8 | 9 |
+| 5 | Voice Calls (1-on-1) | In Progress | 6/8 | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 51/73 requirements completed (70%)
+**Total:** 52/73 requirements completed (71%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 32
+- Plans completed: 33
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -125,6 +125,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Separate PC for voice calls | Voice calls use different RTCPeerConnection than data channels | Allows media renegotiation independent of messaging |
 | 2026-01-30 | Callback-based voice call notifications | VoiceCallService uses callbacks for state changes and signaling | Consistent with messaging and file transfer patterns |
 | 2026-01-30 | Voice recorder stored on NetworkService | _voice_recorder attribute lazily created on first recording | Shared instance for recording session, cleared after stop/cancel |
+| 2026-01-30 | Call store event listeners for full lifecycle | Listen to call_state, incoming_call, call_answered, call_rejected, call_ended events | Complete call UI state synchronization |
+| 2026-01-30 | Local duration timer in ActiveCallOverlay | Timer increments locally every second instead of syncing from backend | Simpler implementation, avoids network latency in duration display |
 
 ### Active TODOs
 
@@ -161,7 +163,8 @@ See: .planning/PROJECT.md
 - [x] Execute 05-04-PLAN.md (voice message recording)
 - [x] Execute 05-03-PLAN.md (call service)
 - [x] Execute 05-05-PLAN.md (voice integration)
-- [ ] Execute remaining Phase 5 plans (05-06, 05-07, 05-08)
+- [x] Execute 05-06-PLAN.md (call UI components)
+- [ ] Execute remaining Phase 5 plans (05-07, 05-08)
 
 ### Blockers
 
@@ -180,18 +183,16 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 05-05-PLAN.md (voice integration)
+**Last session:** 2026-01-30 - Completed 05-06-PLAN.md (call UI components)
 
 **What we just completed:**
-- Executed plan 05-05 (voice integration)
-- Integrated VoiceCallService into NetworkService
-- Added all call signaling handlers (offer, answer, reject, end, mute, ice_candidate)
-- Added voice call control methods to NetworkService
-- Added voice call and voice message API methods to bridge.py
-- Added TypeScript types for calls, events, audio devices
+- Executed plan 05-06 (call UI components)
+- Created Zustand call store with useCall hook
+- Built IncomingCallPopup with accept/reject buttons
+- Built ActiveCallOverlay with mute toggle and end call
+- Integrated call components into AppLayout
 
 **What's next:**
-- Execute 05-06-PLAN.md (call UI components)
 - Execute 05-07-PLAN.md (voice message UI)
 - Execute 05-08-PLAN.md (integration testing)
 
@@ -199,15 +200,16 @@ See: .planning/PROJECT.md
 - None
 
 **Files created this session:**
-- .planning/phases/05-voice-calls/05-05-SUMMARY.md
+- frontend/src/stores/call.ts
+- frontend/src/components/call/IncomingCallPopup.tsx
+- frontend/src/components/call/ActiveCallOverlay.tsx
+- .planning/phases/05-voice-calls/05-06-SUMMARY.md
 
 **Files modified this session:**
-- src/network/service.py
-- src/api/bridge.py
-- frontend/src/lib/pywebview.ts
+- frontend/src/components/layout/AppLayout.tsx
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after completing 05-05-PLAN.md*
+*Last updated: 2026-01-30 after completing 05-06-PLAN.md*
