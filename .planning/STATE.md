@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[=============================>                                         ] 40% (Phase 4 - 1/7 plans)
+[==============================>                                        ] 42% (Phase 4 - 3/7 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
-| 4 | File Transfer | In Progress | 1/7 | 7 |
+| 4 | File Transfer | In Progress | 3/7 | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 20
+- Plans completed: 22
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -95,6 +95,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | 64KB buffer threshold for backpressure | Typical WebRTC buffer limit is 256KB; use 64KB threshold to prevent overflow | Prevents connection crashes from buffer overflow |
 | 2026-01-30 | Poll bufferedAmount instead of event-based | aiortc RTCDataChannel lacks bufferedAmountLow event (browser-only feature) | Slightly less efficient than event-driven but simplest working approach |
 | 2026-01-30 | aiofiles for file transfer I/O | Prevent blocking asyncio event loop during file reads | Non-blocking transfers that don't degrade other operations |
+| 2026-01-30 | Temp files for chunk assembly | Large files shouldn't be held in memory during reception | Supports receiving files larger than available RAM |
+| 2026-01-30 | Max 3 concurrent transfers per contact | Prevent resource exhaustion from malicious or buggy peers | Service rejects new transfers when limit reached |
+| 2026-01-30 | Callback-based transfer notifications | Clean separation between transfer logic and frontend notification | Service emits events that API layer translates to frontend updates |
 
 ### Active TODOs
 
@@ -119,6 +122,8 @@ See: .planning/PROJECT.md
 - [x] Execute 03-06-PLAN.md (message features)
 - [x] Execute 03-07-PLAN.md (integration) - PHASE 3 COMPLETE
 - [x] Execute 04-01-PLAN.md (file storage infrastructure)
+- [x] Execute 04-02-PLAN.md (file chunking and sender)
+- [x] Execute 04-03-PLAN.md (file receiver and service orchestration)
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
 
@@ -141,30 +146,31 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 04-02-PLAN.md (file transfer sender)
+**Last session:** 2026-01-30 - Completed 04-03-PLAN.md (file receiver and transfer service)
 
 **What we just completed:**
-- Executed plan 04-02 (file chunking and sender-side transfer logic)
-- Created wire protocol with CHUNK_SIZE=16384, BUFFER_THRESHOLD=65536
-- Implemented async chunker with hash calculation using aiofiles
-- Created FileSender class with backpressure control via bufferedAmount polling
-- Added progress tracking with speed and ETA calculation
+- Executed plan 04-03 (file receiver with hash verification and service orchestration)
+- Created FileReceiver class with chunk reassembly, hash verification, temp file handling
+- Added database functions for transfer state persistence (save, get, update, delete)
+- Implemented FileTransferService managing up to 3 concurrent transfers per contact
+- Message routing handles metadata, chunks, EOF, cancel markers
+- Callback-based notifications for progress, completion, errors
 - All tests passed, 2 commits created
 
 **What's next:**
-- Continue Phase 4: Execute 04-03-PLAN.md (file receiver)
+- Continue Phase 4: Execute 04-04-PLAN.md (API endpoints for file transfer)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/file_transfer/protocol.py
-- src/file_transfer/chunker.py
-- src/file_transfer/sender.py
-- .planning/phases/04-file-transfer/04-02-SUMMARY.md
+- src/file_transfer/receiver.py
+- src/file_transfer/service.py
+- .planning/phases/04-file-transfer/04-03-SUMMARY.md
 
 **Files modified this session:**
 - src/file_transfer/__init__.py
+- src/storage/db.py
 - .planning/STATE.md
 
 ---
