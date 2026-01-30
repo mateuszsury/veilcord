@@ -102,7 +102,10 @@ def init_database() -> sqlcipher3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Connect to database
-    conn = sqlcipher3.connect(str(db_path))
+    # check_same_thread=False: Required because PyWebView runs API methods
+    # in a separate thread from where the connection was created.
+    # SQLite handles its own locking internally, so this is safe.
+    conn = sqlcipher3.connect(str(db_path), check_same_thread=False)
 
     # CRITICAL: Set key BEFORE any other operations
     conn.execute(f"PRAGMA key = \"x'{db_key.hex()}'\"")
