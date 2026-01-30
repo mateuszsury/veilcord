@@ -27,6 +27,11 @@ from .audio_track import (
     AudioPlaybackTrack
 )
 
+from .voice_message import (
+    VoiceMessageRecorder,
+    VoiceMessagePlayer
+)
+
 __all__ = [
     # Device management
     'AudioDeviceManager',
@@ -44,4 +49,7 @@ __all__ = [
     # Audio tracks
     'MicrophoneAudioTrack',
     'AudioPlaybackTrack',
+    # Voice messages
+    'VoiceMessageRecorder',
+    'VoiceMessagePlayer',
 ]
