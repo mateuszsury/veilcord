@@ -194,3 +194,73 @@ def import_backup(backup_json: str, password: str) -> Identity:
         raise
     except Exception as e:
         raise BackupError(f"Failed to import backup: {e}") from e
+
+
+def export_backup_to_file(identity: Identity, password: str, file_path: str) -> None:
+    """
+    Export identity backup to file.
+
+    Args:
+        identity: Identity to backup
+        password: Password for encryption
+        file_path: Destination file path
+
+    Raises:
+        BackupError: If export or file write fails
+    """
+    backup_json = export_backup(identity, password)
+
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(backup_json)
+    except OSError as e:
+        raise BackupError(f"Failed to write backup file: {e}") from e
+
+
+def import_backup_from_file(file_path: str, password: str) -> Identity:
+    """
+    Import identity backup from file.
+
+    Args:
+        file_path: Source file path
+        password: Password used during export
+
+    Returns:
+        Restored Identity object
+
+    Raises:
+        BackupError: If file read or import fails
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            backup_json = f.read()
+    except OSError as e:
+        raise BackupError(f"Failed to read backup file: {e}") from e
+
+    return import_backup(backup_json, password)
+
+
+def get_backup_info(backup_json: str) -> dict:
+    """
+    Get backup metadata without decrypting.
+
+    Useful for showing backup info before import.
+
+    Args:
+        backup_json: JSON string from export_backup()
+
+    Returns:
+        Dict with version and KDF parameters
+
+    Raises:
+        BackupError: If backup format is invalid
+    """
+    try:
+        backup = json.loads(backup_json)
+        return {
+            'version': backup.get('version'),
+            'kdf': backup.get('kdf'),
+            'kdf_params': backup.get('kdf_params')
+        }
+    except (json.JSONDecodeError, KeyError) as e:
+        raise BackupError("Invalid backup file format") from e

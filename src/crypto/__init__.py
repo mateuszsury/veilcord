@@ -19,6 +19,9 @@ from src.crypto.backup import (
     BackupError,
     export_backup,
     import_backup,
+    export_backup_to_file,
+    import_backup_from_file,
+    get_backup_info,
 )
 
 __all__ = [
@@ -32,4 +35,7 @@ __all__ = [
     'BackupError',
     'export_backup',
     'import_backup',
+    'export_backup_to_file',
+    'import_backup_from_file',
+    'get_backup_info',
 ]
