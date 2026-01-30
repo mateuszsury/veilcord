@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 3 - P2P Text Messaging
-**Status:** In Progress (Plan 4/7 complete)
+**Status:** In Progress (Plan 5/7 pending)
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -82,6 +82,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | 3-second typing throttle | Prevents typing indicator spam while maintaining UX | Max 1 typing event per 3 seconds |
 | 2026-01-30 | Simplified X3DH key exchange | Use ephemeral + identity DH only (no pre-key bundles) | P2P connections exchange keys synchronously |
 | 2026-01-30 | Async Signal encryption | All encrypt/decrypt methods are async (with sync wrappers) | Underlying doubleratchet library is fully async |
+| 2026-01-30 | Lazy import for message_crypto | __getattr__ in crypto/__init__.py defers message_crypto imports | Breaks circular import with storage module |
+| 2026-01-30 | Base64 encoding for encrypted transmission | Header, ciphertext, ephemeral_key encoded as base64 for data channel | JSON-safe message transmission |
+| 2026-01-30 | Callback-based messaging notifications | MessagingService uses callbacks for async frontend notification | Clean separation, thread-safe event dispatch |
 
 ### Active TODOs
 
@@ -101,7 +104,7 @@ See: .planning/PROJECT.md
 - [x] Execute 03-01-PLAN.md (message storage layer)
 - [x] Execute 03-02-PLAN.md (Signal Protocol)
 - [x] Execute 03-03-PLAN.md (WebRTC data channels)
-- [ ] Execute 03-04-PLAN.md (message protocol)
+- [x] Execute 03-04-PLAN.md (message protocol integration)
 - [ ] Execute 03-05-PLAN.md (chat UI)
 - [ ] Execute 03-06-PLAN.md (message features)
 - [ ] Execute 03-07-PLAN.md (integration)
@@ -129,30 +132,31 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 03-02-PLAN.md (Signal Protocol)
+**Last session:** 2026-01-30 - Completed 03-04-PLAN.md (P2P messaging integration)
 
 **What we were doing:**
-- Executed plan 03-02 (Signal Protocol encryption)
-- Installed DoubleRatchet 1.3.0 and X3DH 1.3.0 for E2E encryption
-- Created SignalSession and message_crypto modules
+- Executed plan 03-04 (P2P messaging integration)
+- Created MessagingService integrating peer connections, encryption, and storage
+- Extended NetworkService and API bridge with messaging methods
+- Added frontend TypeScript types for messages and P2P state events
 
 **What's next:**
-- Execute 03-04-PLAN.md (message protocol integration)
-- Continue with remaining Phase 3 plans (05-07)
+- Execute 03-05-PLAN.md (chat UI)
+- Continue with remaining Phase 3 plans (06-07)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/crypto/signal_session.py
-- src/crypto/message_crypto.py
+- src/network/messaging.py
 
 **Files modified this session:**
-- requirements.txt (added DoubleRatchet>=1.3.0, X3DH>=1.1.0)
-- src/crypto/__init__.py (export new modules)
-- src/crypto/identity.py (x25519_private_key property)
+- src/network/service.py (MessagingService integration)
+- src/api/bridge.py (messaging API methods)
+- frontend/src/lib/pywebview.ts (MessageResponse, P2PConnectionState types)
+- src/crypto/__init__.py (lazy import fix for circular dependency)
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 03-02 completion*
+*Last updated: 2026-01-30 after 03-04 completion*
