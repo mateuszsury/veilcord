@@ -3,6 +3,7 @@ import { IdentitySection } from './IdentitySection';
 import { NetworkSection } from './NetworkSection';
 import { BackupSection } from './BackupSection';
 import { ContactsSection } from './ContactsSection';
+import { AudioSection } from './AudioSection';
 
 export function SettingsPanel() {
   return (
@@ -15,6 +16,7 @@ export function SettingsPanel() {
 
       <IdentitySection />
       <NetworkSection />
+      <AudioSection />
       <BackupSection />
       <ContactsSection />
     </motion.div>
