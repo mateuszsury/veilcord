@@ -22,6 +22,15 @@ from src.storage.dpapi import dpapi_encrypt, dpapi_decrypt
 # Database operations
 from src.storage.db import init_database, get_database, close_database
 
+# Identity storage
+from src.storage.identity_store import (
+    has_identity,
+    save_identity,
+    load_identity,
+    update_display_name,
+    get_or_create_identity,
+)
+
 __all__ = [
     # Paths
     'get_app_data_dir',
@@ -35,4 +44,10 @@ __all__ = [
     'init_database',
     'get_database',
     'close_database',
+    # Identity storage
+    'has_identity',
+    'save_identity',
+    'load_identity',
+    'update_display_name',
+    'get_or_create_identity',
 ]
