@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[======================================================>                ] 71% (Phase 5 In Progress - 4/8 plans)
+[========================================================>              ] 74% (Phase 5 In Progress - 5/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -24,17 +24,17 @@ See: .planning/PROJECT.md
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
-| 5 | Voice Calls (1-on-1) | In Progress | 4/8 | 9 |
+| 5 | Voice Calls (1-on-1) | In Progress | 5/8 | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 50/73 requirements completed (69%)
+**Total:** 51/73 requirements completed (70%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 31
+- Plans completed: 32
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -123,6 +123,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | PyOgg libopusenc for voice messages | Use low-level libopusenc bindings instead of high-level API | Streams Opus directly to Ogg files, no memory bloat |
 | 2026-01-30 | ctypes to numpy via as_array() | Use np.ctypeslib.as_array() for OpusFile buffer conversion | PyOgg returns LP_c_short pointer, not buffer protocol |
 | 2026-01-30 | Separate PC for voice calls | Voice calls use different RTCPeerConnection than data channels | Allows media renegotiation independent of messaging |
+| 2026-01-30 | Callback-based voice call notifications | VoiceCallService uses callbacks for state changes and signaling | Consistent with messaging and file transfer patterns |
+| 2026-01-30 | Voice recorder stored on NetworkService | _voice_recorder attribute lazily created on first recording | Shared instance for recording session, cleared after stop/cancel |
 
 ### Active TODOs
 
@@ -158,7 +160,8 @@ See: .planning/PROJECT.md
 - [x] Execute 05-02-PLAN.md (audio tracks)
 - [x] Execute 05-04-PLAN.md (voice message recording)
 - [x] Execute 05-03-PLAN.md (call service)
-- [ ] Execute remaining Phase 5 plans
+- [x] Execute 05-05-PLAN.md (voice integration)
+- [ ] Execute remaining Phase 5 plans (05-06, 05-07, 05-08)
 
 ### Blockers
 
@@ -177,34 +180,34 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 05-03-PLAN.md (voice call service)
+**Last session:** 2026-01-30 - Completed 05-05-PLAN.md (voice integration)
 
 **What we just completed:**
-- Executed plan 05-03 (voice call service)
-- Created VoiceCallService class for call lifecycle management
-- Handles outgoing calls (create offer, ICE gathering, ring timeout)
-- Handles incoming calls (store offer, accept/reject)
-- Call state machine with proper transitions (7 states)
-- Audio track integration (MicrophoneAudioTrack + AudioPlaybackTrack)
-- Signaling callbacks for offer/answer/reject/end/mute events
-- Reconnection support for network changes
+- Executed plan 05-05 (voice integration)
+- Integrated VoiceCallService into NetworkService
+- Added all call signaling handlers (offer, answer, reject, end, mute, ice_candidate)
+- Added voice call control methods to NetworkService
+- Added voice call and voice message API methods to bridge.py
+- Added TypeScript types for calls, events, audio devices
 
 **What's next:**
-- Execute remaining Phase 5 plans (call UI, network integration)
-- Continue Phase 5 voice call implementation
+- Execute 05-06-PLAN.md (call UI components)
+- Execute 05-07-PLAN.md (voice message UI)
+- Execute 05-08-PLAN.md (integration testing)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/voice/call_service.py
-- .planning/phases/05-voice-calls/05-03-SUMMARY.md
+- .planning/phases/05-voice-calls/05-05-SUMMARY.md
 
 **Files modified this session:**
-- src/voice/__init__.py
+- src/network/service.py
+- src/api/bridge.py
+- frontend/src/lib/pywebview.ts
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after completing 05-03-PLAN.md*
+*Last updated: 2026-01-30 after completing 05-05-PLAN.md*
