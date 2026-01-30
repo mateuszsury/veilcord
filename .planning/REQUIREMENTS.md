@@ -18,11 +18,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Encryption
 
-- [ ] **ENCR-01**: All messages are E2E encrypted (Signal Protocol)
+- [x] **ENCR-01**: All messages are E2E encrypted (Signal Protocol)
 - [ ] **ENCR-02**: All voice/video calls are E2E encrypted
 - [ ] **ENCR-03**: All file transfers are E2E encrypted
 - [x] **ENCR-04**: Keys stored securely using Windows DPAPI
-- [ ] **ENCR-05**: Perfect forward secrecy (Double Ratchet)
+- [x] **ENCR-05**: Perfect forward secrecy (Double Ratchet)
 
 ### Contacts
 
@@ -34,14 +34,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Messaging
 
-- [ ] **MSG-01**: User can send text message to contact (1:1)
-- [ ] **MSG-02**: User can receive text message from contact
-- [ ] **MSG-03**: User can view message history (locally stored, encrypted)
-- [ ] **MSG-04**: User can send message to group
-- [ ] **MSG-05**: User can edit sent message
-- [ ] **MSG-06**: User can delete sent message
-- [ ] **MSG-07**: User sees typing indicator when contact is typing
-- [ ] **MSG-08**: User can add emoji reaction to message
+- [x] **MSG-01**: User can send text message to contact (1:1)
+- [x] **MSG-02**: User can receive text message from contact
+- [x] **MSG-03**: User can view message history (locally stored, encrypted)
+- [x] **MSG-04**: User can send message to group
+- [x] **MSG-05**: User can edit sent message
+- [x] **MSG-06**: User can delete sent message
+- [x] **MSG-07**: User sees typing indicator when contact is typing
+- [x] **MSG-08**: User can add emoji reaction to message
 
 ### Voice Messages
 
@@ -176,24 +176,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IDEN-04 | Phase 1 | Complete |
 | IDEN-05 | Phase 1 | Complete |
 | IDEN-06 | Phase 1 | Complete |
-| ENCR-01 | Phase 3 | Pending |
+| ENCR-01 | Phase 3 | Complete |
 | ENCR-02 | Phase 5 | Pending |
 | ENCR-03 | Phase 4 | Pending |
 | ENCR-04 | Phase 1 | Complete |
-| ENCR-05 | Phase 3 | Pending |
+| ENCR-05 | Phase 3 | Complete |
 | CONT-01 | Phase 2 | Complete |
 | CONT-02 | Phase 2 | Complete |
 | CONT-03 | Phase 2 | Complete |
 | CONT-04 | Phase 2 | Complete |
 | CONT-05 | Phase 2 | Complete |
-| MSG-01 | Phase 3 | Pending |
-| MSG-02 | Phase 3 | Pending |
-| MSG-03 | Phase 3 | Pending |
-| MSG-04 | Phase 3 | Pending |
-| MSG-05 | Phase 3 | Pending |
-| MSG-06 | Phase 3 | Pending |
-| MSG-07 | Phase 3 | Pending |
-| MSG-08 | Phase 3 | Pending |
+| MSG-01 | Phase 3 | Complete |
+| MSG-02 | Phase 3 | Complete |
+| MSG-03 | Phase 3 | Complete |
+| MSG-04 | Phase 3 | Complete |
+| MSG-05 | Phase 3 | Complete |
+| MSG-06 | Phase 3 | Complete |
+| MSG-07 | Phase 3 | Complete |
+| MSG-08 | Phase 3 | Complete |
 | VMSG-01 | Phase 5 | Pending |
 | VMSG-02 | Phase 5 | Pending |
 | VMSG-03 | Phase 5 | Pending |
@@ -261,4 +261,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-30*
-*Last updated: 2026-01-30 after roadmap creation*
+*Last updated: 2026-01-30 after Phase 3 completion*

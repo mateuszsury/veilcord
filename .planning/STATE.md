@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
-**Current Phase:** Phase 3 - P2P Text Messaging
-**Status:** COMPLETE (Plan 7/7 done)
+**Current Phase:** Phase 4 - File Transfer
+**Status:** Not Started
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -10,7 +10,7 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 3 - P2P text messaging using WebRTC data channels over the signaling infrastructure built in Phase 2. Signal Protocol (Double Ratchet) for E2E encryption, message persistence in SQLCipher, and chat UI.
+**Current focus:** Phase 4 - File transfer with E2E encryption over existing WebRTC data channels. Chunking for large files, progress tracking, and resume capability.
 
 ## Progress
 
@@ -163,4 +163,4 @@ See: .planning/PROJECT.md
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 03-06 completion*
+*Last updated: 2026-01-30 after Phase 3 completion*

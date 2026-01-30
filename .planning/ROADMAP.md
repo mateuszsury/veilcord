@@ -38,7 +38,7 @@ Plans:
 - [x] 01-06-PLAN.md - Identity and contact management UI
 - [x] 01-07-PLAN.md - PyInstaller packaging and verification
 
-**Status:** ✓ Complete (2026-01-30)
+**Status:** Complete (2026-01-30)
 
 **Success Criteria:**
 1. User downloads single .exe file and launches app within 5 seconds
@@ -77,7 +77,7 @@ Plans:
 - [x] 02-04-PLAN.md - Frontend presence UI (status selector, contact presence)
 - [x] 02-05-PLAN.md - Visual verification checkpoint
 
-**Status:** ✓ Complete (2026-01-30)
+**Status:** Complete (2026-01-30)
 
 **Success Criteria:**
 1. User connects to signaling server via WSS on app launch
@@ -104,6 +104,19 @@ Plans:
 - MSG-01, MSG-02, MSG-03, MSG-04, MSG-05, MSG-06, MSG-07, MSG-08
 - ENCR-01, ENCR-05
 
+**Plans:** 7 plans
+
+Plans:
+- [x] 03-01-PLAN.md - Database schema extension for messages, reactions, and Signal sessions
+- [x] 03-02-PLAN.md - Signal Protocol encryption layer (X3DH + Double Ratchet)
+- [x] 03-03-PLAN.md - WebRTC peer connection manager (aiortc data channels)
+- [x] 03-04-PLAN.md - P2P messaging integration (network service + API bridge)
+- [x] 03-05-PLAN.md - Chat UI core (message list, input, stores)
+- [x] 03-06-PLAN.md - Enhanced features (typing, reactions, edit, delete)
+- [x] 03-07-PLAN.md - Layout integration and verification checkpoint
+
+**Status:** Complete (2026-01-30)
+
 **Success Criteria:**
 1. User sends text message to online contact and it arrives within 2 seconds
 2. User receives text message from contact with notification
@@ -121,7 +134,7 @@ Plans:
 
 **Dependencies:** Phase 2 (signaling required for WebRTC connection establishment)
 
-**Research Notes:** Requires deeper research into aiortc data channel reliability and offline message store-and-forward patterns.
+**Research Notes:** Research completed (03-RESEARCH.md). Using aiortc for WebRTC, python-doubleratchet + python-x3dh for Signal Protocol.
 
 ---
 
@@ -317,7 +330,7 @@ Phase 8: Notifications & Polish
 
 **Phases requiring deeper research during planning:**
 
-- **Phase 3**: aiortc data channel reliability, offline message store-and-forward (MEDIUM complexity)
+- **Phase 3**: aiortc data channel reliability, offline message store-and-forward (MEDIUM complexity) - RESEARCH COMPLETE
 - **Phase 4**: File chunking and resume protocol (MEDIUM complexity)
 - **Phase 5**: aiortc audio codec interop with browsers, cross-platform audio (HIGH priority)
 - **Phase 6**: Cross-browser WebRTC compatibility, screen capture APIs (MEDIUM complexity)
