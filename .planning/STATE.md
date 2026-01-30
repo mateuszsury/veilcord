@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
-**Current Phase:** Phase 4 - File Transfer
-**Status:** COMPLETE
+**Current Phase:** Phase 5 - Voice Calls
+**Status:** In Progress
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 4 - File transfer with E2E encryption over existing WebRTC data channels. Chunking for large files, progress tracking, and resume capability.
+**Current focus:** Phase 5 - Voice calls with audio device management, WebRTC audio tracks, and call lifecycle state machine.
 
 ## Progress
 
 ```
-[=================================================>                     ] 67% (Phase 4 COMPLETE - 8/8 plans)
+[====================================================>                  ] 69% (Phase 5 In Progress - 1/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -24,17 +24,17 @@ See: .planning/PROJECT.md
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
-| 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
+| 5 | Voice Calls (1-on-1) | In Progress | 1/8 | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 49/73 requirements completed (67%)
+**Total:** 50/73 requirements completed (69%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 27
+- Plans completed: 28
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -115,6 +115,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Lazy metadata loading for file messages | FileMessageWrapper fetches metadata on mount instead of including in message | Better performance for scrolling through history |
 | 2026-01-30 | Type-based preview routing | FileMessage routes based on MIME type: image → ImagePreview, video → VideoPreview, other → download | Extensible pattern for future file type support |
 | 2026-01-30 | User re-selects file for resume | No original path storage - user must locate and re-select the same file for resume | Simpler implementation, validated by file size match |
+| 2026-01-30 | sounddevice for audio device access | Auto-installs PortAudio on Windows, simpler API than PyAudio | Cleaner device enumeration and audio I/O |
+| 2026-01-30 | 7-state CallState enum | IDLE, RINGING_*, CONNECTING, ACTIVE, RECONNECTING, ENDED covers full lifecycle | Clear state machine for UI and logic |
 
 ### Active TODOs
 
@@ -146,8 +148,9 @@ See: .planning/PROJECT.md
 - [x] Execute 04-07-PLAN.md (file transfer UI)
 - [x] Execute 04-06-PLAN.md (file transfer message integration)
 - [x] Execute 04-08-PLAN.md (file transfer resume API & UI) - PHASE 4 COMPLETE
-- [ ] Research aiortc audio codec interop before Phase 5 planning
-- [ ] Research Sender Keys protocol before Phase 7 planning
+- [x] Execute 05-01-PLAN.md (audio device foundation)
+- [ ] Execute 05-02-PLAN.md (audio track manager)
+- [ ] Execute remaining Phase 5 plans
 
 ### Blockers
 
@@ -156,11 +159,9 @@ See: .planning/PROJECT.md
 ### Research Flags
 
 **High priority (research before planning):**
-- Phase 5: aiortc audio codec interop with browser peers
 - Phase 7: Sender Keys protocol implementation and mesh optimization
 
 **Medium priority (research during planning):**
-- Phase 4: File chunking and resume protocol
 - Phase 6: Cross-browser WebRTC compatibility
 
 **Low priority (use standard patterns):**
@@ -168,38 +169,34 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 04-08-PLAN.md (file transfer resume API & UI)
+**Last session:** 2026-01-30 - Completed 05-01-PLAN.md (audio device foundation)
 
 **What we just completed:**
-- Executed plan 04-08 (file transfer resume API & UI)
-- Added NetworkService.resume_file method validating file and calling send_file with resume_offset
-- Added API.resume_transfer method exposing resume to frontend
-- Added TypeScript ResumableTransfer interface and resume_transfer method declaration
-- Added resumeTransfer and loadResumableTransfers store actions
-- Created ResumableTransfers UI component showing incomplete transfers with resume button
-- Integrated into ChatPanel above message list
-- PHASE 4 COMPLETE - all file transfer requirements satisfied including FILE-04 resume
+- Executed plan 05-01 (audio device foundation)
+- Created src/voice/ package with device_manager.py and models.py
+- AudioDeviceManager for input/output device enumeration using sounddevice
+- CallState enum with 7 states for call lifecycle
+- VoiceCall, VoiceMessageMetadata, CallEvent dataclasses
+- Added sounddevice>=0.5.0 and numpy>=2.0.0 to requirements.txt
 
 **What's next:**
-- Research aiortc audio codec interop before Phase 5 planning
-- Plan Phase 5 (Voice Calls) with `/gsd:plan-phase 5`
+- Execute 05-02-PLAN.md (audio track manager)
+- Continue Phase 5 voice call implementation
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- frontend/src/components/chat/ResumableTransfers.tsx
-- .planning/phases/04-file-transfer/04-08-SUMMARY.md
+- src/voice/__init__.py
+- src/voice/device_manager.py
+- src/voice/models.py
+- .planning/phases/05-voice-calls/05-01-SUMMARY.md
 
 **Files modified this session:**
-- src/network/service.py
-- src/api/bridge.py
-- frontend/src/lib/pywebview.ts
-- frontend/src/stores/transfers.ts
-- frontend/src/components/chat/ChatPanel.tsx
+- requirements.txt
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after completing 04-01-PLAN.md*
+*Last updated: 2026-01-30 after completing 05-01-PLAN.md*
