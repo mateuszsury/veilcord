@@ -56,6 +56,14 @@ class Identity:
         """
         return self.ed25519_public_hex
 
+    @property
+    def ed25519_private_key(self) -> ed25519.Ed25519PrivateKey:
+        """Get Ed25519 private key object for signing operations."""
+        return serialization.load_pem_private_key(
+            self.ed25519_private_pem,
+            password=None
+        )
+
 
 def generate_identity(display_name: str = "Anonymous") -> Identity:
     """

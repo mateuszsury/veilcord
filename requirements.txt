@@ -19,3 +19,8 @@ argon2-cffi>=23.1.0
 
 # PyInstaller for single .exe packaging
 pyinstaller>=6.18.0
+
+# Phase 2: Signaling Infrastructure & Presence
+
+# WebSocket client for signaling server connection
+websockets>=15.0
