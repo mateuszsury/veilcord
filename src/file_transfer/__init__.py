@@ -20,6 +20,8 @@ from src.file_transfer.chunker import (
     get_file_info
 )
 from src.file_transfer.sender import FileSender
+from src.file_transfer.receiver import FileReceiver
+from src.file_transfer.service import FileTransferService
 
 __all__ = [
     # Models
@@ -40,4 +42,8 @@ __all__ = [
     "get_file_info",
     # Sender
     "FileSender",
+    # Receiver
+    "FileReceiver",
+    # Service
+    "FileTransferService",
 ]

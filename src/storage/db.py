@@ -282,3 +282,163 @@ def close_database() -> None:
     if _db_connection is not None:
         _db_connection.close()
         _db_connection = None
+
+
+# File transfer state persistence functions
+
+def save_transfer_state(
+    transfer_id: str,
+    contact_id: int,
+    direction: str,
+    filename: str,
+    size: int,
+    hash_value: str,
+    bytes_transferred: int = 0,
+    state: str = "pending"
+) -> None:
+    """
+    Save or update file transfer state.
+
+    Args:
+        transfer_id: Unique transfer UUID
+        contact_id: Contact database ID
+        direction: "send" or "receive"
+        filename: Original filename
+        size: Total file size in bytes
+        hash_value: SHA256 hash of file
+        bytes_transferred: Bytes sent/received so far
+        state: Transfer state (pending, active, complete, failed, cancelled)
+    """
+    import time
+    conn = get_database()
+    timestamp = int(time.time() * 1000)
+
+    # Upsert: insert or update if exists
+    conn.execute("""
+        INSERT INTO file_transfers
+        (id, contact_id, direction, filename, size, hash, bytes_transferred, state, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            bytes_transferred = excluded.bytes_transferred,
+            state = excluded.state,
+            updated_at = excluded.updated_at
+    """, (
+        transfer_id, contact_id, direction, filename, size, hash_value,
+        bytes_transferred, state, timestamp, timestamp
+    ))
+    conn.commit()
+
+
+def get_transfer_state(transfer_id: str) -> Optional[dict]:
+    """
+    Get transfer state by ID.
+
+    Returns:
+        Dictionary with transfer state or None if not found
+    """
+    conn = get_database()
+    row = conn.execute("""
+        SELECT id, contact_id, direction, filename, size, hash,
+               bytes_transferred, state, created_at, updated_at
+        FROM file_transfers
+        WHERE id = ?
+    """, (transfer_id,)).fetchone()
+
+    if not row:
+        return None
+
+    return {
+        "id": row[0],
+        "contact_id": row[1],
+        "direction": row[2],
+        "filename": row[3],
+        "size": row[4],
+        "hash": row[5],
+        "bytes_transferred": row[6],
+        "state": row[7],
+        "created_at": row[8],
+        "updated_at": row[9]
+    }
+
+
+def get_pending_transfers(contact_id: int) -> list[dict]:
+    """
+    Get all incomplete transfers for a contact.
+
+    Args:
+        contact_id: Contact database ID
+
+    Returns:
+        List of transfer state dictionaries
+    """
+    conn = get_database()
+    rows = conn.execute("""
+        SELECT id, contact_id, direction, filename, size, hash,
+               bytes_transferred, state, created_at, updated_at
+        FROM file_transfers
+        WHERE contact_id = ? AND state IN ('pending', 'active', 'paused')
+        ORDER BY created_at DESC
+    """, (contact_id,)).fetchall()
+
+    return [
+        {
+            "id": row[0],
+            "contact_id": row[1],
+            "direction": row[2],
+            "filename": row[3],
+            "size": row[4],
+            "hash": row[5],
+            "bytes_transferred": row[6],
+            "state": row[7],
+            "created_at": row[8],
+            "updated_at": row[9]
+        }
+        for row in rows
+    ]
+
+
+def update_transfer_progress(
+    transfer_id: str,
+    bytes_transferred: int,
+    state: str
+) -> bool:
+    """
+    Update transfer progress.
+
+    Args:
+        transfer_id: Transfer UUID
+        bytes_transferred: Current bytes transferred
+        state: Current state
+
+    Returns:
+        True if updated, False if transfer not found
+    """
+    import time
+    conn = get_database()
+    timestamp = int(time.time() * 1000)
+
+    cursor = conn.execute("""
+        UPDATE file_transfers
+        SET bytes_transferred = ?, state = ?, updated_at = ?
+        WHERE id = ?
+    """, (bytes_transferred, state, timestamp, transfer_id))
+    conn.commit()
+
+    return cursor.rowcount > 0
+
+
+def delete_transfer(transfer_id: str) -> bool:
+    """
+    Delete transfer record from database.
+
+    Args:
+        transfer_id: Transfer UUID
+
+    Returns:
+        True if deleted, False if not found
+    """
+    conn = get_database()
+    cursor = conn.execute("DELETE FROM file_transfers WHERE id = ?", (transfer_id,))
+    conn.commit()
+
+    return cursor.rowcount > 0
