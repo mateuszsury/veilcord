@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[========================================>                              ] 52% (Phase 4 - 7/7 plans)
+[==============================================>                        ] 55% (Phase 4 - 8/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
-| 4 | File Transfer | COMPLETE | 7/7 | 7 |
+| 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 26
+- Plans completed: 27
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -114,6 +114,7 @@ See: .planning/PROJECT.md
 | 2026-01-30 | File messages stored in messages table | Use file_id foreign key to reference files table, same table as text messages | Unified chat history simplifies querying and display |
 | 2026-01-30 | Lazy metadata loading for file messages | FileMessageWrapper fetches metadata on mount instead of including in message | Better performance for scrolling through history |
 | 2026-01-30 | Type-based preview routing | FileMessage routes based on MIME type: image → ImagePreview, video → VideoPreview, other → download | Extensible pattern for future file type support |
+| 2026-01-30 | User re-selects file for resume | No original path storage - user must locate and re-select the same file for resume | Simpler implementation, validated by file size match |
 
 ### Active TODOs
 
@@ -143,7 +144,8 @@ See: .planning/PROJECT.md
 - [x] Execute 04-04-PLAN.md (network and API integration)
 - [x] Execute 04-05-PLAN.md (image and video previews)
 - [x] Execute 04-07-PLAN.md (file transfer UI)
-- [x] Execute 04-06-PLAN.md (file transfer message integration) - PHASE 4 COMPLETE
+- [x] Execute 04-06-PLAN.md (file transfer message integration)
+- [x] Execute 04-08-PLAN.md (file transfer resume API & UI) - PHASE 4 COMPLETE
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
 
@@ -166,15 +168,17 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 04-06-PLAN.md (file transfer message integration)
+**Last session:** 2026-01-30 - Completed 04-08-PLAN.md (file transfer resume API & UI)
 
 **What we just completed:**
-- Executed plan 04-06 (file transfer message integration)
-- Extended message storage with file_id column and save_file_message function (already done in 04-07)
-- Created FileMessageWrapper component for lazy metadata loading
-- Updated MessageBubble to detect and render file messages
-- Verified end-to-end file transfer working with user approval
-- PHASE 4 COMPLETE - all 7 file transfer requirements satisfied
+- Executed plan 04-08 (file transfer resume API & UI)
+- Added NetworkService.resume_file method validating file and calling send_file with resume_offset
+- Added API.resume_transfer method exposing resume to frontend
+- Added TypeScript ResumableTransfer interface and resume_transfer method declaration
+- Added resumeTransfer and loadResumableTransfers store actions
+- Created ResumableTransfers UI component showing incomplete transfers with resume button
+- Integrated into ChatPanel above message list
+- PHASE 4 COMPLETE - all file transfer requirements satisfied including FILE-04 resume
 
 **What's next:**
 - Research aiortc audio codec interop before Phase 5 planning
@@ -184,13 +188,15 @@ See: .planning/PROJECT.md
 - None
 
 **Files created this session:**
-- frontend/src/components/chat/FileMessageWrapper.tsx
-- .planning/phases/04-file-transfer/04-06-SUMMARY.md
+- frontend/src/components/chat/ResumableTransfers.tsx
+- .planning/phases/04-file-transfer/04-08-SUMMARY.md
 
 **Files modified this session:**
+- src/network/service.py
+- src/api/bridge.py
 - frontend/src/lib/pywebview.ts
-- frontend/src/stores/messages.ts
-- frontend/src/components/chat/MessageBubble.tsx
+- frontend/src/stores/transfers.ts
+- frontend/src/components/chat/ChatPanel.tsx
 - .planning/STATE.md
 
 ---
