@@ -214,6 +214,38 @@ def init_database() -> sqlcipher3.Connection:
         )
     """)
 
+    # files table: file metadata and content storage
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            mime_type TEXT,
+            size INTEGER NOT NULL,
+            hash TEXT NOT NULL,
+            data BLOB,
+            file_path TEXT,
+            created_at INTEGER NOT NULL,
+            transfer_id TEXT
+        )
+    """)
+
+    # file_transfers table: file transfer state tracking
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS file_transfers (
+            id TEXT PRIMARY KEY,
+            contact_id INTEGER NOT NULL,
+            direction TEXT NOT NULL,
+            filename TEXT NOT NULL,
+            size INTEGER NOT NULL,
+            hash TEXT NOT NULL,
+            bytes_transferred INTEGER DEFAULT 0,
+            state TEXT NOT NULL DEFAULT 'pending',
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            FOREIGN KEY (contact_id) REFERENCES contacts(id)
+        )
+    """)
+
     conn.commit()
 
     _db_connection = conn

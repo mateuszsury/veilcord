@@ -71,3 +71,15 @@ def get_identity_key_path() -> Path:
         Path to %APPDATA%/DiscordOpus/identity.key
     """
     return get_app_data_dir() / 'identity.key'
+
+
+def get_data_dir() -> Path:
+    """
+    Get the application data directory (alias for get_app_data_dir).
+
+    Used by file storage for encrypted file persistence.
+
+    Returns:
+        Path to %APPDATA%/DiscordOpus/
+    """
+    return get_app_data_dir()
