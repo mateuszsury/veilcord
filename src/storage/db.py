@@ -144,9 +144,18 @@ def init_database() -> sqlcipher3.Connection:
             display_name TEXT NOT NULL,
             fingerprint TEXT NOT NULL,
             verified INTEGER DEFAULT 0,
-            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            online_status TEXT DEFAULT 'unknown'
         )
     """)
+
+    # Migration: add online_status column to existing databases
+    try:
+        conn.execute(
+            "ALTER TABLE contacts ADD COLUMN online_status TEXT DEFAULT 'unknown'"
+        )
+    except sqlcipher3.OperationalError:
+        pass  # Column already exists
 
     # settings table: key-value store for user preferences
     conn.execute("""
