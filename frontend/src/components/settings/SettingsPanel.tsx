@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { IdentitySection } from './IdentitySection';
+import { NetworkSection } from './NetworkSection';
 import { BackupSection } from './BackupSection';
 import { ContactsSection } from './ContactsSection';
 
@@ -13,6 +14,7 @@ export function SettingsPanel() {
       <h2 className="text-2xl font-semibold">Settings</h2>
 
       <IdentitySection />
+      <NetworkSection />
       <BackupSection />
       <ContactsSection />
     </motion.div>
