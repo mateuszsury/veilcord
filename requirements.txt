@@ -24,3 +24,8 @@ pyinstaller>=6.18.0
 
 # WebSocket client for signaling server connection
 websockets>=15.0
+
+# Phase 3: P2P Text Messaging
+
+# Python WebRTC implementation for P2P data channels
+aiortc>=1.14.0
