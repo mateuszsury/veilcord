@@ -13,7 +13,7 @@ Runs in a background thread started by webview.start(func=...).
 import asyncio
 import logging
 import threading
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 import webview
 
@@ -22,6 +22,10 @@ from src.network.presence import PresenceManager, UserStatus
 from src.network.messaging import MessagingService
 from src.network.peer_connection import P2PConnectionState
 from src.storage.settings import get_setting, set_setting, Settings
+from src.file_transfer.service import FileTransferService
+from src.file_transfer.protocol import EOF_MARKER, CANCEL_MARKER, ACK_MARKER, ERROR_MARKER
+from src.file_transfer.models import TransferProgress
+from src.storage.files import FileMetadata
 
 
 logger = logging.getLogger(__name__)
@@ -57,6 +61,7 @@ class NetworkService:
         self._signaling: Optional[SignalingClient] = None
         self._presence: Optional[PresenceManager] = None
         self._messaging: Optional[MessagingService] = None
+        self._file_transfer: Optional[FileTransferService] = None
         self._state = ConnectionState.DISCONNECTED
         self._running = False
         self._startup_task: Optional[asyncio.Task] = None
@@ -130,6 +135,13 @@ class NetworkService:
             self._messaging.send_signaling = lambda msg: asyncio.create_task(
                 self._async_send(msg)
             )
+
+            # Create file transfer service with callbacks
+            self._file_transfer = FileTransferService()
+            self._file_transfer.on_transfer_progress = self._on_file_progress
+            self._file_transfer.on_file_received = self._on_file_received
+            self._file_transfer.on_transfer_complete = self._on_transfer_complete
+            self._file_transfer.on_transfer_error = self._on_transfer_error
 
             # Start signaling client
             await self._signaling.start()
@@ -244,13 +256,66 @@ class NetworkService:
             'status': status
         })
 
-    def _on_incoming_message(self, contact_id: int, message_dict: Dict[str, Any]) -> None:
-        """Handle incoming message from MessagingService."""
-        logger.debug(f"Incoming message for contact {contact_id}: {message_dict.get('type', 'text')}")
-        self._notify_frontend('discordopus:message', {
-            'contactId': contact_id,
-            'message': message_dict
-        })
+    def _on_incoming_message(self, contact_id: int, message: Any) -> None:
+        """
+        Handle incoming message from MessagingService.
+
+        Routes messages based on type:
+        - Binary messages starting with 'C' -> file chunks
+        - JSON messages with type starting with 'file_' -> file metadata/control
+        - Special markers (EOF, CANCEL, etc.) -> file control
+        - Everything else -> regular messages for frontend
+        """
+        # Check if it's a binary message (bytes)
+        if isinstance(message, bytes):
+            # Check for file control markers
+            if message in (EOF_MARKER, CANCEL_MARKER, ACK_MARKER, ERROR_MARKER):
+                if self._file_transfer and self._loop:
+                    # Get peer connection from messaging service
+                    peer = self._messaging._connections.get(contact_id)
+                    if peer:
+                        asyncio.run_coroutine_threadsafe(
+                            self._file_transfer.handle_incoming_message(contact_id, peer, message),
+                            self._loop
+                        )
+                return
+
+            # Check for chunk data (starts with 'C' byte)
+            if message.startswith(b'C'):
+                if self._file_transfer and self._loop:
+                    peer = self._messaging._connections.get(contact_id)
+                    if peer:
+                        asyncio.run_coroutine_threadsafe(
+                            self._file_transfer.handle_incoming_message(contact_id, peer, message),
+                            self._loop
+                        )
+                return
+
+            # Check if it's JSON file message
+            if message.startswith(b'{'):
+                try:
+                    import json
+                    msg_str = message.decode('utf-8')
+                    data = json.loads(msg_str)
+                    if data.get('type', '').startswith('file_'):
+                        if self._file_transfer and self._loop:
+                            peer = self._messaging._connections.get(contact_id)
+                            if peer:
+                                asyncio.run_coroutine_threadsafe(
+                                    self._file_transfer.handle_incoming_message(contact_id, peer, message),
+                                    self._loop
+                                )
+                        return
+                except (UnicodeDecodeError, json.JSONDecodeError):
+                    pass
+
+        # Regular message - should be a dict
+        if isinstance(message, dict):
+            logger.debug(f"Incoming message for contact {contact_id}: {message.get('type', 'text')}")
+            self._notify_frontend('discordopus:message', {
+                'contactId': contact_id,
+                'message': message
+            })
 
     def _on_p2p_state_change(self, contact_id: int, state: P2PConnectionState) -> None:
         """Handle P2P connection state change."""
@@ -449,6 +514,154 @@ class NetworkService:
         """
         if self._messaging:
             self._messaging.send_typing(contact_id, active)
+
+    # ========== File Transfer Methods ==========
+
+    def send_file(self, contact_id: int, file_path: str) -> Optional[str]:
+        """
+        Send a file to a contact.
+
+        Args:
+            contact_id: Contact database ID
+            file_path: Absolute path to file
+
+        Returns:
+            Transfer ID or None if failed
+        """
+        if not self._loop or not self._file_transfer or not self._messaging:
+            return None
+
+        from pathlib import Path
+        peer = self._messaging._connections.get(contact_id)
+        if not peer:
+            logger.error(f"No P2P connection to contact {contact_id}")
+            return None
+
+        future = asyncio.run_coroutine_threadsafe(
+            self._file_transfer.send_file(contact_id, peer, Path(file_path)),
+            self._loop
+        )
+        try:
+            return future.result(timeout=10.0)
+        except Exception as e:
+            logger.error(f"Failed to start file send: {e}")
+            return None
+
+    def cancel_transfer(self, contact_id: int, transfer_id: str, direction: str = "send") -> bool:
+        """
+        Cancel a file transfer.
+
+        Args:
+            contact_id: Contact database ID
+            transfer_id: Transfer UUID
+            direction: "send" or "receive"
+
+        Returns:
+            True if cancelled, False if not found
+        """
+        if not self._loop or not self._file_transfer:
+            return False
+
+        if direction == "send":
+            future = asyncio.run_coroutine_threadsafe(
+                self._file_transfer.cancel_send(contact_id, transfer_id),
+                self._loop
+            )
+        else:
+            future = asyncio.run_coroutine_threadsafe(
+                self._file_transfer.cancel_receive(contact_id, transfer_id),
+                self._loop
+            )
+
+        try:
+            return future.result(timeout=5.0)
+        except Exception as e:
+            logger.error(f"Failed to cancel transfer: {e}")
+            return False
+
+    def get_active_transfers(self, contact_id: int) -> List[Dict[str, Any]]:
+        """
+        Get active transfers for a contact.
+
+        Args:
+            contact_id: Contact database ID
+
+        Returns:
+            List of transfer progress dicts
+        """
+        if not self._file_transfer:
+            return []
+
+        transfers = self._file_transfer.get_active_transfers(contact_id)
+        return [self._transfer_progress_to_dict(t) for t in transfers]
+
+    def get_resumable_transfers(self, contact_id: int) -> List[Dict[str, Any]]:
+        """
+        Get resumable transfers for a contact.
+
+        Args:
+            contact_id: Contact database ID
+
+        Returns:
+            List of transfer state dicts from database
+        """
+        if not self._file_transfer:
+            return []
+
+        return self._file_transfer.get_resumable_transfers(contact_id)
+
+    def _transfer_progress_to_dict(self, progress: TransferProgress) -> Dict[str, Any]:
+        """Convert TransferProgress to JSON-serializable dict."""
+        return {
+            'transferId': progress.transfer_id,
+            'bytesTransferred': progress.bytes_transferred,
+            'totalBytes': progress.total_bytes,
+            'state': progress.state.value,
+            'speedBps': progress.speed_bps,
+            'etaSeconds': progress.eta_seconds
+        }
+
+    def _on_file_progress(self, contact_id: int, progress: TransferProgress) -> None:
+        """Handle file transfer progress update."""
+        logger.debug(
+            f"File transfer progress: {progress.transfer_id} - "
+            f"{progress.bytes_transferred}/{progress.total_bytes} bytes"
+        )
+        self._notify_frontend('discordopus:file_progress', {
+            'contactId': contact_id,
+            'progress': self._transfer_progress_to_dict(progress)
+        })
+
+    def _on_file_received(self, contact_id: int, file_meta: FileMetadata) -> None:
+        """Handle file reception completion."""
+        logger.info(f"File received: {file_meta.filename} from contact {contact_id}")
+        self._notify_frontend('discordopus:file_received', {
+            'contactId': contact_id,
+            'file': {
+                'id': file_meta.id,
+                'filename': file_meta.filename,
+                'size': file_meta.size,
+                'mimeType': file_meta.mime_type,
+                'transferId': file_meta.transfer_id
+            }
+        })
+
+    def _on_transfer_complete(self, contact_id: int, transfer_id: str) -> None:
+        """Handle file transfer completion."""
+        logger.info(f"File transfer complete: {transfer_id}")
+        self._notify_frontend('discordopus:transfer_complete', {
+            'contactId': contact_id,
+            'transferId': transfer_id
+        })
+
+    def _on_transfer_error(self, contact_id: int, transfer_id: str, error: str) -> None:
+        """Handle file transfer error."""
+        logger.error(f"File transfer error: {transfer_id} - {error}")
+        self._notify_frontend('discordopus:transfer_error', {
+            'contactId': contact_id,
+            'transferId': transfer_id,
+            'error': error
+        })
 
 
 # ========== Module-level singleton ==========
