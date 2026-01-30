@@ -19,8 +19,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Encryption
 
 - [x] **ENCR-01**: All messages are E2E encrypted (Signal Protocol)
-- [ ] **ENCR-02**: All voice/video calls are E2E encrypted
-- [ ] **ENCR-03**: All file transfers are E2E encrypted
+- [x] **ENCR-02**: All voice/video calls are E2E encrypted
+- [x] **ENCR-03**: All file transfers are E2E encrypted
 - [x] **ENCR-04**: Keys stored securely using Windows DPAPI
 - [x] **ENCR-05**: Perfect forward secrecy (Double Ratchet)
 
@@ -45,17 +45,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Voice Messages
 
-- [ ] **VMSG-01**: User can record voice message
-- [ ] **VMSG-02**: User can send voice message to contact/group
-- [ ] **VMSG-03**: User can play received voice message
-- [ ] **VMSG-04**: Voice messages are E2E encrypted
+- [x] **VMSG-01**: User can record voice message
+- [x] **VMSG-02**: User can send voice message to contact/group
+- [x] **VMSG-03**: User can play received voice message
+- [x] **VMSG-04**: Voice messages are E2E encrypted
 
 ### Voice Calls
 
-- [ ] **CALL-01**: User can start voice call with contact (1:1)
-- [ ] **CALL-02**: User can receive incoming voice call
-- [ ] **CALL-03**: User can mute/unmute microphone during call
-- [ ] **CALL-04**: User can end call
+- [x] **CALL-01**: User can start voice call with contact (1:1)
+- [x] **CALL-02**: User can receive incoming voice call
+- [x] **CALL-03**: User can mute/unmute microphone during call
+- [x] **CALL-04**: User can end call
 - [ ] **CALL-05**: User can start group voice call (2-4 participants)
 - [ ] **CALL-06**: User can join ongoing group call
 

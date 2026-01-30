@@ -188,6 +188,22 @@ Plans:
 - VMSG-01, VMSG-02, VMSG-03, VMSG-04
 - ENCR-02
 
+**Plans:** 8 plans
+
+Plans:
+- [x] 05-01-PLAN.md - Audio device manager and call state models
+- [x] 05-02-PLAN.md - Microphone audio track (sounddevice + aiortc)
+- [x] 05-03-PLAN.md - Voice call service with signaling
+- [x] 05-04-PLAN.md - Voice message recording with PyOgg
+- [x] 05-05-PLAN.md - NetworkService and API bridge integration
+- [x] 05-06-PLAN.md - Call UI (incoming popup, active overlay)
+- [x] 05-07-PLAN.md - Voice message UI (recorder, player)
+- [x] 05-08-PLAN.md - Audio settings and verification checkpoint
+
+**Status:** Complete (2026-01-31)
+
+**Verification Notes:** 05-VERIFICATION.md passed with 12/12 success criteria verified. Known limitation: network migration requires manual reconnection (aiortc lacks ICE restart).
+
 **Success Criteria:**
 1. User starts voice call with online contact and hears ringing
 2. User receives incoming call notification and can accept/reject
@@ -204,7 +220,7 @@ Plans:
 
 **Dependencies:** Phase 3 (P2P connection established before media streams)
 
-**Research Notes:** HIGH priority research needed for aiortc audio codec interop with browser peers and cross-platform audio handling.
+**Research Notes:** Research completed (05-RESEARCH.md). Using sounddevice for audio capture, PyOgg for Opus encoding, aiortc built-in DTLS-SRTP for call encryption. Known limitation: manual reconnection required for network migration (aiortc lacks ICE restart).
 
 ---
 
@@ -348,7 +364,7 @@ Phase 8: Notifications & Polish
 
 - **Phase 3**: aiortc data channel reliability, offline message store-and-forward (MEDIUM complexity) - RESEARCH COMPLETE
 - **Phase 4**: File chunking and resume protocol (MEDIUM complexity) - RESEARCH COMPLETE
-- **Phase 5**: aiortc audio codec interop with browsers, cross-platform audio (HIGH priority)
+- **Phase 5**: aiortc audio codec interop with browsers, cross-platform audio (HIGH priority) - RESEARCH COMPLETE
 - **Phase 6**: Cross-browser WebRTC compatibility, screen capture APIs (MEDIUM complexity)
 - **Phase 7**: Sender Keys protocol, WebRTC mesh optimization (HIGH complexity, consider research-phase)
 
