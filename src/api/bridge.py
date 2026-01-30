@@ -30,6 +30,7 @@ from src.crypto.backup import (
 )
 from src.crypto.identity import Identity
 from src.crypto.fingerprint import format_fingerprint
+from src.network.service import get_network_service
 
 
 class API:
@@ -61,7 +62,8 @@ class API:
             'fingerprintFormatted': format_fingerprint(contact.fingerprint),
             'displayName': contact.display_name,
             'verified': contact.verified,
-            'addedAt': contact.added_at
+            'addedAt': contact.added_at,
+            'onlineStatus': contact.online_status
         }
 
     # ========== Identity Methods ==========
@@ -135,6 +137,39 @@ class API:
     def set_contact_verified(self, contact_id: int, verified: bool) -> None:
         """Set contact verification status."""
         _set_contact_verified(contact_id, verified)
+
+    # ========== Network Methods ==========
+
+    def get_connection_state(self) -> str:
+        """Get current signaling connection state."""
+        try:
+            service = get_network_service()
+            return service.get_connection_state()
+        except RuntimeError:
+            return "disconnected"  # Service not started yet
+
+    def get_signaling_server(self) -> str:
+        """Get configured signaling server URL."""
+        service = get_network_service()
+        return service.get_signaling_server()
+
+    def set_signaling_server(self, url: str) -> None:
+        """Set signaling server URL (will reconnect)."""
+        service = get_network_service()
+        service.set_signaling_server(url)
+
+    def get_user_status(self) -> str:
+        """Get user's presence status."""
+        service = get_network_service()
+        return service.get_user_status()
+
+    def set_user_status(self, status: str) -> None:
+        """Set user's presence status (online/away/busy/invisible)."""
+        valid_statuses = ["online", "away", "busy", "invisible"]
+        if status not in valid_statuses:
+            raise ValueError(f"Invalid status: {status}. Must be one of {valid_statuses}")
+        service = get_network_service()
+        service.set_user_status(status)
 
     # ========== System Methods ==========
 
