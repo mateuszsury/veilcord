@@ -84,48 +84,46 @@ export function MessageInput({
   };
 
   return (
-    <div className="border-t border-cosmic-border p-4">
-      <div className="flex items-end gap-2">
-        <textarea
-          ref={textareaRef}
-          value={message}
-          onChange={(e) => {
-            handleChange(e.target.value);
-            handleInput();
-          }}
-          onKeyDown={handleKeyDown}
-          placeholder={disabled ? 'Connect to send messages' : placeholder}
-          disabled={disabled || sending}
-          rows={1}
-          className="flex-1 bg-cosmic-surface text-cosmic-text placeholder-cosmic-muted rounded-xl px-4 py-3
-                     border border-cosmic-border focus:border-cosmic-accent focus:outline-none
-                     resize-none min-h-[48px] max-h-[120px]
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-        />
+    <>
+      <textarea
+        ref={textareaRef}
+        value={message}
+        onChange={(e) => {
+          handleChange(e.target.value);
+          handleInput();
+        }}
+        onKeyDown={handleKeyDown}
+        placeholder={disabled ? 'Connect to send messages' : placeholder}
+        disabled={disabled || sending}
+        rows={1}
+        className="flex-1 bg-cosmic-surface text-cosmic-text placeholder-cosmic-muted rounded-xl px-4 py-3
+                   border border-cosmic-border focus:border-cosmic-accent focus:outline-none
+                   resize-none min-h-[48px] max-h-[120px]
+                   disabled:opacity-50 disabled:cursor-not-allowed"
+      />
 
-        <button
-          onClick={handleSend}
-          disabled={!message.trim() || sending || disabled}
-          className="p-3 rounded-xl bg-cosmic-accent text-white
-                     hover:bg-cosmic-accent/80 disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-colors"
+      <button
+        onClick={handleSend}
+        disabled={!message.trim() || sending || disabled}
+        className="p-3 rounded-xl bg-cosmic-accent text-white
+                   hover:bg-cosmic-accent/80 disabled:opacity-50 disabled:cursor-not-allowed
+                   transition-colors"
+      >
+        {/* Send icon */}
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          {/* Send icon */}
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-            />
-          </svg>
-        </button>
-      </div>
-    </div>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+          />
+        </svg>
+      </button>
+    </>
   );
 }

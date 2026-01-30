@@ -14,6 +14,8 @@ import { useContactsStore } from '@/stores/contacts';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { TypingIndicator } from './TypingIndicator';
+import { FileUpload } from './FileUpload';
+import { TransferProgress } from './TransferProgress';
 
 // SVG path for icons
 const ICONS = {
@@ -140,12 +142,23 @@ export function ChatPanel() {
       {/* Typing indicator */}
       {isTyping && <TypingIndicator displayName={contact.displayName} />}
 
-      {/* Input */}
-      <MessageInput
-        contactId={activeContactId}
-        onSend={handleSend}
-        disabled={p2pState !== 'connected'}
-      />
+      {/* Transfer progress */}
+      <TransferProgress contactId={activeContactId} />
+
+      {/* Input area with file upload */}
+      <div className="border-t border-cosmic-border p-4">
+        <div className="flex items-end gap-2">
+          <FileUpload
+            contactId={activeContactId}
+            disabled={p2pState !== 'connected'}
+          />
+          <MessageInput
+            contactId={activeContactId}
+            onSend={handleSend}
+            disabled={p2pState !== 'connected'}
+          />
+        </div>
+      </div>
     </div>
   );
 }
