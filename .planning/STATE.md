@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 5 - Voice Calls
-**Status:** In Progress
+**Status:** COMPLETE
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 5 - Voice calls with audio device management, WebRTC audio tracks, and call lifecycle state machine.
+**Current focus:** Phase 5 COMPLETE - Voice calls with audio device management, WebRTC audio tracks, and call lifecycle state machine. Ready for Phase 6.
 
 ## Progress
 
 ```
-[============================================================>          ] 79% (Phase 5 In Progress - 7/8 plans)
+[================================================================>      ] 85% (Phase 5 COMPLETE - 8/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -24,17 +24,17 @@ See: .planning/PROJECT.md
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
-| 5 | Voice Calls (1-on-1) | In Progress | 7/8 | 9 |
+| 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 53/73 requirements completed (73%)
+**Total:** 62/73 requirements completed (85%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 34
+- Plans completed: 35
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -168,7 +168,7 @@ See: .planning/PROJECT.md
 - [x] Execute 05-05-PLAN.md (voice integration)
 - [x] Execute 05-06-PLAN.md (call UI components)
 - [x] Execute 05-07-PLAN.md (voice message UI)
-- [ ] Execute 05-08-PLAN.md (integration testing)
+- [x] Execute 05-08-PLAN.md (integration testing) - PHASE 5 COMPLETE
 
 ### Blockers
 
@@ -187,34 +187,32 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 05-07-PLAN.md (voice message UI)
+**Last session:** 2026-01-30 - Completed 05-08-PLAN.md (voice calling integration) - PHASE 5 COMPLETE
 
 **What we just completed:**
-- Executed plan 05-07 (voice message UI)
-- Created Zustand store for voice recording state management
-- Built VoiceRecorder component with pulsing indicator and animated waveform
-- Built VoiceMessagePlayer with play/pause and seekable progress bar
-- Integrated voice playback into FileMessage for audio files
-- Added microphone button to ChatPanel with recording mode toggle
+- Executed plan 05-08 (voice calling integration)
+- Created AudioSection component for audio device selection in settings
+- Added call button to chat header for voice call initiation
+- Integrated AudioSection into SettingsPanel
+- Verified AppLayout already has call UI components from 05-06
+- Human verification checkpoint deferred by user
 
 **What's next:**
-- Execute 05-08-PLAN.md (integration testing) - FINAL Phase 5 plan
+- Plan Phase 6 (Video & Screen Sharing)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- frontend/src/stores/voiceRecording.ts
-- frontend/src/components/chat/VoiceRecorder.tsx
-- frontend/src/components/chat/VoiceMessagePlayer.tsx
-- .planning/phases/05-voice-calls/05-07-SUMMARY.md
+- frontend/src/components/settings/AudioSection.tsx
+- .planning/phases/05-voice-calls/05-08-SUMMARY.md
 
 **Files modified this session:**
-- frontend/src/components/chat/FileMessage.tsx
+- frontend/src/components/settings/SettingsPanel.tsx
 - frontend/src/components/chat/ChatPanel.tsx
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after completing 05-07-PLAN.md*
+*Last updated: 2026-01-30 after completing 05-08-PLAN.md - PHASE 5 COMPLETE*
