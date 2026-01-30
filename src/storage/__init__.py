@@ -31,6 +31,17 @@ from src.storage.identity_store import (
     get_or_create_identity,
 )
 
+# Contact storage
+from src.storage.contacts import (
+    get_contacts,
+    get_contact,
+    add_contact,
+    remove_contact,
+    set_contact_verified,
+    update_contact_display_name,
+    Contact,
+)
+
 __all__ = [
     # Paths
     'get_app_data_dir',
@@ -50,4 +61,12 @@ __all__ = [
     'load_identity',
     'update_display_name',
     'get_or_create_identity',
+    # Contact storage
+    'get_contacts',
+    'get_contact',
+    'add_contact',
+    'remove_contact',
+    'set_contact_verified',
+    'update_contact_display_name',
+    'Contact',
 ]
