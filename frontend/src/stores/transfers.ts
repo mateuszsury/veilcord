@@ -15,6 +15,7 @@ import type {
   FileTransferProgress,
   FileMetadata,
   TransferDirection,
+  ResumableTransfer,
 } from '@/lib/pywebview';
 
 export interface ActiveTransfer extends FileTransferProgress {
@@ -33,20 +34,27 @@ interface TransfersState {
   // Active transfers by transfer ID
   transfers: Map<string, ActiveTransfer>;
 
+  // Resumable transfers by transfer ID
+  resumableTransfers: Map<string, ResumableTransfer>;
+
   // Received files by file ID
   receivedFiles: Map<string, ReceivedFile>;
 
   // Actions
   sendFile: (contactId: number) => Promise<void>;
   cancelTransfer: (transferId: string, direction?: TransferDirection) => Promise<void>;
+  loadResumableTransfers: (contactId: number) => Promise<void>;
+  resumeTransfer: (contactId: number, transferId: string) => Promise<void>;
   addTransfer: (transfer: ActiveTransfer) => void;
   updateProgress: (transferId: string, progress: Partial<FileTransferProgress>) => void;
   removeTransfer: (transferId: string) => void;
+  removeResumableTransfer: (transferId: string) => void;
   addReceivedFile: (file: ReceivedFile) => void;
 }
 
 export const useTransferStore = create<TransfersState>((set, get) => ({
   transfers: new Map(),
+  resumableTransfers: new Map(),
   receivedFiles: new Map(),
 
   sendFile: async (contactId: number) => {
@@ -101,6 +109,86 @@ export const useTransferStore = create<TransfersState>((set, get) => ({
     }
   },
 
+  loadResumableTransfers: async (contactId: number) => {
+    try {
+      const result = await api.call((a) => a.get_transfers(contactId));
+
+      if (result.error) {
+        console.error('Load resumable transfers error:', result.error);
+        return;
+      }
+
+      // Filter to only send direction transfers that are resumable
+      const resumable = (result.resumable || []).filter(
+        (t) => t.direction === 'send' && t.bytes_transferred > 0
+      );
+
+      set((state) => {
+        const resumableTransfers = new Map(state.resumableTransfers);
+        // Clear existing for this contact and add fresh data
+        for (const [id, transfer] of resumableTransfers) {
+          if (transfer.contact_id === contactId) {
+            resumableTransfers.delete(id);
+          }
+        }
+        for (const transfer of resumable) {
+          resumableTransfers.set(transfer.id, transfer);
+        }
+        return { resumableTransfers };
+      });
+    } catch (error) {
+      console.error('Failed to load resumable transfers:', error);
+    }
+  },
+
+  resumeTransfer: async (contactId: number, transferId: string) => {
+    const resumable = get().resumableTransfers.get(transferId);
+    if (!resumable) {
+      console.warn('Resumable transfer not found:', transferId);
+      return;
+    }
+
+    try {
+      // Open file dialog to re-select the file
+      const fileResult = await api.call((a) => a.open_file_dialog());
+
+      if (fileResult.cancelled || !fileResult.path) {
+        return;
+      }
+
+      if (fileResult.error) {
+        console.error('File dialog error:', fileResult.error);
+        return;
+      }
+
+      // Validate file size matches original
+      if (fileResult.size !== resumable.size) {
+        console.error(
+          `File size mismatch: expected ${resumable.size}, got ${fileResult.size}`
+        );
+        alert(
+          `File size mismatch! Expected ${resumable.size} bytes but selected file is ${fileResult.size} bytes.`
+        );
+        return;
+      }
+
+      // Resume the transfer
+      const result = await api.call((a) =>
+        a.resume_transfer(contactId, transferId, fileResult.path!)
+      );
+
+      if (result.error) {
+        console.error('Resume transfer error:', result.error);
+        return;
+      }
+
+      // Remove from resumable transfers (it's now active)
+      get().removeResumableTransfer(transferId);
+    } catch (error) {
+      console.error('Failed to resume transfer:', error);
+    }
+  },
+
   addTransfer: (transfer: ActiveTransfer) => {
     set((state) => {
       const transfers = new Map(state.transfers);
@@ -130,6 +218,14 @@ export const useTransferStore = create<TransfersState>((set, get) => ({
       const transfers = new Map(state.transfers);
       transfers.delete(transferId);
       return { transfers };
+    });
+  },
+
+  removeResumableTransfer: (transferId: string) => {
+    set((state) => {
+      const resumableTransfers = new Map(state.resumableTransfers);
+      resumableTransfers.delete(transferId);
+      return { resumableTransfers };
     });
   },
 

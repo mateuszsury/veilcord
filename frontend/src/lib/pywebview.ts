@@ -50,6 +50,7 @@ export interface PyWebViewAPI {
   // File Transfer
   send_file(contact_id: number, file_path: string): Promise<FileTransferResult>;
   cancel_transfer(contact_id: number, transfer_id: string, direction?: string): Promise<ApiResult>;
+  resume_transfer(contact_id: number, transfer_id: string, file_path: string): Promise<FileTransferResult>;
   get_transfers(contact_id: number): Promise<FileTransfersList>;
   get_file(file_id: string): Promise<FileData>;
   get_file_preview(file_id: number): Promise<FilePreviewResponse>;
@@ -134,9 +135,20 @@ export interface FileTransferResult {
   error?: string;
 }
 
+export interface ResumableTransfer {
+  id: string;
+  contact_id: number;
+  direction: TransferDirection;
+  filename: string;
+  size: number;
+  bytes_transferred: number;
+  state: TransferState;
+  created_at: number;
+}
+
 export interface FileTransfersList {
   active: FileTransferProgress[];
-  resumable: any[];
+  resumable: ResumableTransfer[];
   error?: string;
 }
 
