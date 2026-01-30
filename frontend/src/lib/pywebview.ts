@@ -56,6 +56,23 @@ export interface PyWebViewAPI {
   get_file_preview(file_id: number): Promise<FilePreviewResponse>;
   open_file_dialog(): Promise<FileDialogResult>;
 
+  // Voice Calls
+  start_call(contact_id: number): Promise<CallResult>;
+  accept_call(): Promise<ApiResult>;
+  reject_call(): Promise<ApiResult>;
+  end_call(): Promise<ApiResult>;
+  set_muted(muted: boolean): Promise<void>;
+  is_muted(): Promise<boolean>;
+  get_call_state(): Promise<CallState | null>;
+
+  // Voice Messages
+  start_voice_recording(): Promise<VoiceRecordingResult>;
+  stop_voice_recording(): Promise<VoiceRecordingResult>;
+  cancel_voice_recording(): Promise<ApiResult>;
+  get_recording_duration(): Promise<number>;
+  get_audio_devices(): Promise<{ inputs: AudioDevice[]; outputs: AudioDevice[]; error?: string }>;
+  set_audio_devices(input_id: number | null, output_id: number | null): Promise<void>;
+
   // System
   ping(): Promise<string>;
 }
@@ -107,6 +124,37 @@ export interface ReactionResponse {
   senderId: string;
   emoji: string;
   timestamp: number;
+}
+
+// Voice call types
+export type VoiceCallState = 'idle' | 'ringing_outgoing' | 'ringing_incoming' | 'connecting' | 'active' | 'reconnecting' | 'ended';
+
+export interface CallState {
+  callId: string;
+  contactId: number;
+  state: VoiceCallState;
+  direction: 'outgoing' | 'incoming';
+  muted: boolean;
+  duration: number | null;
+}
+
+export interface AudioDevice {
+  id: number;
+  name: string;
+  channels: number;
+}
+
+export interface CallResult {
+  callId?: string;
+  error?: string;
+}
+
+export interface VoiceRecordingResult {
+  recordingPath?: string;
+  id?: string;
+  duration?: number;
+  path?: string;
+  error?: string;
 }
 
 // File Transfer types
@@ -233,6 +281,27 @@ export interface TransferErrorEventPayload {
   error: string;
 }
 
+// Voice call event payloads
+export interface CallStateEventPayload {
+  contactId: number;
+  state: VoiceCallState;
+}
+
+export interface IncomingCallEventPayload {
+  callId: string;
+  fromKey: string;
+}
+
+export interface CallEndedEventPayload {
+  callId: string;
+  reason: string;
+}
+
+export interface RemoteMuteEventPayload {
+  callId: string;
+  muted: boolean;
+}
+
 // Custom events dispatched by Python backend
 declare global {
   interface Window {
@@ -250,6 +319,12 @@ declare global {
     'discordopus:file_received': CustomEvent<FileReceivedEventPayload>;
     'discordopus:transfer_complete': CustomEvent<TransferCompleteEventPayload>;
     'discordopus:transfer_error': CustomEvent<TransferErrorEventPayload>;
+    'discordopus:call_state': CustomEvent<CallStateEventPayload>;
+    'discordopus:incoming_call': CustomEvent<IncomingCallEventPayload>;
+    'discordopus:call_answered': CustomEvent<{ callId: string }>;
+    'discordopus:call_rejected': CustomEvent<CallEndedEventPayload>;
+    'discordopus:call_ended': CustomEvent<CallEndedEventPayload>;
+    'discordopus:remote_mute': CustomEvent<RemoteMuteEventPayload>;
   }
 }
 

@@ -26,6 +26,8 @@ from src.file_transfer.service import FileTransferService
 from src.file_transfer.protocol import EOF_MARKER, CANCEL_MARKER, ACK_MARKER, ERROR_MARKER
 from src.file_transfer.models import TransferProgress
 from src.storage.files import FileMetadata
+from src.voice.call_service import VoiceCallService
+from src.voice.models import CallState, CallEvent, CallEndReason
 
 
 logger = logging.getLogger(__name__)
@@ -62,6 +64,7 @@ class NetworkService:
         self._presence: Optional[PresenceManager] = None
         self._messaging: Optional[MessagingService] = None
         self._file_transfer: Optional[FileTransferService] = None
+        self._voice_call: Optional[VoiceCallService] = None
         self._state = ConnectionState.DISCONNECTED
         self._running = False
         self._startup_task: Optional[asyncio.Task] = None
@@ -143,6 +146,19 @@ class NetworkService:
             self._file_transfer.on_transfer_complete = self._on_transfer_complete
             self._file_transfer.on_transfer_error = self._on_transfer_error
 
+            # Create voice call service with callbacks
+            self._voice_call = VoiceCallService()
+            self._voice_call.on_state_change = self._on_call_state_change
+            self._voice_call.send_signaling = lambda msg: asyncio.create_task(
+                self._async_send(msg)
+            )
+
+            # Set local public key for voice call service
+            from src.storage.identity_store import load_identity
+            identity = load_identity()
+            if identity and self._voice_call:
+                self._voice_call.set_local_public_key(identity.shareable_id)
+
             # Start signaling client
             await self._signaling.start()
         except Exception as e:
@@ -178,6 +194,9 @@ class NetworkService:
 
     async def _async_stop(self) -> None:
         """Async shutdown sequence."""
+        # End any active voice call
+        if self._voice_call and self._voice_call._current_call:
+            await self._voice_call.end_call()
         if self._messaging:
             await self._messaging.close_all()
         if self._signaling:
@@ -244,6 +263,118 @@ class NetworkService:
             sdp = message.get('sdp')
             if from_key and sdp and self._messaging:
                 await self._messaging.handle_answer(from_key, sdp)
+
+        elif msg_type == 'call_offer':
+            # Incoming voice call offer
+            from_key = message.get('from')
+            call_id = message.get('call_id')
+            sdp = message.get('sdp')
+            if self._voice_call and from_key and call_id and sdp:
+                event = CallEvent(
+                    type='call_offer',
+                    call_id=call_id,
+                    from_key=from_key,
+                    to_key=message.get('to', ''),
+                    sdp=sdp
+                )
+                await self._voice_call.handle_call_offer(event)
+                # Notify frontend of incoming call
+                self._notify_frontend('discordopus:incoming_call', {
+                    'callId': call_id,
+                    'fromKey': from_key
+                })
+
+        elif msg_type == 'call_answer':
+            # Answer to our outgoing call
+            call_id = message.get('call_id')
+            sdp = message.get('sdp')
+            from_key = message.get('from')
+            if self._voice_call and call_id and sdp:
+                event = CallEvent(
+                    type='call_answer',
+                    call_id=call_id,
+                    from_key=from_key or '',
+                    to_key=message.get('to', ''),
+                    sdp=sdp
+                )
+                await self._voice_call.handle_call_answer(event)
+                # Notify frontend call was answered
+                self._notify_frontend('discordopus:call_answered', {
+                    'callId': call_id
+                })
+
+        elif msg_type == 'call_reject':
+            # Our call was rejected
+            call_id = message.get('call_id')
+            reason = message.get('reason', 'rejected')
+            from_key = message.get('from')
+            if self._voice_call and call_id:
+                event = CallEvent(
+                    type='call_reject',
+                    call_id=call_id,
+                    from_key=from_key or '',
+                    to_key=message.get('to', ''),
+                    reason=CallEndReason.REJECTED
+                )
+                await self._voice_call.handle_call_reject(event)
+                # Notify frontend call was rejected
+                self._notify_frontend('discordopus:call_rejected', {
+                    'callId': call_id,
+                    'reason': reason
+                })
+
+        elif msg_type == 'call_end':
+            # Call ended by remote party
+            call_id = message.get('call_id')
+            reason = message.get('reason', 'completed')
+            if self._voice_call:
+                # Map string reason to CallEndReason enum
+                end_reason = CallEndReason.COMPLETED
+                if reason == 'busy':
+                    end_reason = CallEndReason.CANCELLED
+                elif reason == 'timeout':
+                    end_reason = CallEndReason.NO_ANSWER
+                elif reason == 'error':
+                    end_reason = CallEndReason.FAILED
+                elif reason == 'rejected':
+                    end_reason = CallEndReason.REJECTED
+
+                await self._voice_call.end_call(end_reason)
+                # Notify frontend call ended
+                self._notify_frontend('discordopus:call_ended', {
+                    'callId': call_id,
+                    'reason': reason
+                })
+
+        elif msg_type == 'call_ice_candidate':
+            # ICE candidate from remote party (for trickle ICE support in future)
+            call_id = message.get('call_id')
+            candidate = message.get('candidate')
+            sdp_mid = message.get('sdpMid')
+            sdp_mline_index = message.get('sdpMLineIndex')
+            if self._voice_call and call_id and candidate:
+                # Note: Currently using full ICE gathering before signaling
+                # This handler is for future trickle ICE support
+                logger.debug(f"Received ICE candidate for call {call_id}")
+
+        elif msg_type == 'call_mute':
+            # Remote mute status change
+            call_id = message.get('call_id')
+            muted = message.get('muted', False)
+            if self._voice_call:
+                event = CallEvent(
+                    type='call_mute',
+                    call_id=call_id or '',
+                    from_key=message.get('from', ''),
+                    to_key=message.get('to', ''),
+                    muted=muted
+                )
+                await self._voice_call.handle_call_mute(event)
+                # Notify frontend of remote mute status
+                self._notify_frontend('discordopus:remote_mute', {
+                    'callId': call_id,
+                    'muted': muted
+                })
 
         else:
             logger.debug(f"Unhandled message type: {msg_type}")
@@ -321,6 +452,14 @@ class NetworkService:
         """Handle P2P connection state change."""
         logger.debug(f"P2P state for contact {contact_id}: {state.value}")
         self._notify_frontend('discordopus:p2p_state', {
+            'contactId': contact_id,
+            'state': state.value
+        })
+
+    def _on_call_state_change(self, contact_id: int, state: CallState) -> None:
+        """Handle voice call state change."""
+        logger.debug(f"Call state for contact {contact_id}: {state.value}")
+        self._notify_frontend('discordopus:call_state', {
             'contactId': contact_id,
             'state': state.value
         })
@@ -763,6 +902,134 @@ class NetworkService:
             'transferId': transfer_id,
             'error': error
         })
+
+    # ========== Voice Call Methods ==========
+
+    def start_voice_call(self, contact_id: int) -> Optional[str]:
+        """
+        Start voice call with contact.
+
+        Args:
+            contact_id: Contact database ID
+
+        Returns:
+            Call ID on success, None if failed
+        """
+        if not self._loop or not self._voice_call:
+            return None
+
+        # Get contact public key
+        from src.storage.contacts import get_contact
+        contact = get_contact(contact_id)
+        if not contact:
+            return None
+
+        future = asyncio.run_coroutine_threadsafe(
+            self._voice_call.start_call(contact_id, contact.ed25519_public_pem),
+            self._loop
+        )
+        try:
+            return future.result(timeout=35.0)  # Allow time for ICE gathering
+        except Exception as e:
+            logger.error(f"Failed to start call: {e}")
+            return None
+
+    def accept_voice_call(self) -> bool:
+        """
+        Accept incoming voice call.
+
+        Returns:
+            True on success, False if no incoming call
+        """
+        if not self._loop or not self._voice_call:
+            return False
+        future = asyncio.run_coroutine_threadsafe(
+            self._voice_call.accept_call(),
+            self._loop
+        )
+        try:
+            return future.result(timeout=35.0)
+        except Exception as e:
+            logger.error(f"Failed to accept call: {e}")
+            return False
+
+    def reject_voice_call(self) -> bool:
+        """
+        Reject incoming voice call.
+
+        Returns:
+            True on success, False if no incoming call
+        """
+        if not self._loop or not self._voice_call:
+            return False
+        future = asyncio.run_coroutine_threadsafe(
+            self._voice_call.reject_call(),
+            self._loop
+        )
+        try:
+            return future.result(timeout=5.0)
+        except Exception as e:
+            logger.error(f"Failed to reject call: {e}")
+            return False
+
+    def end_voice_call(self) -> bool:
+        """
+        End current voice call.
+
+        Returns:
+            True on success, False if no call to end
+        """
+        if not self._loop or not self._voice_call:
+            return False
+        future = asyncio.run_coroutine_threadsafe(
+            self._voice_call.end_call(CallEndReason.COMPLETED),
+            self._loop
+        )
+        try:
+            return future.result(timeout=5.0)
+        except Exception as e:
+            logger.error(f"Failed to end call: {e}")
+            return False
+
+    def set_call_muted(self, muted: bool) -> None:
+        """
+        Mute/unmute call microphone.
+
+        Args:
+            muted: True to mute, False to unmute
+        """
+        if self._voice_call:
+            self._voice_call.set_muted(muted)
+
+    def is_call_muted(self) -> bool:
+        """
+        Check if call is muted.
+
+        Returns:
+            True if muted, False otherwise
+        """
+        if self._voice_call:
+            return self._voice_call.is_muted()
+        return False
+
+    def get_call_state(self) -> Optional[Dict[str, Any]]:
+        """
+        Get current call state.
+
+        Returns:
+            Call state dict or None if no call
+        """
+        if not self._voice_call or not self._voice_call._current_call:
+            return None
+        call = self._voice_call._current_call
+        return {
+            'callId': call.call_id,
+            'contactId': call.contact_id,
+            'state': call.state.value,
+            'direction': call.direction,
+            'muted': call.muted,
+            'duration': self._voice_call.get_call_duration()
+        }
 
 
 # ========== Module-level singleton ==========

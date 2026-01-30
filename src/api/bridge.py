@@ -610,6 +610,216 @@ class API:
         except Exception as e:
             return {"error": str(e)}
 
+    # ========== Voice Call Methods ==========
+
+    def start_call(self, contact_id: int) -> Dict[str, Any]:
+        """
+        Start voice call with contact.
+
+        Args:
+            contact_id: Contact database ID
+
+        Returns:
+            Dict with callId on success or error on failure
+        """
+        try:
+            service = get_network_service()
+            call_id = service.start_voice_call(contact_id)
+            if call_id:
+                return {"callId": call_id}
+            return {"error": "Failed to start call (contact offline or busy)"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def accept_call(self) -> Dict[str, Any]:
+        """
+        Accept incoming voice call.
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.accept_voice_call()
+            return {"success": success}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def reject_call(self) -> Dict[str, Any]:
+        """
+        Reject incoming voice call.
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.reject_voice_call()
+            return {"success": success}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def end_call(self) -> Dict[str, Any]:
+        """
+        End current voice call.
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.end_voice_call()
+            return {"success": success}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def set_muted(self, muted: bool) -> None:
+        """
+        Mute/unmute call microphone.
+
+        Args:
+            muted: True to mute, False to unmute
+        """
+        service = get_network_service()
+        service.set_call_muted(muted)
+
+    def is_muted(self) -> bool:
+        """
+        Check if call is muted.
+
+        Returns:
+            True if muted, False otherwise
+        """
+        service = get_network_service()
+        return service.is_call_muted()
+
+    def get_call_state(self) -> Optional[Dict[str, Any]]:
+        """
+        Get current call state.
+
+        Returns:
+            Call state dict or None if no call
+        """
+        service = get_network_service()
+        return service.get_call_state()
+
+    # ========== Voice Message Methods ==========
+
+    def start_voice_recording(self) -> Dict[str, Any]:
+        """
+        Start recording voice message.
+
+        Returns:
+            Dict with recordingPath on success or error on failure
+        """
+        try:
+            from src.voice.voice_message import VoiceMessageRecorder
+            service = get_network_service()
+            if not hasattr(service, '_voice_recorder') or service._voice_recorder is None:
+                service._voice_recorder = VoiceMessageRecorder()
+
+            import asyncio
+            future = asyncio.run_coroutine_threadsafe(
+                service._voice_recorder.start_recording(),
+                service._loop
+            )
+            path = future.result(timeout=5.0)
+            return {"recordingPath": str(path)}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def stop_voice_recording(self) -> Dict[str, Any]:
+        """
+        Stop recording and get metadata.
+
+        Returns:
+            Dict with duration and path on success
+        """
+        try:
+            service = get_network_service()
+            if not hasattr(service, '_voice_recorder') or service._voice_recorder is None:
+                return {"error": "No recording in progress"}
+
+            import asyncio
+            future = asyncio.run_coroutine_threadsafe(
+                service._voice_recorder.stop_recording(),
+                service._loop
+            )
+            metadata = future.result(timeout=5.0)
+            service._voice_recorder = None
+
+            if metadata is None:
+                return {"error": "Recording too short"}
+
+            return {
+                "id": metadata.id,
+                "duration": metadata.duration_seconds,
+                "path": str(metadata.file_path)
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
+    def cancel_voice_recording(self) -> Dict[str, Any]:
+        """
+        Cancel current voice recording.
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            if hasattr(service, '_voice_recorder') and service._voice_recorder:
+                import asyncio
+                future = asyncio.run_coroutine_threadsafe(
+                    service._voice_recorder.cancel(),
+                    service._loop
+                )
+                future.result(timeout=5.0)
+                service._voice_recorder = None
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_recording_duration(self) -> float:
+        """
+        Get current recording duration in seconds.
+
+        Returns:
+            Duration in seconds (0 if not recording)
+        """
+        service = get_network_service()
+        if hasattr(service, '_voice_recorder') and service._voice_recorder:
+            return service._voice_recorder.get_duration()
+        return 0.0
+
+    def get_audio_devices(self) -> Dict[str, Any]:
+        """
+        Get available audio input and output devices.
+
+        Returns:
+            Dict with inputs and outputs lists
+        """
+        try:
+            from src.voice import get_input_devices, get_output_devices
+            return {
+                "inputs": get_input_devices(),
+                "outputs": get_output_devices()
+            }
+        except Exception as e:
+            return {"inputs": [], "outputs": [], "error": str(e)}
+
+    def set_audio_devices(self, input_id: Optional[int], output_id: Optional[int]) -> None:
+        """
+        Set audio devices to use for calls.
+
+        Args:
+            input_id: Input (microphone) device ID, or None for default
+            output_id: Output (speaker) device ID, or None for default
+        """
+        service = get_network_service()
+        if service._voice_call:
+            service._voice_call.set_audio_devices(input_id, output_id)
+
     # ========== System Methods ==========
 
     def ping(self) -> str:
