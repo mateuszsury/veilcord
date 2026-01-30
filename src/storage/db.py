@@ -166,6 +166,54 @@ def init_database() -> sqlcipher3.Connection:
         )
     """)
 
+    # messages table: P2P chat message history
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS messages (
+            id TEXT PRIMARY KEY,
+            conversation_id INTEGER NOT NULL,
+            sender_id TEXT NOT NULL,
+            type TEXT NOT NULL DEFAULT 'text',
+            body TEXT,
+            reply_to TEXT,
+            edited INTEGER DEFAULT 0,
+            deleted INTEGER DEFAULT 0,
+            timestamp INTEGER NOT NULL,
+            received_at INTEGER,
+            FOREIGN KEY (conversation_id) REFERENCES contacts(id)
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_messages_conversation
+        ON messages(conversation_id, timestamp)
+    """)
+
+    # reactions table: emoji reactions to messages
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS reactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_id TEXT NOT NULL,
+            sender_id TEXT NOT NULL,
+            emoji TEXT NOT NULL,
+            timestamp INTEGER NOT NULL,
+            FOREIGN KEY (message_id) REFERENCES messages(id),
+            UNIQUE(message_id, sender_id, emoji)
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_reactions_message
+        ON reactions(message_id)
+    """)
+
+    # signal_sessions table: Signal Protocol session state persistence
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS signal_sessions (
+            contact_id INTEGER PRIMARY KEY,
+            session_state BLOB NOT NULL,
+            updated_at INTEGER NOT NULL,
+            FOREIGN KEY (contact_id) REFERENCES contacts(id)
+        )
+    """)
+
     conn.commit()
 
     _db_connection = conn
