@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[==============================>                                        ] 42% (Phase 4 - 3/7 plans)
+[================================>                                      ] 44% (Phase 4 - 4/7 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -23,19 +23,19 @@ See: .planning/PROJECT.md
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
-| 4 | File Transfer | In Progress | 3/7 | 7 |
+| 4 | File Transfer | In Progress | 4/7 | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 37/73 requirements completed (51%)
+**Total:** 38/73 requirements completed (52%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 22
-- Average plan duration: 5m
+- Plans completed: 23
+- Average plan duration: 4m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -98,6 +98,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Temp files for chunk assembly | Large files shouldn't be held in memory during reception | Supports receiving files larger than available RAM |
 | 2026-01-30 | Max 3 concurrent transfers per contact | Prevent resource exhaustion from malicious or buggy peers | Service rejects new transfers when limit reached |
 | 2026-01-30 | Callback-based transfer notifications | Clean separation between transfer logic and frontend notification | Service emits events that API layer translates to frontend updates |
+| 2026-01-30 | Message routing by type detection | Route messages in NetworkService based on structure (binary 'C' prefix, JSON file_ type, control markers) | Clean separation between text messages and file transfers on same data channel |
+| 2026-01-30 | Native file picker via tkinter | Use tkinter.filedialog for file selection | Cross-platform, no additional dependencies (bundled with Python), provides native OS dialogs |
+| 2026-01-30 | Frontend events for file transfer | Custom events: file_progress, file_received, transfer_complete, transfer_error | Consistent with existing message events, allows reactive UI updates |
 
 ### Active TODOs
 
@@ -124,6 +127,7 @@ See: .planning/PROJECT.md
 - [x] Execute 04-01-PLAN.md (file storage infrastructure)
 - [x] Execute 04-02-PLAN.md (file chunking and sender)
 - [x] Execute 04-03-PLAN.md (file receiver and service orchestration)
+- [x] Execute 04-04-PLAN.md (network and API integration)
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
 
@@ -146,31 +150,30 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 04-03-PLAN.md (file receiver and transfer service)
+**Last session:** 2026-01-30 - Completed 04-04-PLAN.md (network and API integration)
 
 **What we just completed:**
-- Executed plan 04-03 (file receiver with hash verification and service orchestration)
-- Created FileReceiver class with chunk reassembly, hash verification, temp file handling
-- Added database functions for transfer state persistence (save, get, update, delete)
-- Implemented FileTransferService managing up to 3 concurrent transfers per contact
-- Message routing handles metadata, chunks, EOF, cancel markers
-- Callback-based notifications for progress, completion, errors
-- All tests passed, 2 commits created
+- Executed plan 04-04 (FileTransferService integration with NetworkService and API bridge)
+- Integrated FileTransferService into NetworkService with message routing
+- Modified _on_incoming_message to detect and route file messages
+- Added send_file, cancel_transfer, get_transfers, get_file, open_file_dialog API methods
+- Created comprehensive TypeScript types for file transfer
+- Added frontend custom events for file transfer state
+- All compilation checks passed, 2 commits created
 
 **What's next:**
-- Continue Phase 4: Execute 04-04-PLAN.md (API endpoints for file transfer)
+- Continue Phase 4: Execute 04-05-PLAN.md (File UI integration)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/file_transfer/receiver.py
-- src/file_transfer/service.py
-- .planning/phases/04-file-transfer/04-03-SUMMARY.md
+- .planning/phases/04-file-transfer/04-04-SUMMARY.md
 
 **Files modified this session:**
-- src/file_transfer/__init__.py
-- src/storage/db.py
+- src/network/service.py
+- src/api/bridge.py
+- frontend/src/lib/pywebview.ts
 - .planning/STATE.md
 
 ---
