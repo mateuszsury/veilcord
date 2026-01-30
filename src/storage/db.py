@@ -148,6 +148,15 @@ def init_database() -> sqlcipher3.Connection:
         )
     """)
 
+    # settings table: key-value store for user preferences
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
 
     _db_connection = conn

@@ -42,6 +42,15 @@ from src.storage.contacts import (
     Contact,
 )
 
+# Settings storage
+from src.storage.settings import (
+    Settings,
+    get_setting,
+    set_setting,
+    get_all_settings,
+    delete_setting,
+)
+
 __all__ = [
     # Paths
     'get_app_data_dir',
@@ -69,4 +78,10 @@ __all__ = [
     'set_contact_verified',
     'update_contact_display_name',
     'Contact',
+    # Settings storage
+    'Settings',
+    'get_setting',
+    'set_setting',
+    'get_all_settings',
+    'delete_setting',
 ]
