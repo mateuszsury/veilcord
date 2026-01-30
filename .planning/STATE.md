@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 3 - P2P Text Messaging
-**Status:** In Progress (Plan 5/7 pending)
+**Status:** In Progress (Plan 6/7 pending)
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -15,14 +15,14 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[==================>                                                    ] 25% (Phase 2/8 COMPLETE)
+[=====================>                                                 ] 29% (Phase 2/8 COMPLETE)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
 |-------|------|--------|-------|--------------|
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
-| 3 | P2P Text Messaging | In Progress | 4/7 | 10 |
+| 3 | P2P Text Messaging | In Progress | 5/7 | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 16
+- Plans completed: 17
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -85,6 +85,7 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Lazy import for message_crypto | __getattr__ in crypto/__init__.py defers message_crypto imports | Breaks circular import with storage module |
 | 2026-01-30 | Base64 encoding for encrypted transmission | Header, ciphertext, ephemeral_key encoded as base64 for data channel | JSON-safe message transmission |
 | 2026-01-30 | Callback-based messaging notifications | MessagingService uses callbacks for async frontend notification | Clean separation, thread-safe event dispatch |
+| 2026-01-30 | Inline SVG icons in chat UI | Use inline SVG paths instead of lucide-react dependency | Matches existing codebase pattern, no new dependencies |
 
 ### Active TODOs
 
@@ -105,10 +106,9 @@ See: .planning/PROJECT.md
 - [x] Execute 03-02-PLAN.md (Signal Protocol)
 - [x] Execute 03-03-PLAN.md (WebRTC data channels)
 - [x] Execute 03-04-PLAN.md (message protocol integration)
-- [ ] Execute 03-05-PLAN.md (chat UI)
+- [x] Execute 03-05-PLAN.md (chat UI)
 - [ ] Execute 03-06-PLAN.md (message features)
 - [ ] Execute 03-07-PLAN.md (integration)
-- [ ] Research aiortc data channels before Phase 3 planning
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
 
@@ -123,7 +123,6 @@ See: .planning/PROJECT.md
 - Phase 7: Sender Keys protocol implementation and mesh optimization
 
 **Medium priority (research during planning):**
-- Phase 3: aiortc data channel reliability, offline message patterns
 - Phase 4: File chunking and resume protocol
 - Phase 6: Cross-browser WebRTC compatibility
 
@@ -132,31 +131,34 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 03-04-PLAN.md (P2P messaging integration)
+**Last session:** 2026-01-30 - Completed 03-05-PLAN.md (chat UI)
 
 **What we were doing:**
-- Executed plan 03-04 (P2P messaging integration)
-- Created MessagingService integrating peer connections, encryption, and storage
-- Extended NetworkService and API bridge with messaging methods
-- Added frontend TypeScript types for messages and P2P state events
+- Executed plan 03-05 (chat UI components)
+- Created useMessages and useChat Zustand stores
+- Built ChatPanel, MessageList, MessageBubble, MessageInput components
+- Integrated ChatPanel into MainPanel
 
 **What's next:**
-- Execute 03-05-PLAN.md (chat UI)
-- Continue with remaining Phase 3 plans (06-07)
+- Execute 03-06-PLAN.md (message features: edit, delete, reactions)
+- Execute 03-07-PLAN.md (integration and testing)
+- Complete Phase 3
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/network/messaging.py
+- frontend/src/stores/messages.ts
+- frontend/src/stores/chat.ts
+- frontend/src/components/chat/ChatPanel.tsx
+- frontend/src/components/chat/MessageList.tsx
+- frontend/src/components/chat/MessageBubble.tsx
+- frontend/src/components/chat/MessageInput.tsx
 
 **Files modified this session:**
-- src/network/service.py (MessagingService integration)
-- src/api/bridge.py (messaging API methods)
-- frontend/src/lib/pywebview.ts (MessageResponse, P2PConnectionState types)
-- src/crypto/__init__.py (lazy import fix for circular dependency)
+- frontend/src/components/layout/MainPanel.tsx
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 03-04 completion*
+*Last updated: 2026-01-30 after 03-05 completion*
