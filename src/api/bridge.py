@@ -404,6 +404,185 @@ class API:
             "timestamp": r.timestamp
         } for r in reactions]
 
+    # ========== File Transfer Methods ==========
+
+    def send_file(self, contact_id: int, file_path: str) -> Dict[str, Any]:
+        """
+        Send a file to a contact.
+
+        Args:
+            contact_id: Contact database ID
+            file_path: Absolute path to file
+
+        Returns:
+            Dict with transferId on success or error on failure
+        """
+        try:
+            service = get_network_service()
+            transfer_id = service.send_file(contact_id, file_path)
+            if transfer_id:
+                return {"transferId": transfer_id}
+            else:
+                return {"error": "Failed to start transfer (no P2P connection?)"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def cancel_transfer(
+        self,
+        contact_id: int,
+        transfer_id: str,
+        direction: str = "send"
+    ) -> Dict[str, Any]:
+        """
+        Cancel a file transfer.
+
+        Args:
+            contact_id: Contact database ID
+            transfer_id: Transfer UUID
+            direction: "send" or "receive"
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.cancel_transfer(contact_id, transfer_id, direction)
+            return {"success": success}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_transfers(self, contact_id: int) -> Dict[str, Any]:
+        """
+        Get all transfers for a contact.
+
+        Args:
+            contact_id: Contact database ID
+
+        Returns:
+            Dict with active and resumable transfer lists
+        """
+        try:
+            service = get_network_service()
+            active = service.get_active_transfers(contact_id)
+            resumable = service.get_resumable_transfers(contact_id)
+            return {
+                "active": active,
+                "resumable": resumable
+            }
+        except Exception as e:
+            return {"active": [], "resumable": [], "error": str(e)}
+
+    def get_file(self, file_id: str) -> Dict[str, Any]:
+        """
+        Get file data by ID.
+
+        Args:
+            file_id: File UUID from database
+
+        Returns:
+            Dict with file metadata and base64 data, or error
+        """
+        try:
+            from src.storage.files import get_file_metadata, retrieve_file_data
+            import base64
+
+            metadata = get_file_metadata(file_id)
+            if not metadata:
+                return {"error": "File not found"}
+
+            data = retrieve_file_data(file_id)
+            if not data:
+                return {"error": "File data not found"}
+
+            return {
+                "id": metadata.id,
+                "filename": metadata.filename,
+                "mimeType": metadata.mime_type,
+                "size": metadata.size,
+                "data": base64.b64encode(data).decode('utf-8')
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
+    def open_file_dialog(self) -> Dict[str, Any]:
+        """
+        Open native file picker dialog.
+
+        Returns:
+            Dict with path, name, size on success, or cancelled: true if cancelled
+        """
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            from pathlib import Path
+
+            # Create hidden root window
+            root = tk.Tk()
+            root.withdraw()
+
+            # Open file dialog
+            file_path = filedialog.askopenfilename(
+                title="Select file to send",
+                filetypes=[("All files", "*.*")]
+            )
+
+            # Clean up
+            root.destroy()
+
+            if not file_path:
+                return {"cancelled": True}
+
+            # Get file info
+            path = Path(file_path)
+            size = path.stat().st_size
+
+            return {
+                "path": str(path.absolute()),
+                "name": path.name,
+                "size": size
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_file_preview(self, file_id: int) -> Dict[str, Any]:
+        """
+        Get preview/thumbnail for an image or video file.
+
+        Args:
+            file_id: File database ID
+
+        Returns:
+            Dict with preview data (base64 JPEG) or error
+        """
+        try:
+            from src.storage.files import get_file
+            from src.file_transfer.preview import get_preview
+            import base64
+
+            result = get_file(file_id)
+            if not result:
+                return {"error": "File not found"}
+
+            metadata, data = result
+
+            # Generate preview
+            preview_data = get_preview(
+                data,
+                metadata.mime_type,
+                file_id=str(file_id)
+            )
+
+            if not preview_data:
+                return {"error": "Preview not available for this file type"}
+
+            # Return base64-encoded JPEG
+            return {
+                "preview": base64.b64encode(preview_data).decode('utf-8'),
+                "mimeType": "image/jpeg"
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
     # ========== System Methods ==========
 
     def ping(self) -> str:

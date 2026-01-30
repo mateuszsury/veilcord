@@ -47,6 +47,13 @@ export interface PyWebViewAPI {
   remove_reaction(contact_id: number, message_id: string, emoji: string): Promise<ApiResult>;
   get_reactions(message_id: string): Promise<ReactionResponse[]>;
 
+  // File Transfer
+  send_file(contact_id: number, file_path: string): Promise<FileTransferResult>;
+  cancel_transfer(contact_id: number, transfer_id: string, direction?: string): Promise<ApiResult>;
+  get_transfers(contact_id: number): Promise<FileTransfersList>;
+  get_file(file_id: string): Promise<FileData>;
+  open_file_dialog(): Promise<FileDialogResult>;
+
   // System
   ping(): Promise<string>;
 }
@@ -99,6 +106,55 @@ export interface ReactionResponse {
   timestamp: number;
 }
 
+// File Transfer types
+export type TransferState = 'pending' | 'active' | 'paused' | 'complete' | 'cancelled' | 'failed';
+export type TransferDirection = 'send' | 'receive';
+
+export interface FileMetadata {
+  id: string;
+  filename: string;
+  size: number;
+  mimeType: string;
+  transferId?: string;
+}
+
+export interface FileTransferProgress {
+  transferId: string;
+  bytesTransferred: number;
+  totalBytes: number;
+  state: TransferState;
+  speedBps: number;
+  etaSeconds: number;
+}
+
+export interface FileTransferResult {
+  transferId?: string;
+  error?: string;
+}
+
+export interface FileTransfersList {
+  active: FileTransferProgress[];
+  resumable: any[];
+  error?: string;
+}
+
+export interface FileData {
+  id?: string;
+  filename?: string;
+  mimeType?: string;
+  size?: number;
+  data?: string; // base64 encoded
+  error?: string;
+}
+
+export interface FileDialogResult {
+  path?: string;
+  name?: string;
+  size?: number;
+  cancelled?: boolean;
+  error?: string;
+}
+
 // Event payload types for incoming messages
 export interface MessageEventPayload {
   contactId: number;
@@ -136,6 +192,27 @@ export interface P2PStateEventPayload {
   state: P2PConnectionState;
 }
 
+export interface FileProgressEventPayload {
+  contactId: number;
+  progress: FileTransferProgress;
+}
+
+export interface FileReceivedEventPayload {
+  contactId: number;
+  file: FileMetadata;
+}
+
+export interface TransferCompleteEventPayload {
+  contactId: number;
+  transferId: string;
+}
+
+export interface TransferErrorEventPayload {
+  contactId: number;
+  transferId: string;
+  error: string;
+}
+
 // Custom events dispatched by Python backend
 declare global {
   interface Window {
@@ -149,6 +226,10 @@ declare global {
     'discordopus:presence': CustomEvent<{ publicKey: string; status: UserStatus }>;
     'discordopus:message': CustomEvent<MessageEventPayload>;
     'discordopus:p2p_state': CustomEvent<P2PStateEventPayload>;
+    'discordopus:file_progress': CustomEvent<FileProgressEventPayload>;
+    'discordopus:file_received': CustomEvent<FileReceivedEventPayload>;
+    'discordopus:transfer_complete': CustomEvent<TransferCompleteEventPayload>;
+    'discordopus:transfer_error': CustomEvent<TransferErrorEventPayload>;
   }
 }
 
