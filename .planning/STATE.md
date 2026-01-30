@@ -20,7 +20,7 @@ See: .planning/PROJECT.md
 
 | Phase | Name | Status | Plans | Requirements |
 |-------|------|--------|-------|--------------|
-| 1 | Cryptographic Foundation & Packaging | In Progress | 4/7 | 14 |
+| 1 | Cryptographic Foundation & Packaging | In Progress | 5/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | Pending | 0/? | 12 |
 | 3 | P2P Text Messaging | Pending | 0/? | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
@@ -34,8 +34,8 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 4
-- Average plan duration: 4.5m
+- Plans completed: 5
+- Average plan duration: 4.2m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -62,6 +62,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Private keys in filesystem, public in DB | Defense-in-depth: database compromise doesn't expose private keys | identity.key file separate from data.db |
 | 2026-01-30 | Zustand stores manage state only | API calls happen in components via api.call() - simpler architecture | Clear separation of concerns |
 | 2026-01-30 | Tailwind v4 @theme directive | Use native v4 approach instead of separate tailwind.config.ts | Simpler configuration |
+| 2026-01-30 | RFC 9106 desktop params for Argon2id | 64MB memory, 3 iterations, 4 lanes - balances security with <1s completion | Backup creation fast enough for UX |
+| 2026-01-30 | Versioned backup format with embedded KDF params | Future versions can read old backups by using embedded parameters | Forward compatibility for backup files |
 
 ### Active TODOs
 
@@ -70,7 +72,8 @@ See: .planning/PROJECT.md
 - [x] Execute 01-02-PLAN.md (DPAPI + SQLCipher storage)
 - [x] Execute 01-03-PLAN.md (cryptographic identity)
 - [x] Execute 01-05-PLAN.md (React UI shell)
-- [ ] Execute 01-04-PLAN.md, 01-06-PLAN.md, 01-07-PLAN.md
+- [x] Execute 01-04-PLAN.md (password-based key backup)
+- [ ] Execute 01-06-PLAN.md, 01-07-PLAN.md
 - [ ] Research aiortc data channels before Phase 3 planning
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
@@ -95,17 +98,15 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Executed 01-05-PLAN.md
+**Last session:** 2026-01-30 - Executed 01-04-PLAN.md
 
 **What we were doing:**
-- Executed Phase 1 Plan 05: React UI Shell
-- Created PyWebView bridge with waitForPyWebView() for safe API access
-- Implemented Zustand stores for identity, contacts, and UI state
-- Built dark cosmic theme with starry background
-- Created sidebar and main panel layout components
+- Executed Phase 1 Plan 04: Password-Based Key Backup
+- Implemented Argon2id KDF with RFC 9106 desktop parameters
+- Added ChaCha20Poly1305 authenticated encryption for backup
+- Created file I/O helpers for backup export/import
 
 **What's next:**
-- Execute 01-04-PLAN.md (Python backend API bridge)
 - Execute 01-06-PLAN.md (Settings panel and identity UI)
 - Execute 01-07-PLAN.md (PyInstaller packaging)
 
@@ -113,17 +114,10 @@ See: .planning/PROJECT.md
 - None
 
 **Files created this session:**
-- frontend/src/lib/pywebview.ts
-- frontend/src/stores/identity.ts
-- frontend/src/stores/contacts.ts
-- frontend/src/stores/ui.ts
-- frontend/src/components/theme-provider.tsx
-- frontend/src/components/layout/Sidebar.tsx
-- frontend/src/components/layout/MainPanel.tsx
-- frontend/src/components/layout/AppLayout.tsx
-- .planning/phases/01-cryptographic-foundation-packaging/01-05-SUMMARY.md
+- src/crypto/backup.py
+- .planning/phases/01-cryptographic-foundation-packaging/01-04-SUMMARY.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 01-05-PLAN.md execution*
+*Last updated: 2026-01-30 after 01-04-PLAN.md execution*
