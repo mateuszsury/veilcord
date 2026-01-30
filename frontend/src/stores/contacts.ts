@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ContactResponse } from '@/lib/pywebview';
+import type { ContactResponse, UserStatus } from '@/lib/pywebview';
 
 interface ContactsState {
   contacts: ContactResponse[];
@@ -10,6 +10,7 @@ interface ContactsState {
   addContact: (contact: ContactResponse) => void;
   removeContact: (id: number) => void;
   updateContact: (id: number, updates: Partial<ContactResponse>) => void;
+  updateContactStatus: (publicKey: string, status: UserStatus) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -38,6 +39,21 @@ export const useContactsStore = create<ContactsState>((set) => ({
       ),
     })),
 
+  // Update contact online status by public key
+  updateContactStatus: (publicKey, status) =>
+    set((state) => ({
+      contacts: state.contacts.map((c) =>
+        c.publicKey.includes(publicKey) ? { ...c, onlineStatus: status } : c
+      ),
+    })),
+
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error, isLoading: false }),
 }));
+
+// Set up event listener for presence updates from backend
+if (typeof window !== 'undefined') {
+  window.addEventListener('discordopus:presence', ((e: CustomEvent) => {
+    useContactsStore.getState().updateContactStatus(e.detail.publicKey, e.detail.status);
+  }) as EventListener);
+}
