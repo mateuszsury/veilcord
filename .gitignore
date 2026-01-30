@@ -39,7 +39,9 @@ env/
 
 # PyInstaller
 *.manifest
-*.spec
+# *.spec - We DO want to track build.spec
+# Allow our build spec file
+!build.spec
 
 # Installer logs
 pip-log.txt
