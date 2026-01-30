@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[====================================================>                  ] 69% (Phase 5 In Progress - 1/8 plans)
+[====================================================>                  ] 69% (Phase 5 In Progress - 2/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
-| 5 | Voice Calls (1-on-1) | In Progress | 1/8 | 9 |
+| 5 | Voice Calls (1-on-1) | In Progress | 2/8 | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
@@ -117,6 +117,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | User re-selects file for resume | No original path storage - user must locate and re-select the same file for resume | Simpler implementation, validated by file size match |
 | 2026-01-30 | sounddevice for audio device access | Auto-installs PortAudio on Windows, simpler API than PyAudio | Cleaner device enumeration and audio I/O |
 | 2026-01-30 | 7-state CallState enum | IDLE, RINGING_*, CONNECTING, ACTIVE, RECONNECTING, ENDED covers full lifecycle | Clear state machine for UI and logic |
+| 2026-01-30 | Thread-safe async queue for audio | Use loop.call_soon_threadsafe() to bridge sounddevice callback thread to asyncio | Safe audio data transfer between threads |
+| 2026-01-30 | Mute returns silence instead of stopping | When muted, track returns zero-filled frames instead of stopping capture | Allows instant unmute without stream restart |
+| 2026-01-30 | Drop frames on queue full | Prevent memory bloat by dropping oldest frames when buffer exceeds 100 | Better than blocking callback thread |
 
 ### Active TODOs
 
@@ -149,7 +152,8 @@ See: .planning/PROJECT.md
 - [x] Execute 04-06-PLAN.md (file transfer message integration)
 - [x] Execute 04-08-PLAN.md (file transfer resume API & UI) - PHASE 4 COMPLETE
 - [x] Execute 05-01-PLAN.md (audio device foundation)
-- [ ] Execute 05-02-PLAN.md (audio track manager)
+- [x] Execute 05-02-PLAN.md (audio tracks)
+- [ ] Execute 05-03-PLAN.md (call signaling)
 - [ ] Execute remaining Phase 5 plans
 
 ### Blockers
@@ -169,34 +173,32 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 05-01-PLAN.md (audio device foundation)
+**Last session:** 2026-01-30 - Completed 05-02-PLAN.md (audio tracks)
 
 **What we just completed:**
-- Executed plan 05-01 (audio device foundation)
-- Created src/voice/ package with device_manager.py and models.py
-- AudioDeviceManager for input/output device enumeration using sounddevice
-- CallState enum with 7 states for call lifecycle
-- VoiceCall, VoiceMessageMetadata, CallEvent dataclasses
-- Added sounddevice>=0.5.0 and numpy>=2.0.0 to requirements.txt
+- Executed plan 05-02 (audio tracks)
+- Created src/voice/audio_track.py with MicrophoneAudioTrack and AudioPlaybackTrack
+- MicrophoneAudioTrack captures from microphone, produces av.AudioFrame for WebRTC
+- AudioPlaybackTrack plays received audio through speakers
+- 20ms frames at 48kHz (960 samples) for Opus codec compatibility
+- Thread-safe queue bridging sounddevice callback to asyncio
 
 **What's next:**
-- Execute 05-02-PLAN.md (audio track manager)
+- Execute 05-03-PLAN.md (call signaling)
 - Continue Phase 5 voice call implementation
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/voice/__init__.py
-- src/voice/device_manager.py
-- src/voice/models.py
-- .planning/phases/05-voice-calls/05-01-SUMMARY.md
+- src/voice/audio_track.py
+- .planning/phases/05-voice-calls/05-02-SUMMARY.md
 
 **Files modified this session:**
-- requirements.txt
+- src/voice/__init__.py
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after completing 05-01-PLAN.md*
+*Last updated: 2026-01-30 after completing 05-02-PLAN.md*
