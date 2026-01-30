@@ -1,21 +1,6 @@
 import { useEffect, useState } from 'react'
 
-/**
- * PyWebView API bridge type declaration
- *
- * When running in PyWebView, window.pywebview.api exposes Python methods.
- * In browser dev mode, this will be undefined.
- */
-declare global {
-  interface Window {
-    pywebview?: {
-      api: {
-        ping: () => Promise<string>
-        get_version: () => Promise<string>
-      }
-    }
-  }
-}
+// PyWebView API types are now in @/lib/pywebview.ts
 
 function App() {
   const [bridgeReady, setBridgeReady] = useState(false)
