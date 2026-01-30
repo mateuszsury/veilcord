@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[===========================================================>           ] 77% (Phase 5 In Progress - 6/8 plans)
+[============================================================>          ] 79% (Phase 5 In Progress - 7/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -24,17 +24,17 @@ See: .planning/PROJECT.md
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
-| 5 | Voice Calls (1-on-1) | In Progress | 6/8 | 9 |
+| 5 | Voice Calls (1-on-1) | In Progress | 7/8 | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 52/73 requirements completed (71%)
+**Total:** 53/73 requirements completed (73%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 33
+- Plans completed: 34
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -127,6 +127,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Voice recorder stored on NetworkService | _voice_recorder attribute lazily created on first recording | Shared instance for recording session, cleared after stop/cancel |
 | 2026-01-30 | Call store event listeners for full lifecycle | Listen to call_state, incoming_call, call_answered, call_rejected, call_ended events | Complete call UI state synchronization |
 | 2026-01-30 | Local duration timer in ActiveCallOverlay | Timer increments locally every second instead of syncing from backend | Simpler implementation, avoids network latency in duration display |
+| 2026-01-30 | Duration polling every 100ms for voice recording | Smooth UI updates without pushing duration from backend | Clean polling pattern in Zustand store |
+| 2026-01-30 | Audio file detection via MIME type and extension | Robust detection using both mimeType.startsWith('audio/') and file extension list | Handles edge cases where MIME type is generic |
+| 2026-01-30 | 5 minute max recording with 4:30 warning | Reasonable limit for voice messages, warning gives time to finish | Prevents very large recordings, good UX |
 
 ### Active TODOs
 
@@ -164,7 +167,8 @@ See: .planning/PROJECT.md
 - [x] Execute 05-03-PLAN.md (call service)
 - [x] Execute 05-05-PLAN.md (voice integration)
 - [x] Execute 05-06-PLAN.md (call UI components)
-- [ ] Execute remaining Phase 5 plans (05-07, 05-08)
+- [x] Execute 05-07-PLAN.md (voice message UI)
+- [ ] Execute 05-08-PLAN.md (integration testing)
 
 ### Blockers
 
@@ -183,33 +187,34 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 05-06-PLAN.md (call UI components)
+**Last session:** 2026-01-30 - Completed 05-07-PLAN.md (voice message UI)
 
 **What we just completed:**
-- Executed plan 05-06 (call UI components)
-- Created Zustand call store with useCall hook
-- Built IncomingCallPopup with accept/reject buttons
-- Built ActiveCallOverlay with mute toggle and end call
-- Integrated call components into AppLayout
+- Executed plan 05-07 (voice message UI)
+- Created Zustand store for voice recording state management
+- Built VoiceRecorder component with pulsing indicator and animated waveform
+- Built VoiceMessagePlayer with play/pause and seekable progress bar
+- Integrated voice playback into FileMessage for audio files
+- Added microphone button to ChatPanel with recording mode toggle
 
 **What's next:**
-- Execute 05-07-PLAN.md (voice message UI)
-- Execute 05-08-PLAN.md (integration testing)
+- Execute 05-08-PLAN.md (integration testing) - FINAL Phase 5 plan
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- frontend/src/stores/call.ts
-- frontend/src/components/call/IncomingCallPopup.tsx
-- frontend/src/components/call/ActiveCallOverlay.tsx
-- .planning/phases/05-voice-calls/05-06-SUMMARY.md
+- frontend/src/stores/voiceRecording.ts
+- frontend/src/components/chat/VoiceRecorder.tsx
+- frontend/src/components/chat/VoiceMessagePlayer.tsx
+- .planning/phases/05-voice-calls/05-07-SUMMARY.md
 
 **Files modified this session:**
-- frontend/src/components/layout/AppLayout.tsx
+- frontend/src/components/chat/FileMessage.tsx
+- frontend/src/components/chat/ChatPanel.tsx
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after completing 05-06-PLAN.md*
+*Last updated: 2026-01-30 after completing 05-07-PLAN.md*
