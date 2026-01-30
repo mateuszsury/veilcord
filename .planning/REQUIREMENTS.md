@@ -9,19 +9,19 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Identity & Security
 
-- [ ] **IDEN-01**: User can generate cryptographic identity (Ed25519/X25519 key pair)
-- [ ] **IDEN-02**: User can view their public key as shareable ID
-- [ ] **IDEN-03**: User can set display name (local, not on server)
-- [ ] **IDEN-04**: User can verify contact's identity via fingerprint comparison
-- [ ] **IDEN-05**: User can export encrypted key backup with password
-- [ ] **IDEN-06**: User can import key backup to restore identity
+- [x] **IDEN-01**: User can generate cryptographic identity (Ed25519/X25519 key pair)
+- [x] **IDEN-02**: User can view their public key as shareable ID
+- [x] **IDEN-03**: User can set display name (local, not on server)
+- [x] **IDEN-04**: User can verify contact's identity via fingerprint comparison
+- [x] **IDEN-05**: User can export encrypted key backup with password
+- [x] **IDEN-06**: User can import key backup to restore identity
 
 ### Encryption
 
 - [ ] **ENCR-01**: All messages are E2E encrypted (Signal Protocol)
 - [ ] **ENCR-02**: All voice/video calls are E2E encrypted
 - [ ] **ENCR-03**: All file transfers are E2E encrypted
-- [ ] **ENCR-04**: Keys stored securely using Windows DPAPI
+- [x] **ENCR-04**: Keys stored securely using Windows DPAPI
 - [ ] **ENCR-05**: Perfect forward secrecy (Double Ratchet)
 
 ### Contacts
@@ -106,11 +106,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### UI/UX
 
-- [ ] **UI-01**: Dark cosmic theme with starry animations
-- [ ] **UI-02**: Sidebar with contacts and groups
-- [ ] **UI-03**: Main chat panel with message history
-- [ ] **UI-04**: Settings panel for preferences
-- [ ] **UI-05**: Smooth transitions and animations
+- [x] **UI-01**: Dark cosmic theme with starry animations
+- [x] **UI-02**: Sidebar with contacts and groups
+- [x] **UI-03**: Main chat panel with message history
+- [x] **UI-04**: Settings panel for preferences
+- [x] **UI-05**: Smooth transitions and animations
 
 ### Infrastructure
 
@@ -121,8 +121,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Packaging
 
-- [ ] **PKG-01**: Single .exe installer/portable for Windows
-- [ ] **PKG-02**: App starts in reasonable time (<5 seconds)
+- [x] **PKG-01**: Single .exe installer/portable for Windows
+- [x] **PKG-02**: App starts in reasonable time (<5 seconds)
 - [ ] **PKG-03**: Auto-updater for new versions
 
 ## v2 Requirements
@@ -170,16 +170,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IDEN-01 | Phase 1 | Pending |
-| IDEN-02 | Phase 1 | Pending |
-| IDEN-03 | Phase 1 | Pending |
-| IDEN-04 | Phase 1 | Pending |
-| IDEN-05 | Phase 1 | Pending |
-| IDEN-06 | Phase 1 | Pending |
+| IDEN-01 | Phase 1 | Complete |
+| IDEN-02 | Phase 1 | Complete |
+| IDEN-03 | Phase 1 | Complete |
+| IDEN-04 | Phase 1 | Complete |
+| IDEN-05 | Phase 1 | Complete |
+| IDEN-06 | Phase 1 | Complete |
 | ENCR-01 | Phase 3 | Pending |
 | ENCR-02 | Phase 5 | Pending |
 | ENCR-03 | Phase 4 | Pending |
-| ENCR-04 | Phase 1 | Pending |
+| ENCR-04 | Phase 1 | Complete |
 | ENCR-05 | Phase 3 | Pending |
 | CONT-01 | Phase 2 | Pending |
 | CONT-02 | Phase 2 | Pending |
@@ -231,17 +231,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTF-02 | Phase 8 | Pending |
 | NOTF-03 | Phase 8 | Pending |
 | NOTF-04 | Phase 8 | Pending |
-| UI-01 | Phase 1 | Pending |
-| UI-02 | Phase 1 | Pending |
-| UI-03 | Phase 1 | Pending |
-| UI-04 | Phase 1 | Pending |
-| UI-05 | Phase 1 | Pending |
+| UI-01 | Phase 1 | Complete |
+| UI-02 | Phase 1 | Complete |
+| UI-03 | Phase 1 | Complete |
+| UI-04 | Phase 1 | Complete |
+| UI-05 | Phase 1 | Complete |
 | INFR-01 | Phase 2 | Pending |
 | INFR-02 | Phase 2 | Pending |
 | INFR-03 | Phase 2 | Pending |
 | INFR-04 | Phase 2 | Pending |
-| PKG-01 | Phase 1 | Pending |
-| PKG-02 | Phase 1 | Pending |
+| PKG-01 | Phase 1 | Complete |
+| PKG-02 | Phase 1 | Complete |
 | PKG-03 | Phase 8 | Pending |
 
 **Coverage:**
