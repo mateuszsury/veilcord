@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useUIStore } from '@/stores/ui';
 import { useContactsStore } from '@/stores/contacts';
+import { SettingsPanel } from '@/components/settings/SettingsPanel';
 
 export function MainPanel() {
   const activePanel = useUIStore((s) => s.activePanel);
@@ -16,11 +17,8 @@ export function MainPanel() {
       className="flex-1 h-full bg-cosmic-bg flex flex-col overflow-hidden"
     >
       {activePanel === 'settings' ? (
-        <div className="flex-1 p-6">
-          <h2 className="text-xl font-semibold mb-4">Settings</h2>
-          <p className="text-cosmic-muted">
-            Settings panel will be implemented in the next plan.
-          </p>
+        <div className="flex-1 overflow-y-auto">
+          <SettingsPanel />
         </div>
       ) : selectedContact ? (
         <div className="flex-1 flex flex-col">

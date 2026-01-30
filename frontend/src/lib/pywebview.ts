@@ -14,7 +14,7 @@ export interface PyWebViewAPI {
   update_display_name(name: string): Promise<void>;
 
   // Backup
-  export_backup(password: string): Promise<string>;
+  export_backup(password: string): Promise<BackupResponse>;
   import_backup(backup_json: string, password: string): Promise<IdentityResponse>;
 
   // Contacts
@@ -30,13 +30,19 @@ export interface PyWebViewAPI {
 export interface IdentityResponse {
   publicKey: string;
   fingerprint: string;
+  fingerprintFormatted: string;
   displayName: string;
+}
+
+export interface BackupResponse {
+  backup: string;
 }
 
 export interface ContactResponse {
   id: number;
   publicKey: string;
   fingerprint: string;
+  fingerprintFormatted: string;
   displayName: string;
   verified: boolean;
   addedAt: string;
