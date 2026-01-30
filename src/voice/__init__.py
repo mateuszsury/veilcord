@@ -32,6 +32,8 @@ from .voice_message import (
     VoiceMessagePlayer
 )
 
+from .call_service import VoiceCallService
+
 __all__ = [
     # Device management
     'AudioDeviceManager',
@@ -52,4 +54,6 @@ __all__ = [
     # Voice messages
     'VoiceMessageRecorder',
     'VoiceMessagePlayer',
+    # Call service
+    'VoiceCallService',
 ]
