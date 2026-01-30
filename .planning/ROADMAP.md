@@ -145,6 +145,20 @@ Plans:
 **Requirements:**
 - FILE-01, FILE-02, FILE-03, FILE-04, FILE-05, FILE-06
 
+**Plans:** 8 plans
+
+Plans:
+- [x] 04-01-PLAN.md - Database schema and encrypted file storage layer
+- [x] 04-02-PLAN.md - File chunker and sender with backpressure control
+- [x] 04-03-PLAN.md - File receiver and transfer service orchestration
+- [x] 04-04-PLAN.md - NetworkService integration and API bridge
+- [x] 04-05-PLAN.md - Image and video preview generation
+- [x] 04-06-PLAN.md - Message integration and E2E verification checkpoint
+- [x] 04-07-PLAN.md - Frontend UI components (store, upload, progress)
+- [x] 04-08-PLAN.md - Gap closure: Resume transfer API and UI (from verification)
+
+**Status:** Complete (2026-01-30)
+
 **Success Criteria:**
 1. User sends file to contact (up to 5GB tested) and it transfers successfully
 2. User sees file transfer progress (percentage, speed, ETA)
@@ -159,7 +173,9 @@ Plans:
 
 **Dependencies:** Phase 3 (WebRTC data channel established for file chunks)
 
-**Research Notes:** Needs research into chunking strategy (64KB chunks recommended), resume protocol, and concurrent transfer limits.
+**Research Notes:** Research completed (04-RESEARCH.md). Using 16KB chunks for cross-browser compatibility, backpressure via bufferedAmountLowThreshold, Pillow for image thumbnails, ffmpeg for video thumbnails.
+
+**Verification Notes:** 04-VERIFICATION.md passed on re-verification after gap closure plan 04-08. All 10 success criteria verified, 6/6 requirements satisfied.
 
 ---
 
@@ -331,7 +347,7 @@ Phase 8: Notifications & Polish
 **Phases requiring deeper research during planning:**
 
 - **Phase 3**: aiortc data channel reliability, offline message store-and-forward (MEDIUM complexity) - RESEARCH COMPLETE
-- **Phase 4**: File chunking and resume protocol (MEDIUM complexity)
+- **Phase 4**: File chunking and resume protocol (MEDIUM complexity) - RESEARCH COMPLETE
 - **Phase 5**: aiortc audio codec interop with browsers, cross-platform audio (HIGH priority)
 - **Phase 6**: Cross-browser WebRTC compatibility, screen capture APIs (MEDIUM complexity)
 - **Phase 7**: Sender Keys protocol, WebRTC mesh optimization (HIGH complexity, consider research-phase)

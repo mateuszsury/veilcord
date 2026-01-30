@@ -75,12 +75,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### File Transfer
 
-- [ ] **FILE-01**: User can send file to contact (no size limit)
-- [ ] **FILE-02**: User can see file transfer progress
-- [ ] **FILE-03**: User can cancel file transfer
-- [ ] **FILE-04**: User can resume interrupted file transfer
-- [ ] **FILE-05**: User can preview images/videos in chat
-- [ ] **FILE-06**: Files are E2E encrypted during transfer
+- [x] **FILE-01**: User can send file to contact (no size limit)
+- [x] **FILE-02**: User can see file transfer progress
+- [x] **FILE-03**: User can cancel file transfer
+- [x] **FILE-04**: User can resume interrupted file transfer
+- [x] **FILE-05**: User can preview images/videos in chat
+- [x] **FILE-06**: Files are E2E encrypted during transfer
 
 ### Groups
 
@@ -212,12 +212,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCRN-02 | Phase 6 | Pending |
 | SCRN-03 | Phase 6 | Pending |
 | SCRN-04 | Phase 6 | Pending |
-| FILE-01 | Phase 4 | Pending |
-| FILE-02 | Phase 4 | Pending |
-| FILE-03 | Phase 4 | Pending |
-| FILE-04 | Phase 4 | Pending |
-| FILE-05 | Phase 4 | Pending |
-| FILE-06 | Phase 4 | Pending |
+| FILE-01 | Phase 4 | Complete |
+| FILE-02 | Phase 4 | Complete |
+| FILE-03 | Phase 4 | Complete |
+| FILE-04 | Phase 4 | Complete |
+| FILE-05 | Phase 4 | Complete |
+| FILE-06 | Phase 4 | Complete |
 | GRP-01 | Phase 7 | Pending |
 | GRP-02 | Phase 7 | Pending |
 | GRP-03 | Phase 7 | Pending |
