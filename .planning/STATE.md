@@ -15,12 +15,12 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[==>                                                                    ] 3% (Phase 1/8)
+[====>                                                                  ] 4% (Phase 1/8)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
 |-------|------|--------|-------|--------------|
-| 1 | Cryptographic Foundation & Packaging | In Progress | 2/7 | 14 |
+| 1 | Cryptographic Foundation & Packaging | In Progress | 3/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | Pending | 0/? | 12 |
 | 3 | P2P Text Messaging | Pending | 0/? | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
@@ -34,8 +34,8 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 2
-- Average plan duration: 5.5m
+- Plans completed: 3
+- Average plan duration: 4.3m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -58,6 +58,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | No TURN relay (STUN only) | Accept 20-30% connection failure (symmetric NAT) for zero ongoing costs | Must implement clear connection diagnostics and error messages |
 | 2026-01-30 | SQLCipher + DPAPI from Phase 1 | Secure key storage is architectural constraint, expensive to change later | Keys never stored plaintext, safe to backup |
 | 2026-01-30 | Use sqlcipher3 (not -binary) | sqlcipher3-binary lacks Python 3.13 Windows wheels | None - same API |
+| 2026-01-30 | Separate Ed25519 and X25519 keys | cryptography library removed Ed25519-to-X25519 conversion support | Generate two independent key pairs |
+| 2026-01-30 | Private keys in filesystem, public in DB | Defense-in-depth: database compromise doesn't expose private keys | identity.key file separate from data.db |
 
 ### Active TODOs
 
@@ -89,29 +91,29 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Executed 01-02-PLAN.md
+**Last session:** 2026-01-30 - Executed 01-03-PLAN.md
 
 **What we were doing:**
-- Executed Phase 1 Plan 02: Secure Storage Foundation
-- Implemented Windows DPAPI encryption wrapper
-- Created SQLCipher database with DPAPI-protected key
-- Established application paths in %APPDATA%/DiscordOpus/
+- Executed Phase 1 Plan 03: Cryptographic Identity Generation
+- Implemented Ed25519/X25519 key pair generation
+- Created Identity dataclass with fingerprint and shareable_id
+- Implemented DPAPI-encrypted identity storage in filesystem
 
 **What's next:**
-- Execute 01-03-PLAN.md (Identity generation with Ed25519/X25519)
+- Execute 01-04-PLAN.md through 01-07-PLAN.md
 - Continue through remaining Phase 1 plans
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/storage/__init__.py
-- src/storage/paths.py
-- src/storage/dpapi.py
-- src/storage/db.py
-- .planning/phases/01-cryptographic-foundation-packaging/01-02-SUMMARY.md
+- src/crypto/__init__.py
+- src/crypto/identity.py
+- src/crypto/fingerprint.py
+- src/storage/identity_store.py
+- .planning/phases/01-cryptographic-foundation-packaging/01-03-SUMMARY.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 01-02-PLAN.md execution*
+*Last updated: 2026-01-30 after 01-03-PLAN.md execution*
