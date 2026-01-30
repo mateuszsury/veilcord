@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[================================>                                      ] 44% (Phase 4 - 4/7 plans)
+[==================================>                                    ] 46% (Phase 4 - 5/7 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -23,19 +23,19 @@ See: .planning/PROJECT.md
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
-| 4 | File Transfer | In Progress | 4/7 | 7 |
+| 4 | File Transfer | In Progress | 5/7 | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 38/73 requirements completed (52%)
+**Total:** 39/73 requirements completed (53%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 23
-- Average plan duration: 4m
+- Plans completed: 24
+- Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -101,6 +101,12 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Message routing by type detection | Route messages in NetworkService based on structure (binary 'C' prefix, JSON file_ type, control markers) | Clean separation between text messages and file transfers on same data channel |
 | 2026-01-30 | Native file picker via tkinter | Use tkinter.filedialog for file selection | Cross-platform, no additional dependencies (bundled with Python), provides native OS dialogs |
 | 2026-01-30 | Frontend events for file transfer | Custom events: file_progress, file_received, transfer_complete, transfer_error | Consistent with existing message events, allows reactive UI updates |
+| 2026-01-30 | JPEG at 85% quality for thumbnails | Good balance between file size and visual quality for preview transmission | Small enough for fast loading, high enough quality for recognition |
+| 2026-01-30 | 300x300 max thumbnail size | Large enough for recognition, small enough for fast transmission | Maintains aspect ratio, typical thumbnail size |
+| 2026-01-30 | EXIF rotation via ImageOps.exif_transpose | Pillow automatically handles EXIF orientation metadata | Prevents sideways/upside-down mobile photos |
+| 2026-01-30 | ffmpeg frame at 1 second | Extract video thumbnail at 1-second mark | Avoids blank/black first frames, configurable if needed |
+| 2026-01-30 | Base64 preview transmission | Encode thumbnails as base64 for JSON-safe API responses | Simple data URI construction in frontend |
+| 2026-01-30 | MIME-type-based component routing | FileMessage routes to ImagePreview, VideoPreview, or generic download based on MIME prefix | Clear separation of concerns, extensible for future types |
 
 ### Active TODOs
 
@@ -150,28 +156,32 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 04-04-PLAN.md (network and API integration)
+**Last session:** 2026-01-30 - Completed 04-05-PLAN.md (image and video previews)
 
 **What we just completed:**
-- Executed plan 04-04 (FileTransferService integration with NetworkService and API bridge)
-- Integrated FileTransferService into NetworkService with message routing
-- Modified _on_incoming_message to detect and route file messages
-- Added send_file, cancel_transfer, get_transfers, get_file, open_file_dialog API methods
-- Created comprehensive TypeScript types for file transfer
-- Added frontend custom events for file transfer state
-- All compilation checks passed, 2 commits created
+- Executed plan 04-05 (image and video preview generation)
+- Created preview.py with Pillow/ffmpeg thumbnail generation
+- Added get_file_preview API method
+- Created ImagePreview component with lightbox modal
+- Created VideoPreview component with inline playback
+- Created FileMessage router component for MIME-type-based display
+- All components compiled successfully, 2 commits created
 
 **What's next:**
-- Continue Phase 4: Execute 04-05-PLAN.md (File UI integration)
+- Continue Phase 4: Execute 04-06-PLAN.md (file transfer UI integration)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- .planning/phases/04-file-transfer/04-04-SUMMARY.md
+- src/file_transfer/preview.py
+- frontend/src/components/chat/ImagePreview.tsx
+- frontend/src/components/chat/VideoPreview.tsx
+- frontend/src/components/chat/FileMessage.tsx
+- .planning/phases/04-file-transfer/04-05-SUMMARY.md
 
 **Files modified this session:**
-- src/network/service.py
+- requirements.txt
 - src/api/bridge.py
 - frontend/src/lib/pywebview.ts
 - .planning/STATE.md
