@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* Base styles for DiscordOpus dark theme */
+body {
+  @apply bg-[#0a0a0a] text-white antialiased;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Ensure root takes full height */
+#root {
+  min-height: 100vh;
+}
