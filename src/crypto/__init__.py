@@ -34,15 +34,17 @@ from src.crypto.signal_session import (
 )
 
 # High-level message encryption API
-from src.crypto.message_crypto import (
-    OutgoingMessage,
-    encrypt_message,
-    decrypt_message,
-    encrypt_message_sync,
-    decrypt_message_sync,
-    has_session,
-    reset_session,
-)
+# NOTE: message_crypto imports are deferred to avoid circular import with storage
+# Import directly: from src.crypto.message_crypto import encrypt_message, ...
+def __getattr__(name: str):
+    """Lazy import for message_crypto to avoid circular import."""
+    if name in (
+        'OutgoingMessage', 'encrypt_message', 'decrypt_message',
+        'encrypt_message_sync', 'decrypt_message_sync', 'has_session', 'reset_session'
+    ):
+        from src.crypto import message_crypto
+        return getattr(message_crypto, name)
+    raise AttributeError(f"module 'src.crypto' has no attribute {name!r}")
 
 __all__ = [
     # Identity
