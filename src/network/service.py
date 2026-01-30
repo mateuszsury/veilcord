@@ -547,6 +547,67 @@ class NetworkService:
             logger.error(f"Failed to start file send: {e}")
             return None
 
+    def resume_file(self, contact_id: int, transfer_id: str, file_path: str) -> Optional[str]:
+        """
+        Resume an interrupted file transfer.
+
+        Requires original file to still be at same path (or user re-selects).
+
+        Args:
+            contact_id: Contact database ID
+            transfer_id: Transfer UUID from database
+            file_path: Path to the file (must match original)
+
+        Returns:
+            New transfer ID or None if failed
+        """
+        if not self._loop or not self._file_transfer or not self._messaging:
+            return None
+
+        from pathlib import Path
+        from src.storage.db import get_transfer_state
+
+        # Get stored transfer state
+        state = get_transfer_state(transfer_id)
+        if not state:
+            logger.error(f"Transfer {transfer_id} not found in database")
+            return None
+
+        # Can only resume SEND direction transfers
+        if state['direction'] != 'send':
+            logger.error(f"Cannot resume receive transfer {transfer_id}")
+            return None
+
+        # Verify file exists and matches original size
+        path = Path(file_path)
+        if not path.exists():
+            logger.error(f"File not found: {file_path}")
+            return None
+
+        if path.stat().st_size != state['size']:
+            logger.error(f"File size mismatch - cannot resume (original: {state['size']}, current: {path.stat().st_size})")
+            return None
+
+        # Check for P2P connection
+        peer = self._messaging._connections.get(contact_id)
+        if not peer:
+            logger.error(f"No P2P connection to contact {contact_id}")
+            return None
+
+        # Get resume offset from stored state
+        resume_offset = state['bytes_transferred']
+
+        # Start transfer with resume offset
+        future = asyncio.run_coroutine_threadsafe(
+            self._file_transfer.send_file(contact_id, peer, path, resume_offset=resume_offset),
+            self._loop
+        )
+        try:
+            return future.result(timeout=10.0)
+        except Exception as e:
+            logger.error(f"Failed to resume file send: {e}")
+            return None
+
     def cancel_transfer(self, contact_id: int, transfer_id: str, direction: str = "send") -> bool:
         """
         Cancel a file transfer.

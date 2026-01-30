@@ -451,6 +451,33 @@ class API:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    def resume_transfer(
+        self,
+        contact_id: int,
+        transfer_id: str,
+        file_path: str
+    ) -> Dict[str, Any]:
+        """
+        Resume an interrupted file transfer.
+
+        Args:
+            contact_id: Contact database ID
+            transfer_id: Original transfer UUID
+            file_path: Path to the file (must be same file)
+
+        Returns:
+            Dict with new transferId on success or error on failure
+        """
+        try:
+            service = get_network_service()
+            new_transfer_id = service.resume_file(contact_id, transfer_id, file_path)
+            if new_transfer_id:
+                return {"transferId": new_transfer_id}
+            else:
+                return {"error": "Failed to resume transfer (check file path and P2P connection)"}
+        except Exception as e:
+            return {"error": str(e)}
+
     def get_transfers(self, contact_id: int) -> Dict[str, Any]:
         """
         Get all transfers for a contact.
