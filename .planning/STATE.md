@@ -8,19 +8,19 @@
 
 See: .planning/PROJECT.md
 
-**Core value:** Prywatna, w pełni szyfrowana komunikacja P2P bez zaufania do centralnego serwera — użytkownicy kontrolują swoje dane i tożsamość.
+**Core value:** Prywatna, w pełni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
 **Current focus:** Phase 1 - Establishing cryptographic identity system, secure key storage with DPAPI, local encrypted database with SQLCipher, and single .exe packaging with PyInstaller. This phase validates Python-React integration and packaging early (both high-risk areas) before adding network complexity.
 
 ## Progress
 
 ```
-[====>                                                                  ] 4% (Phase 1/8)
+[======>                                                                ] 6% (Phase 1/8)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
 |-------|------|--------|-------|--------------|
-| 1 | Cryptographic Foundation & Packaging | In Progress | 3/7 | 14 |
+| 1 | Cryptographic Foundation & Packaging | In Progress | 4/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | Pending | 0/? | 12 |
 | 3 | P2P Text Messaging | Pending | 0/? | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
@@ -34,8 +34,8 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 3
-- Average plan duration: 4.3m
+- Plans completed: 4
+- Average plan duration: 4.5m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -60,13 +60,17 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Use sqlcipher3 (not -binary) | sqlcipher3-binary lacks Python 3.13 Windows wheels | None - same API |
 | 2026-01-30 | Separate Ed25519 and X25519 keys | cryptography library removed Ed25519-to-X25519 conversion support | Generate two independent key pairs |
 | 2026-01-30 | Private keys in filesystem, public in DB | Defense-in-depth: database compromise doesn't expose private keys | identity.key file separate from data.db |
+| 2026-01-30 | Zustand stores manage state only | API calls happen in components via api.call() - simpler architecture | Clear separation of concerns |
+| 2026-01-30 | Tailwind v4 @theme directive | Use native v4 approach instead of separate tailwind.config.ts | Simpler configuration |
 
 ### Active TODOs
 
 - [x] Plan Phase 1 with `/gsd:plan-phase 1`
 - [x] Execute 01-01-PLAN.md (project scaffolding)
 - [x] Execute 01-02-PLAN.md (DPAPI + SQLCipher storage)
-- [ ] Execute 01-03-PLAN.md through 01-07-PLAN.md
+- [x] Execute 01-03-PLAN.md (cryptographic identity)
+- [x] Execute 01-05-PLAN.md (React UI shell)
+- [ ] Execute 01-04-PLAN.md, 01-06-PLAN.md, 01-07-PLAN.md
 - [ ] Research aiortc data channels before Phase 3 planning
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
@@ -91,29 +95,35 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Executed 01-03-PLAN.md
+**Last session:** 2026-01-30 - Executed 01-05-PLAN.md
 
 **What we were doing:**
-- Executed Phase 1 Plan 03: Cryptographic Identity Generation
-- Implemented Ed25519/X25519 key pair generation
-- Created Identity dataclass with fingerprint and shareable_id
-- Implemented DPAPI-encrypted identity storage in filesystem
+- Executed Phase 1 Plan 05: React UI Shell
+- Created PyWebView bridge with waitForPyWebView() for safe API access
+- Implemented Zustand stores for identity, contacts, and UI state
+- Built dark cosmic theme with starry background
+- Created sidebar and main panel layout components
 
 **What's next:**
-- Execute 01-04-PLAN.md through 01-07-PLAN.md
-- Continue through remaining Phase 1 plans
+- Execute 01-04-PLAN.md (Python backend API bridge)
+- Execute 01-06-PLAN.md (Settings panel and identity UI)
+- Execute 01-07-PLAN.md (PyInstaller packaging)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/crypto/__init__.py
-- src/crypto/identity.py
-- src/crypto/fingerprint.py
-- src/storage/identity_store.py
-- .planning/phases/01-cryptographic-foundation-packaging/01-03-SUMMARY.md
+- frontend/src/lib/pywebview.ts
+- frontend/src/stores/identity.ts
+- frontend/src/stores/contacts.ts
+- frontend/src/stores/ui.ts
+- frontend/src/components/theme-provider.tsx
+- frontend/src/components/layout/Sidebar.tsx
+- frontend/src/components/layout/MainPanel.tsx
+- frontend/src/components/layout/AppLayout.tsx
+- .planning/phases/01-cryptographic-foundation-packaging/01-05-SUMMARY.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 01-03-PLAN.md execution*
+*Last updated: 2026-01-30 after 01-05-PLAN.md execution*
