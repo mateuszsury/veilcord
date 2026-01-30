@@ -27,6 +27,17 @@
 - PKG-01, PKG-02
 - UI-01, UI-02, UI-03, UI-04, UI-05
 
+**Plans:** 7 plans
+
+Plans:
+- [ ] 01-01-PLAN.md - Project scaffolding (Python + React)
+- [ ] 01-02-PLAN.md - Secure storage foundation (DPAPI + SQLCipher)
+- [ ] 01-03-PLAN.md - Cryptographic identity (Ed25519/X25519)
+- [ ] 01-04-PLAN.md - Key backup and restore (Argon2id)
+- [ ] 01-05-PLAN.md - React UI shell (theme + layout)
+- [ ] 01-06-PLAN.md - Identity and contact management UI
+- [ ] 01-07-PLAN.md - PyInstaller packaging and verification
+
 **Success Criteria:**
 1. User downloads single .exe file and launches app within 5 seconds
 2. User generates cryptographic identity (Ed25519/X25519 keys) on first launch
