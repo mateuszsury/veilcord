@@ -16,6 +16,7 @@ import { MessageInput } from './MessageInput';
 import { TypingIndicator } from './TypingIndicator';
 import { FileUpload } from './FileUpload';
 import { TransferProgress } from './TransferProgress';
+import { ResumableTransfers } from './ResumableTransfers';
 
 // SVG path for icons
 const ICONS = {
@@ -129,6 +130,9 @@ export function ChatPanel() {
           )}
         </div>
       </div>
+
+      {/* Resumable transfers */}
+      <ResumableTransfers contactId={activeContactId} />
 
       {/* Messages */}
       <MessageList
