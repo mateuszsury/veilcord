@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 4 - File Transfer
-**Status:** Not Started
+**Status:** In Progress
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[===========================>                                           ] 38% (Phase 3/8 COMPLETE)
+[=============================>                                         ] 40% (Phase 4 - 1/7 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
-| 4 | File Transfer | Pending | 0/? | 7 |
+| 4 | File Transfer | In Progress | 1/7 | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 18
+- Plans completed: 19
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -88,6 +88,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Inline SVG icons in chat UI | Use inline SVG paths instead of lucide-react dependency | Matches existing codebase pattern, no new dependencies |
 | 2026-01-30 | Context menu inline SVG icons | Use inline SVG for MessageContextMenu icons | Consistency with existing pattern |
 | 2026-01-30 | Unicode escape sequences for emoji | ReactionPicker uses \u{} escapes for consistent cross-platform rendering | Avoids font/encoding issues |
+| 2026-01-30 | 100KB threshold for BLOB/filesystem storage | Research recommends 100KB as optimal balance between database size and filesystem overhead | Small files benefit from database transactionality, large files avoid database bloat |
+| 2026-01-30 | Fernet for filesystem encryption | SQLCipher already encrypts BLOBs, only filesystem files need additional encryption; Fernet provides authenticated encryption | Defense-in-depth for large files on disk |
+| 2026-01-30 | No double encryption for BLOBs | SQLCipher already encrypts database, additional encryption would be redundant | Better performance, same security |
 
 ### Active TODOs
 
@@ -111,6 +114,7 @@ See: .planning/PROJECT.md
 - [x] Execute 03-05-PLAN.md (chat UI)
 - [x] Execute 03-06-PLAN.md (message features)
 - [x] Execute 03-07-PLAN.md (integration) - PHASE 3 COMPLETE
+- [x] Execute 04-01-PLAN.md (file storage infrastructure)
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
 
@@ -133,34 +137,33 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 03-07-PLAN.md (integration)
+**Last session:** 2026-01-30 - Completed 04-01-PLAN.md (file storage infrastructure)
 
 **What we just completed:**
-- Executed plan 03-07 (integration and testing)
-- Added local signaling server for P2P development/testing
-- Integrated ChatPanel into MainLayout with Sidebar
-- User verified complete P2P messaging flow working end-to-end
+- Executed plan 04-01 (file storage infrastructure)
+- Extended database schema with files and file_transfers tables
+- Created FileStorage class with hybrid BLOB/filesystem strategy
+- Created file transfer protocol data models
+- All tests passed, 2 commits created
 
 **What's next:**
-- Plan Phase 4: File Transfer
-- Research file chunking and resume protocol
+- Continue Phase 4: Execute 04-02-PLAN.md (file transfer protocol)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- frontend/src/components/chat/TypingIndicator.tsx
-- frontend/src/components/chat/ReactionPicker.tsx
-- frontend/src/components/chat/MessageContextMenu.tsx
+- src/storage/files.py
+- src/file_transfer/__init__.py
+- src/file_transfer/models.py
+- .planning/phases/04-file-transfer/04-01-SUMMARY.md
 
 **Files modified this session:**
-- src/api/bridge.py
-- frontend/src/lib/pywebview.ts
-- frontend/src/components/chat/MessageBubble.tsx
-- frontend/src/components/chat/MessageList.tsx
-- frontend/src/components/chat/ChatPanel.tsx
+- src/storage/db.py
+- src/storage/paths.py
+- .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after Phase 3 completion*
+*Last updated: 2026-01-30 after completing 04-01-PLAN.md*
