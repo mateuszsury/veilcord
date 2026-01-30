@@ -2,7 +2,7 @@
 
 **Current Phase:** Phase 2 - Signaling Infrastructure & Presence
 **Status:** In Progress
-**Last Updated:** 2026-01-30
+**Last Updated:** 2026-01-30 (after 02-03)
 
 ## Project Reference
 
@@ -15,13 +15,13 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[============>                                                          ] 14% (Phase 2 in progress)
+[==============>                                                        ] 16% (Phase 2 in progress)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
 |-------|------|--------|-------|--------------|
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
-| 2 | Signaling Infrastructure & Presence | In Progress | 2/? | 12 |
+| 2 | Signaling Infrastructure & Presence | In Progress | 3/? | 12 |
 | 3 | P2P Text Messaging | Pending | 0/? | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 9
+- Plans completed: 10
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -70,6 +70,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | websockets>=15.0 (not 16.0) | v15.0.1 already installed, API compatible with requirements | No additional install needed |
 | 2026-01-30 | Settings stored as strings | All setting values are strings; callers handle type conversion | Simple key-value API |
 | 2026-01-30 | Database migration via ALTER TABLE | Use try/except OperationalError pattern for column additions | Safe for existing databases |
+| 2026-01-30 | NetworkService runs in background thread | webview.start(func=...) runs in separate thread with asyncio loop | Non-blocking GUI |
+| 2026-01-30 | Frontend events via CustomEvent | evaluate_js dispatches discordopus:* events | Clean JS notification pattern |
 
 ### Active TODOs
 
@@ -83,6 +85,7 @@ See: .planning/PROJECT.md
 - [x] Execute 01-07-PLAN.md (PyInstaller packaging) - PHASE 1 COMPLETE
 - [x] Execute 02-01-PLAN.md (WebSocket signaling client)
 - [x] Execute 02-02-PLAN.md (presence system)
+- [x] Execute 02-03-PLAN.md (network integration)
 - [ ] Research aiortc data channels before Phase 3 planning
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
@@ -107,33 +110,33 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 02-02-PLAN.md
+**Last session:** 2026-01-30 - Completed 02-03-PLAN.md
 
 **What we were doing:**
-- Executed Phase 2 Plan 02: Presence State Management
-- Created settings key-value storage
-- Added online_status to contacts
-- Built PresenceManager for user/contact status
+- Executed Phase 2 Plan 03: Network Integration
+- Created NetworkService orchestrator in background thread
+- Updated API bridge with network methods
+- Updated main.py to start network on launch
+- Added TypeScript types for network API
 
 **What's next:**
-- Execute remaining Phase 2 plans
-- Integrate PresenceManager with SignalingClient
+- Execute remaining Phase 2 plans (if any)
+- Begin Phase 3 P2P messaging
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/storage/settings.py
-- src/network/presence.py
-- .planning/phases/02-signaling-infrastructure--presence/02-02-SUMMARY.md
+- src/network/service.py
+- .planning/phases/02-signaling-infrastructure--presence/02-03-SUMMARY.md
 
 **Files modified this session:**
-- src/storage/db.py (settings table, online_status column)
-- src/storage/contacts.py (online_status field and functions)
-- src/storage/__init__.py (settings exports)
-- src/network/__init__.py (presence exports)
+- src/network/__init__.py (service exports)
+- src/api/bridge.py (network methods, onlineStatus in contacts)
+- src/main.py (start_network/stop_network)
+- frontend/src/lib/pywebview.ts (network types and events)
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 02-02-PLAN.md execution*
+*Last updated: 2026-01-30 after 02-03-PLAN.md execution*
