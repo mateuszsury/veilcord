@@ -13,6 +13,7 @@ import { useMessages } from '@/stores/messages';
 import { useContactsStore } from '@/stores/contacts';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
+import { TypingIndicator } from './TypingIndicator';
 
 // SVG path for icons
 const ICONS = {
@@ -130,10 +131,14 @@ export function ChatPanel() {
       {/* Messages */}
       <MessageList
         messages={messages}
+        contactId={activeContactId}
         loading={isLoading}
         hasMore={canLoadMore}
         onLoadMore={handleLoadMore}
       />
+
+      {/* Typing indicator */}
+      {isTyping && <TypingIndicator displayName={contact.displayName} />}
 
       {/* Input */}
       <MessageInput

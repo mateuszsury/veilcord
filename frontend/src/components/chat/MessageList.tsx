@@ -14,6 +14,7 @@ import type { Message } from '@/stores/messages';
 
 interface MessageListProps {
   messages: Message[];
+  contactId: number;
   loading?: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
@@ -21,6 +22,7 @@ interface MessageListProps {
 
 export function MessageList({
   messages,
+  contactId,
   loading = false,
   hasMore = false,
   onLoadMore,
@@ -77,6 +79,7 @@ export function MessageList({
           key={message.id}
           message={message}
           isOwn={message.sender_id === 'self'}
+          contactId={contactId}
         />
       ))}
 
