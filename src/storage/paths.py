@@ -83,3 +83,18 @@ def get_data_dir() -> Path:
         Path to %APPDATA%/DiscordOpus/
     """
     return get_app_data_dir()
+
+
+def get_voice_messages_dir() -> Path:
+    """
+    Get the directory for voice message recordings.
+
+    Voice messages are stored as Opus-encoded .ogg files.
+    This directory is created if it doesn't exist.
+
+    Returns:
+        Path to %APPDATA%/DiscordOpus/voice_messages/
+    """
+    voice_dir = get_app_data_dir() / 'voice_messages'
+    voice_dir.mkdir(parents=True, exist_ok=True)
+    return voice_dir
