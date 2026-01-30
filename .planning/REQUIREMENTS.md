@@ -26,11 +26,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Contacts
 
-- [ ] **CONT-01**: User can add contact by public key
-- [ ] **CONT-02**: User can view contact list with online status
-- [ ] **CONT-03**: User can remove contact
-- [ ] **CONT-04**: User can set nickname for contact (local)
-- [ ] **CONT-05**: User sees contact verification status (verified/unverified)
+- [x] **CONT-01**: User can add contact by public key
+- [x] **CONT-02**: User can view contact list with online status
+- [x] **CONT-03**: User can remove contact
+- [x] **CONT-04**: User can set nickname for contact (local)
+- [x] **CONT-05**: User sees contact verification status (verified/unverified)
 
 ### Messaging
 
@@ -93,9 +93,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Presence & Status
 
-- [ ] **PRES-01**: User can set status (online/away/busy/invisible)
-- [ ] **PRES-02**: User can see contacts' online status
-- [ ] **PRES-03**: Status synced via signaling server
+- [x] **PRES-01**: User can set status (online/away/busy/invisible)
+- [x] **PRES-02**: User can see contacts' online status
+- [x] **PRES-03**: Status synced via signaling server
 
 ### Notifications
 
@@ -114,10 +114,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFR-01**: Signaling server for NAT traversal (WebSocket)
-- [ ] **INFR-02**: STUN server for ICE candidates
-- [ ] **INFR-03**: User presence system on signaling server
-- [ ] **INFR-04**: Secure signaling (WSS + authentication)
+- [x] **INFR-01**: Signaling server for NAT traversal (WebSocket)
+- [x] **INFR-02**: STUN server for ICE candidates
+- [x] **INFR-03**: User presence system on signaling server
+- [x] **INFR-04**: Secure signaling (WSS + authentication)
 
 ### Packaging
 
@@ -181,11 +181,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENCR-03 | Phase 4 | Pending |
 | ENCR-04 | Phase 1 | Complete |
 | ENCR-05 | Phase 3 | Pending |
-| CONT-01 | Phase 2 | Pending |
-| CONT-02 | Phase 2 | Pending |
-| CONT-03 | Phase 2 | Pending |
-| CONT-04 | Phase 2 | Pending |
-| CONT-05 | Phase 2 | Pending |
+| CONT-01 | Phase 2 | Complete |
+| CONT-02 | Phase 2 | Complete |
+| CONT-03 | Phase 2 | Complete |
+| CONT-04 | Phase 2 | Complete |
+| CONT-05 | Phase 2 | Complete |
 | MSG-01 | Phase 3 | Pending |
 | MSG-02 | Phase 3 | Pending |
 | MSG-03 | Phase 3 | Pending |
@@ -224,9 +224,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GRP-04 | Phase 7 | Pending |
 | GRP-05 | Phase 7 | Pending |
 | GRP-06 | Phase 7 | Pending |
-| PRES-01 | Phase 2 | Pending |
-| PRES-02 | Phase 2 | Pending |
-| PRES-03 | Phase 2 | Pending |
+| PRES-01 | Phase 2 | Complete |
+| PRES-02 | Phase 2 | Complete |
+| PRES-03 | Phase 2 | Complete |
 | NOTF-01 | Phase 8 | Pending |
 | NOTF-02 | Phase 8 | Pending |
 | NOTF-03 | Phase 8 | Pending |
@@ -236,10 +236,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-03 | Phase 1 | Complete |
 | UI-04 | Phase 1 | Complete |
 | UI-05 | Phase 1 | Complete |
-| INFR-01 | Phase 2 | Pending |
-| INFR-02 | Phase 2 | Pending |
-| INFR-03 | Phase 2 | Pending |
-| INFR-04 | Phase 2 | Pending |
+| INFR-01 | Phase 2 | Complete |
+| INFR-02 | Phase 2 | Complete |
+| INFR-03 | Phase 2 | Complete |
+| INFR-04 | Phase 2 | Complete |
 | PKG-01 | Phase 1 | Complete |
 | PKG-02 | Phase 1 | Complete |
 | PKG-03 | Phase 8 | Pending |

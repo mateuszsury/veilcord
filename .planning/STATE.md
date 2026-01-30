@@ -1,8 +1,8 @@
 # Project State: DiscordOpus
 
-**Current Phase:** Phase 2 - Signaling Infrastructure & Presence
-**Status:** COMPLETE
-**Last Updated:** 2026-01-30 (after 02-04)
+**Current Phase:** Phase 3 - P2P Text Messaging
+**Status:** Not Started
+**Last Updated:** 2026-01-30
 
 ## Project Reference
 
@@ -10,18 +10,18 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 2 COMPLETE - Signaling server connection via WebSocket, presence system for online/offline status, contact status synchronization, and UI components for presence display. Ready for Phase 3 P2P text messaging.
+**Current focus:** Phase 3 - P2P text messaging using WebRTC data channels over the signaling infrastructure built in Phase 2. Signal Protocol (Double Ratchet) for E2E encryption, message persistence in SQLCipher, and chat UI.
 
 ## Progress
 
 ```
-[================>                                                      ] 20% (Phase 2 complete)
+[==================>                                                    ] 25% (Phase 2/8 COMPLETE)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
 |-------|------|--------|-------|--------------|
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
-| 2 | Signaling Infrastructure & Presence | COMPLETE | 4/4 | 12 |
+| 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | Pending | 0/? | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 15/73 requirements completed (21%)
+**Total:** 26/73 requirements completed (36%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 11
+- Plans completed: 12
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -88,7 +88,8 @@ See: .planning/PROJECT.md
 - [x] Execute 02-01-PLAN.md (WebSocket signaling client)
 - [x] Execute 02-02-PLAN.md (presence system)
 - [x] Execute 02-03-PLAN.md (network integration)
-- [x] Execute 02-04-PLAN.md (presence UI) - PHASE 2 COMPLETE
+- [x] Execute 02-04-PLAN.md (presence UI)
+- [x] Execute 02-05-PLAN.md (visual verification) - PHASE 2 COMPLETE
 - [ ] Research aiortc data channels before Phase 3 planning
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
@@ -113,14 +114,12 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 02-04-PLAN.md
+**Last session:** 2026-01-30 - Completed Phase 2 (all 5 plans)
 
 **What we were doing:**
-- Executed Phase 2 Plan 04: Presence UI Components
-- Created network Zustand store for connection and status management
-- Built StatusSelector and ConnectionIndicator components
-- Updated Sidebar with status indicators and contact presence dots
-- Created NetworkSection for settings panel
+- Executed all Phase 2 plans (02-01 through 02-05)
+- User verified packaged application works correctly
+- Phase 2 verification passed (6/6 must-haves)
 
 **What's next:**
 - Plan Phase 3 P2P text messaging
@@ -130,18 +129,28 @@ See: .planning/PROJECT.md
 - None
 
 **Files created this session:**
+- src/network/signaling_client.py
+- src/network/auth.py
+- src/network/stun.py
+- src/network/service.py
+- src/network/presence.py
+- src/storage/settings.py
 - frontend/src/stores/network.ts
 - frontend/src/components/layout/StatusSelector.tsx
 - frontend/src/components/layout/ConnectionIndicator.tsx
 - frontend/src/components/settings/NetworkSection.tsx
-- .planning/phases/02-signaling-infrastructure--presence/02-04-SUMMARY.md
 
 **Files modified this session:**
-- frontend/src/stores/contacts.ts (presence event handling)
-- frontend/src/components/layout/Sidebar.tsx (status components integration)
+- src/storage/db.py (settings table, online_status migration)
+- src/storage/contacts.py (online_status field)
+- src/api/bridge.py (network methods)
+- src/main.py (network service lifecycle)
+- frontend/src/lib/pywebview.ts (network types)
+- frontend/src/stores/contacts.ts (presence events)
+- frontend/src/components/layout/Sidebar.tsx (status UI)
 - frontend/src/components/settings/SettingsPanel.tsx (NetworkSection)
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 02-04-PLAN.md execution*
+*Last updated: 2026-01-30 after Phase 2 completion*

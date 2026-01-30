@@ -71,11 +71,13 @@ Plans:
 **Plans:** 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md - WebSocket signaling client with auto-reconnect and Ed25519 auth
-- [ ] 02-02-PLAN.md - Presence state management and settings storage
-- [ ] 02-03-PLAN.md - API bridge integration and network service orchestration
-- [ ] 02-04-PLAN.md - Frontend presence UI (status selector, contact presence)
-- [ ] 02-05-PLAN.md - Visual verification checkpoint
+- [x] 02-01-PLAN.md - WebSocket signaling client with auto-reconnect and Ed25519 auth
+- [x] 02-02-PLAN.md - Presence state management and settings storage
+- [x] 02-03-PLAN.md - API bridge integration and network service orchestration
+- [x] 02-04-PLAN.md - Frontend presence UI (status selector, contact presence)
+- [x] 02-05-PLAN.md - Visual verification checkpoint
+
+**Status:** ✓ Complete (2026-01-30)
 
 **Success Criteria:**
 1. User connects to signaling server via WSS on app launch
