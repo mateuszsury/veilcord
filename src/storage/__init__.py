@@ -16,8 +16,8 @@ from src.storage.paths import (
     get_identity_key_path,
 )
 
-# DPAPI encryption (available after Task 2)
-# from src.storage.dpapi import dpapi_encrypt, dpapi_decrypt
+# DPAPI encryption
+from src.storage.dpapi import dpapi_encrypt, dpapi_decrypt
 
 # Database operations (available after Task 3)
 # from src.storage.db import init_database, get_database
@@ -28,9 +28,9 @@ __all__ = [
     'get_db_path',
     'get_key_path',
     'get_identity_key_path',
-    # DPAPI (uncomment after Task 2)
-    # 'dpapi_encrypt',
-    # 'dpapi_decrypt',
+    # DPAPI
+    'dpapi_encrypt',
+    'dpapi_decrypt',
     # Database (uncomment after Task 3)
     # 'init_database',
     # 'get_database',
