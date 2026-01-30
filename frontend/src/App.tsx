@@ -1,65 +1,73 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+import { ThemeProvider } from '@/components/theme-provider';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { waitForPyWebView, getApi } from '@/lib/pywebview';
+import { useIdentityStore } from '@/stores/identity';
+import { useContactsStore } from '@/stores/contacts';
 
-// PyWebView API types are now in @/lib/pywebview.ts
+function AppContent() {
+  const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-function App() {
-  const [bridgeReady, setBridgeReady] = useState(false)
-  const [apiResponse, setApiResponse] = useState<string | null>(null)
+  const setIdentity = useIdentityStore((s) => s.setIdentity);
+  const setIdentityLoading = useIdentityStore((s) => s.setLoading);
+  const setContacts = useContactsStore((s) => s.setContacts);
 
   useEffect(() => {
-    /**
-     * Listen for pywebviewready event
-     *
-     * This event fires when PyWebView has finished setting up the JS bridge.
-     * Only after this event can we safely call window.pywebview.api methods.
-     */
-    const handlePyWebViewReady = () => {
-      console.log('[DiscordOpus] PyWebView bridge ready')
-      setBridgeReady(true)
+    async function initialize() {
+      try {
+        // Wait for PyWebView bridge
+        await waitForPyWebView();
+        const api = getApi();
 
-      // Test the bridge with a ping
-      if (window.pywebview?.api) {
-        window.pywebview.api.ping().then((response) => {
-          console.log('[DiscordOpus] Ping response:', response)
-          setApiResponse(response)
-        })
+        // Load identity
+        setIdentityLoading(true);
+        const identity = await api.get_identity();
+        setIdentity(identity);
+
+        // Load contacts
+        const contacts = await api.get_contacts();
+        setContacts(contacts);
+
+        setIsReady(true);
+      } catch (err) {
+        console.error('Initialization error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to initialize');
       }
     }
 
-    // Check if already ready (can happen if event fired before React mounted)
-    if (window.pywebview) {
-      handlePyWebViewReady()
-    } else {
-      // Wait for the event
-      window.addEventListener('pywebviewready', handlePyWebViewReady)
-    }
+    initialize();
+  }, [setIdentity, setIdentityLoading, setContacts]);
 
-    return () => {
-      window.removeEventListener('pywebviewready', handlePyWebViewReady)
-    }
-  }, [])
-
-  return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">DiscordOpus</h1>
-        <p className="text-gray-400 mb-2">Loading...</p>
-
-        {/* Bridge status indicator */}
-        <div className="mt-8 text-sm text-gray-500">
-          {bridgeReady ? (
-            <span className="text-green-500">
-              Bridge connected {apiResponse && `(${apiResponse})`}
-            </span>
-          ) : (
-            <span className="text-yellow-500">
-              Waiting for PyWebView bridge...
-            </span>
-          )}
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-cosmic-bg text-red-400">
+        <div className="text-center p-8">
+          <h1 className="text-xl font-semibold mb-2">Initialization Error</h1>
+          <p className="text-cosmic-muted">{error}</p>
         </div>
       </div>
-    </div>
-  )
+    );
+  }
+
+  if (!isReady) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-cosmic-bg">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-cosmic-accent border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-cosmic-muted">Loading DiscordOpus...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <AppLayout />;
 }
 
-export default App
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}
