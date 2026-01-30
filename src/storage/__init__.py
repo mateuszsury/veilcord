@@ -51,6 +51,23 @@ from src.storage.settings import (
     delete_setting,
 )
 
+# Message storage
+from src.storage.messages import (
+    Message,
+    Reaction,
+    save_message,
+    get_messages,
+    get_message,
+    update_message,
+    delete_message,
+    add_reaction,
+    remove_reaction,
+    get_reactions,
+    save_signal_session,
+    get_signal_session,
+    delete_signal_session,
+)
+
 __all__ = [
     # Paths
     'get_app_data_dir',
@@ -84,4 +101,18 @@ __all__ = [
     'set_setting',
     'get_all_settings',
     'delete_setting',
+    # Message storage
+    'Message',
+    'Reaction',
+    'save_message',
+    'get_messages',
+    'get_message',
+    'update_message',
+    'delete_message',
+    'add_reaction',
+    'remove_reaction',
+    'get_reactions',
+    'save_signal_session',
+    'get_signal_session',
+    'delete_signal_session',
 ]
