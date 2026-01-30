@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 3 - P2P Text Messaging
-**Status:** In Progress (Plan 1/7 complete)
+**Status:** In Progress (Plan 3/7 complete)
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -22,7 +22,7 @@ See: .planning/PROJECT.md
 |-------|------|--------|-------|--------------|
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
-| 3 | P2P Text Messaging | In Progress | 1/7 | 10 |
+| 3 | P2P Text Messaging | In Progress | 3/7 | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 13
+- Plans completed: 15
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -77,6 +77,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Soft delete pattern for messages | delete_message with hard_delete=False sets deleted=1 and body=NULL | Preserves message metadata for conversation integrity |
 | 2026-01-30 | UNIQUE constraint for reactions | Database-level enforcement on (message_id, sender_id, emoji) | Prevents duplicate reactions automatically |
 | 2026-01-30 | BLOB for Signal session state | Binary BLOB type for signal_sessions.session_state | Flexibility in serialization format (pickle, msgpack, custom) |
+| 2026-01-30 | No trickle ICE for aiortc | Wait for iceGatheringState == "complete" before returning SDP | Simpler SDP exchange via signaling |
+| 2026-01-30 | Data channel before offer | aiortc requires data channel creation before createOffer() | Proper SDP negotiation |
+| 2026-01-30 | 3-second typing throttle | Prevents typing indicator spam while maintaining UX | Max 1 typing event per 3 seconds |
 
 ### Active TODOs
 
@@ -94,8 +97,8 @@ See: .planning/PROJECT.md
 - [x] Execute 02-04-PLAN.md (presence UI)
 - [x] Execute 02-05-PLAN.md (visual verification) - PHASE 2 COMPLETE
 - [x] Execute 03-01-PLAN.md (message storage layer)
-- [ ] Execute 03-02-PLAN.md (Signal Protocol)
-- [ ] Execute 03-03-PLAN.md (WebRTC data channels)
+- [x] Execute 03-02-PLAN.md (Signal Protocol)
+- [x] Execute 03-03-PLAN.md (WebRTC data channels)
 - [ ] Execute 03-04-PLAN.md (message protocol)
 - [ ] Execute 03-05-PLAN.md (chat UI)
 - [ ] Execute 03-06-PLAN.md (message features)
@@ -124,28 +127,29 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 03-01-PLAN.md (message storage layer)
+**Last session:** 2026-01-30 - Completed 03-03-PLAN.md (WebRTC peer connections)
 
 **What we were doing:**
-- Executed plan 03-01 (message storage layer)
-- Extended SQLCipher schema with messages, reactions, signal_sessions tables
-- Created messages.py with complete CRUD operations
+- Executed plan 03-03 (WebRTC peer connections)
+- Installed aiortc 1.14.0 for Python WebRTC support
+- Created PeerConnectionManager and MessageChannel abstractions
 
 **What's next:**
-- Execute 03-02-PLAN.md (Signal Protocol implementation)
-- Continue with remaining Phase 3 plans
+- Execute 03-04-PLAN.md (message protocol integration)
+- Continue with remaining Phase 3 plans (04-07)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/storage/messages.py
+- src/network/peer_connection.py
+- src/network/data_channel.py
 
 **Files modified this session:**
-- src/storage/db.py (messages, reactions, signal_sessions tables)
-- src/storage/__init__.py (exported message functions)
+- requirements.txt (added aiortc>=1.14.0)
+- src/network/__init__.py (exported new P2P modules)
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 03-01 completion*
+*Last updated: 2026-01-30 after 03-03 completion*
