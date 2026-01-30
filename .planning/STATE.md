@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 19
+- Plans completed: 20
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -91,6 +91,10 @@ See: .planning/PROJECT.md
 | 2026-01-30 | 100KB threshold for BLOB/filesystem storage | Research recommends 100KB as optimal balance between database size and filesystem overhead | Small files benefit from database transactionality, large files avoid database bloat |
 | 2026-01-30 | Fernet for filesystem encryption | SQLCipher already encrypts BLOBs, only filesystem files need additional encryption; Fernet provides authenticated encryption | Defense-in-depth for large files on disk |
 | 2026-01-30 | No double encryption for BLOBs | SQLCipher already encrypts database, additional encryption would be redundant | Better performance, same security |
+| 2026-01-30 | 16KB chunk size for file transfer | Cross-browser compatibility - Firefox fragments at 16KB boundary, Chrome doesn't reassemble >16KB properly | Broader compatibility at slight throughput cost |
+| 2026-01-30 | 64KB buffer threshold for backpressure | Typical WebRTC buffer limit is 256KB; use 64KB threshold to prevent overflow | Prevents connection crashes from buffer overflow |
+| 2026-01-30 | Poll bufferedAmount instead of event-based | aiortc RTCDataChannel lacks bufferedAmountLow event (browser-only feature) | Slightly less efficient than event-driven but simplest working approach |
+| 2026-01-30 | aiofiles for file transfer I/O | Prevent blocking asyncio event loop during file reads | Non-blocking transfers that don't degrade other operations |
 
 ### Active TODOs
 
@@ -137,30 +141,30 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 04-01-PLAN.md (file storage infrastructure)
+**Last session:** 2026-01-30 - Completed 04-02-PLAN.md (file transfer sender)
 
 **What we just completed:**
-- Executed plan 04-01 (file storage infrastructure)
-- Extended database schema with files and file_transfers tables
-- Created FileStorage class with hybrid BLOB/filesystem strategy
-- Created file transfer protocol data models
+- Executed plan 04-02 (file chunking and sender-side transfer logic)
+- Created wire protocol with CHUNK_SIZE=16384, BUFFER_THRESHOLD=65536
+- Implemented async chunker with hash calculation using aiofiles
+- Created FileSender class with backpressure control via bufferedAmount polling
+- Added progress tracking with speed and ETA calculation
 - All tests passed, 2 commits created
 
 **What's next:**
-- Continue Phase 4: Execute 04-02-PLAN.md (file transfer protocol)
+- Continue Phase 4: Execute 04-03-PLAN.md (file receiver)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/storage/files.py
-- src/file_transfer/__init__.py
-- src/file_transfer/models.py
-- .planning/phases/04-file-transfer/04-01-SUMMARY.md
+- src/file_transfer/protocol.py
+- src/file_transfer/chunker.py
+- src/file_transfer/sender.py
+- .planning/phases/04-file-transfer/04-02-SUMMARY.md
 
 **Files modified this session:**
-- src/storage/db.py
-- src/storage/paths.py
+- src/file_transfer/__init__.py
 - .planning/STATE.md
 
 ---
