@@ -64,6 +64,11 @@ class Identity:
             password=None
         )
 
+    @property
+    def x25519_private_key(self) -> x25519.X25519PrivateKey:
+        """Get X25519 private key object for encryption operations."""
+        return x25519.X25519PrivateKey.from_private_bytes(self.x25519_private_raw)
+
 
 def generate_identity(display_name: str = "Anonymous") -> Identity:
     """
