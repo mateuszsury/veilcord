@@ -170,15 +170,95 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IDEN-01 | TBD | Pending |
-| IDEN-02 | TBD | Pending |
-| ... | ... | ... |
+| IDEN-01 | Phase 1 | Pending |
+| IDEN-02 | Phase 1 | Pending |
+| IDEN-03 | Phase 1 | Pending |
+| IDEN-04 | Phase 1 | Pending |
+| IDEN-05 | Phase 1 | Pending |
+| IDEN-06 | Phase 1 | Pending |
+| ENCR-01 | Phase 3 | Pending |
+| ENCR-02 | Phase 5 | Pending |
+| ENCR-03 | Phase 4 | Pending |
+| ENCR-04 | Phase 1 | Pending |
+| ENCR-05 | Phase 3 | Pending |
+| CONT-01 | Phase 2 | Pending |
+| CONT-02 | Phase 2 | Pending |
+| CONT-03 | Phase 2 | Pending |
+| CONT-04 | Phase 2 | Pending |
+| CONT-05 | Phase 2 | Pending |
+| MSG-01 | Phase 3 | Pending |
+| MSG-02 | Phase 3 | Pending |
+| MSG-03 | Phase 3 | Pending |
+| MSG-04 | Phase 3 | Pending |
+| MSG-05 | Phase 3 | Pending |
+| MSG-06 | Phase 3 | Pending |
+| MSG-07 | Phase 3 | Pending |
+| MSG-08 | Phase 3 | Pending |
+| VMSG-01 | Phase 5 | Pending |
+| VMSG-02 | Phase 5 | Pending |
+| VMSG-03 | Phase 5 | Pending |
+| VMSG-04 | Phase 5 | Pending |
+| CALL-01 | Phase 5 | Pending |
+| CALL-02 | Phase 5 | Pending |
+| CALL-03 | Phase 5 | Pending |
+| CALL-04 | Phase 5 | Pending |
+| CALL-05 | Phase 7 | Pending |
+| CALL-06 | Phase 7 | Pending |
+| VID-01 | Phase 6 | Pending |
+| VID-02 | Phase 6 | Pending |
+| VID-03 | Phase 6 | Pending |
+| VID-04 | Phase 6 | Pending |
+| SCRN-01 | Phase 6 | Pending |
+| SCRN-02 | Phase 6 | Pending |
+| SCRN-03 | Phase 6 | Pending |
+| SCRN-04 | Phase 6 | Pending |
+| FILE-01 | Phase 4 | Pending |
+| FILE-02 | Phase 4 | Pending |
+| FILE-03 | Phase 4 | Pending |
+| FILE-04 | Phase 4 | Pending |
+| FILE-05 | Phase 4 | Pending |
+| FILE-06 | Phase 4 | Pending |
+| GRP-01 | Phase 7 | Pending |
+| GRP-02 | Phase 7 | Pending |
+| GRP-03 | Phase 7 | Pending |
+| GRP-04 | Phase 7 | Pending |
+| GRP-05 | Phase 7 | Pending |
+| GRP-06 | Phase 7 | Pending |
+| PRES-01 | Phase 2 | Pending |
+| PRES-02 | Phase 2 | Pending |
+| PRES-03 | Phase 2 | Pending |
+| NOTF-01 | Phase 8 | Pending |
+| NOTF-02 | Phase 8 | Pending |
+| NOTF-03 | Phase 8 | Pending |
+| NOTF-04 | Phase 8 | Pending |
+| UI-01 | Phase 1 | Pending |
+| UI-02 | Phase 1 | Pending |
+| UI-03 | Phase 1 | Pending |
+| UI-04 | Phase 1 | Pending |
+| UI-05 | Phase 1 | Pending |
+| INFR-01 | Phase 2 | Pending |
+| INFR-02 | Phase 2 | Pending |
+| INFR-03 | Phase 2 | Pending |
+| INFR-04 | Phase 2 | Pending |
+| PKG-01 | Phase 1 | Pending |
+| PKG-02 | Phase 1 | Pending |
+| PKG-03 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 58 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 58
+- v1 requirements: 73 total
+- Mapped to phases: 73 (100%)
+- Unmapped: 0
+
+**Phase Distribution:**
+- Phase 1: 14 requirements
+- Phase 2: 12 requirements
+- Phase 3: 10 requirements
+- Phase 4: 7 requirements
+- Phase 5: 9 requirements
+- Phase 6: 8 requirements
+- Phase 7: 8 requirements
+- Phase 8: 5 requirements
 
 ---
 *Requirements defined: 2026-01-30*
-*Last updated: 2026-01-30 after initial definition*
+*Last updated: 2026-01-30 after roadmap creation*
