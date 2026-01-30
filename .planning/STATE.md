@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[=====================================>                                 ] 49% (Phase 4 - 6/7 plans)
+[========================================>                              ] 52% (Phase 4 - 7/7 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -23,18 +23,18 @@ See: .planning/PROJECT.md
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
-| 4 | File Transfer | In Progress | 6/7 | 7 |
+| 4 | File Transfer | COMPLETE | 7/7 | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 40/73 requirements completed (55%)
+**Total:** 43/73 requirements completed (59%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 25
+- Plans completed: 26
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -111,6 +111,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Event-driven transfer updates | Transfer store listens to file_progress/file_received/transfer_complete/transfer_error events | Consistent with messages.ts pattern, automatic UI updates |
 | 2026-01-30 | TransferProgress filters by contactId | Each chat shows only its own transfers, not all active transfers | Clean per-chat UX |
 | 2026-01-30 | MessageInput restructured for composition | FileUpload button sits alongside input in ChatPanel wrapper | Removed MessageInput's border wrapper for cleaner integration |
+| 2026-01-30 | File messages stored in messages table | Use file_id foreign key to reference files table, same table as text messages | Unified chat history simplifies querying and display |
+| 2026-01-30 | Lazy metadata loading for file messages | FileMessageWrapper fetches metadata on mount instead of including in message | Better performance for scrolling through history |
+| 2026-01-30 | Type-based preview routing | FileMessage routes based on MIME type: image → ImagePreview, video → VideoPreview, other → download | Extensible pattern for future file type support |
 
 ### Active TODOs
 
@@ -140,8 +143,7 @@ See: .planning/PROJECT.md
 - [x] Execute 04-04-PLAN.md (network and API integration)
 - [x] Execute 04-05-PLAN.md (image and video previews)
 - [x] Execute 04-07-PLAN.md (file transfer UI)
-- [x] Execute 04-03-PLAN.md (file receiver and service orchestration)
-- [x] Execute 04-04-PLAN.md (network and API integration)
+- [x] Execute 04-06-PLAN.md (file transfer message integration) - PHASE 4 COMPLETE
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
 
@@ -164,31 +166,31 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 04-07-PLAN.md (file transfer UI)
+**Last session:** 2026-01-30 - Completed 04-06-PLAN.md (file transfer message integration)
 
 **What we just completed:**
-- Executed plan 04-07 (file transfer UI components)
-- Created transfer store with event listeners for file_progress/file_received/transfer_complete/transfer_error
-- Created FileUpload button triggering native file dialog
-- Created TransferProgress component with progress bars showing bytes/speed/ETA
-- Integrated components into ChatPanel
-- All tasks compiled successfully, 3 commits created
+- Executed plan 04-06 (file transfer message integration)
+- Extended message storage with file_id column and save_file_message function (already done in 04-07)
+- Created FileMessageWrapper component for lazy metadata loading
+- Updated MessageBubble to detect and render file messages
+- Verified end-to-end file transfer working with user approval
+- PHASE 4 COMPLETE - all 7 file transfer requirements satisfied
 
 **What's next:**
-- Continue Phase 4: One more plan remaining (04-08 or integration/testing)
+- Research aiortc audio codec interop before Phase 5 planning
+- Plan Phase 5 (Voice Calls) with `/gsd:plan-phase 5`
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- frontend/src/stores/transfers.ts
-- frontend/src/components/chat/FileUpload.tsx
-- frontend/src/components/chat/TransferProgress.tsx
-- .planning/phases/04-file-transfer/04-07-SUMMARY.md
+- frontend/src/components/chat/FileMessageWrapper.tsx
+- .planning/phases/04-file-transfer/04-06-SUMMARY.md
 
 **Files modified this session:**
-- frontend/src/components/chat/ChatPanel.tsx
-- frontend/src/components/chat/MessageInput.tsx
+- frontend/src/lib/pywebview.ts
+- frontend/src/stores/messages.ts
+- frontend/src/components/chat/MessageBubble.tsx
 - .planning/STATE.md
 
 ---
