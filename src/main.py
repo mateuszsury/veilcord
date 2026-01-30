@@ -9,6 +9,7 @@ import webview
 
 from src.api.bridge import API
 from src.storage.db import init_database, close_database
+from src.network.service import start_network, stop_network
 
 # Debug mode - set to False for production
 DEBUG = '--dev' in sys.argv
@@ -39,10 +40,15 @@ def main():
         background_color='#0a0a0f'  # Cosmic dark background
     )
 
-    # Start application
+    # Start application with network service in background thread
     try:
-        webview.start(debug=DEBUG)
+        # start_network runs in background thread with asyncio event loop
+        webview.start(
+            func=lambda: start_network(window),
+            debug=DEBUG
+        )
     finally:
+        stop_network()
         close_database()
 
 
