@@ -85,13 +85,14 @@ export interface MessageResponse {
   id: string;
   conversationId: number;
   senderId: string;
-  type: 'text' | 'edit' | 'delete';
+  type: 'text' | 'edit' | 'delete' | 'file';
   body: string | null;
   replyTo: string | null;
   edited: boolean;
   deleted: boolean;
   timestamp: number;
   receivedAt: number | null;
+  fileId?: number | null;
 }
 
 export interface ApiResult {

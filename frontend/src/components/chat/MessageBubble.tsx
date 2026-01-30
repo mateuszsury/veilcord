@@ -10,6 +10,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Message } from '@/stores/messages';
 import { MessageContextMenu } from './MessageContextMenu';
+import { FileMessageWrapper } from './FileMessageWrapper';
 import { api } from '@/lib/pywebview';
 
 interface Reaction {
@@ -176,7 +177,10 @@ export function MessageBubble({ message, isOwn, contactId }: MessageBubbleProps)
         )}
 
         {/* Message body or edit input */}
-        {isEditing ? (
+        {message.type === 'file' && message.file_id ? (
+          // File message - render file component
+          <FileMessageWrapper fileId={message.file_id} />
+        ) : isEditing ? (
           <div className="flex flex-col gap-1">
             <textarea
               ref={editInputRef}

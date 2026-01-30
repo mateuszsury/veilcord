@@ -15,10 +15,12 @@ import type { MessageResponse, MessageEventPayload } from '@/lib/pywebview';
 export interface Message {
   id: string;
   sender_id: string; // 'self' for outgoing, public key for incoming
+  type: 'text' | 'edit' | 'delete' | 'file';
   body: string;
   timestamp: number;
   edited: boolean;
   reply_to?: string;
+  file_id?: number | null;
 }
 
 interface MessagesState {
@@ -45,10 +47,12 @@ function toMessage(response: MessageResponse): Message {
   return {
     id: response.id,
     sender_id: response.senderId,
+    type: response.type,
     body: response.body || '',
     timestamp: response.timestamp,
     edited: response.edited,
     reply_to: response.replyTo || undefined,
+    file_id: response.fileId || undefined,
   };
 }
 
@@ -99,10 +103,12 @@ export const useMessages = create<MessagesState>((set, get) => ({
         const message: Message = {
           id: result.id,
           sender_id: 'self',
+          type: result.type,
           body: result.body || body,
           timestamp: result.timestamp,
           edited: false,
           reply_to: replyTo,
+          file_id: result.fileId || undefined,
         };
 
         get().addMessage(contactId, message);
@@ -184,15 +190,17 @@ if (typeof window !== 'undefined') {
         useMessages.getState().updateMessage(message.targetId, message.newBody);
       } else if (message.type === 'delete' && 'targetId' in message) {
         useMessages.getState().deleteMessage(message.targetId);
-      } else if (message.type === 'text' && 'id' in message) {
-        // New text message
+      } else if ((message.type === 'text' || message.type === 'file') && 'id' in message) {
+        // New text or file message
         useMessages.getState().addMessage(contactId, {
           id: message.id,
           sender_id: message.senderId,
+          type: message.type,
           body: message.body || '',
           timestamp: message.timestamp,
           edited: message.edited,
           reply_to: message.replyTo || undefined,
+          file_id: message.fileId || undefined,
         });
       }
     }
