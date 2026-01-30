@@ -12,6 +12,7 @@ import { useChat } from '@/stores/chat';
 import { useMessages } from '@/stores/messages';
 import { useContactsStore } from '@/stores/contacts';
 import { useVoiceRecording } from '@/stores/voiceRecording';
+import { useCall } from '@/stores/call';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { TypingIndicator } from './TypingIndicator';
@@ -27,6 +28,7 @@ const ICONS = {
   wifiOff: 'M1 1l22 22M8.111 16.404A5.5 5.5 0 0112 15c1.24 0 2.428.41 3.396 1.164M12 20h.01',
   loader: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
   mic: 'M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2 M12 19v4 M8 23h8',
+  phone: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z',
 };
 
 function Icon({ path, className = 'w-4 h-4', spin = false }: { path: string; className?: string; spin?: boolean }) {
@@ -47,6 +49,7 @@ export function ChatPanel() {
   const { messagesByContact, loading, hasMore, loadMessages, sendMessage } = useMessages();
   const contacts = useContactsStore((s) => s.contacts);
   const { isRecording, startRecording, reset: resetRecording } = useVoiceRecording();
+  const { startCall, state: callState } = useCall();
 
   const contact = contacts.find((c) => c.id === activeContactId);
   const messages = activeContactId ? messagesByContact[activeContactId] || [] : [];
@@ -100,13 +103,24 @@ export function ChatPanel() {
     <div className="flex-1 flex flex-col bg-cosmic-bg/50">
       {/* Header */}
       <div className="border-b border-cosmic-border p-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-cosmic-text">
-            {contact.displayName}
-          </h2>
-          {isTyping && (
-            <p className="text-sm text-cosmic-accent animate-pulse">typing...</p>
-          )}
+        <div className="flex items-center gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-cosmic-text">
+              {contact.displayName}
+            </h2>
+            {isTyping && (
+              <p className="text-sm text-cosmic-accent animate-pulse">typing...</p>
+            )}
+          </div>
+          {/* Call button */}
+          <button
+            onClick={() => startCall(contact.id, contact.displayName)}
+            disabled={callState !== 'idle' || p2pState !== 'connected'}
+            className="p-2 text-cosmic-muted hover:text-cosmic-text hover:bg-cosmic-surface rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title={callState !== 'idle' ? 'Call in progress' : p2pState !== 'connected' ? 'Connect first to call' : 'Start voice call'}
+          >
+            <Icon path={ICONS.phone} className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Connection status */}
