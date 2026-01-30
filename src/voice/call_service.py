@@ -103,6 +103,13 @@ class VoiceCallService:
             if pc.connectionState == "failed":
                 logger.error("Peer connection failed")
                 await self.end_call(CallEndReason.FAILED)
+            elif pc.connectionState == "disconnected":
+                # Network change or temporary disconnect - don't immediately end
+                logger.warning("Peer connection disconnected")
+                if self._current_call and self._current_call.state == CallState.ACTIVE:
+                    self._notify_state_change(
+                        self._current_call.contact_id, CallState.RECONNECTING
+                    )
             elif pc.connectionState == "connected":
                 logger.info("Peer connection established")
                 if self._current_call:
