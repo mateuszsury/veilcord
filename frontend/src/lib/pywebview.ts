@@ -52,6 +52,7 @@ export interface PyWebViewAPI {
   cancel_transfer(contact_id: number, transfer_id: string, direction?: string): Promise<ApiResult>;
   get_transfers(contact_id: number): Promise<FileTransfersList>;
   get_file(file_id: string): Promise<FileData>;
+  get_file_preview(file_id: number): Promise<FilePreviewResponse>;
   open_file_dialog(): Promise<FileDialogResult>;
 
   // System
@@ -152,6 +153,12 @@ export interface FileDialogResult {
   name?: string;
   size?: number;
   cancelled?: boolean;
+  error?: string;
+}
+
+export interface FilePreviewResponse {
+  preview?: string;  // Base64-encoded JPEG
+  mimeType?: string;
   error?: string;
 }
 
