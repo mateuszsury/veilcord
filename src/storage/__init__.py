@@ -19,8 +19,8 @@ from src.storage.paths import (
 # DPAPI encryption
 from src.storage.dpapi import dpapi_encrypt, dpapi_decrypt
 
-# Database operations (available after Task 3)
-# from src.storage.db import init_database, get_database
+# Database operations
+from src.storage.db import init_database, get_database, close_database
 
 __all__ = [
     # Paths
@@ -31,7 +31,8 @@ __all__ = [
     # DPAPI
     'dpapi_encrypt',
     'dpapi_decrypt',
-    # Database (uncomment after Task 3)
-    # 'init_database',
-    # 'get_database',
+    # Database
+    'init_database',
+    'get_database',
+    'close_database',
 ]
