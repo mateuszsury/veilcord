@@ -3,11 +3,29 @@
  *
  * - Images: ImagePreview with lightbox
  * - Videos: VideoPreview with inline playback
+ * - Audio/Voice: VoiceMessagePlayer with playback controls
  * - Other files: Generic download UI
  */
 
 import { ImagePreview } from './ImagePreview';
 import { VideoPreview } from './VideoPreview';
+import { VoiceMessagePlayer } from './VoiceMessagePlayer';
+
+// Audio file extensions that should render as voice messages
+const AUDIO_EXTENSIONS = ['.ogg', '.opus', '.mp3', '.wav', '.m4a', '.webm', '.aac', '.flac'];
+
+/**
+ * Check if a file should be treated as a voice/audio message.
+ */
+function isVoiceMessage(mimeType: string, filename: string): boolean {
+  // Check MIME type
+  if (mimeType.startsWith('audio/')) {
+    return true;
+  }
+  // Check file extension as fallback
+  const lowerFilename = filename.toLowerCase();
+  return AUDIO_EXTENSIONS.some(ext => lowerFilename.endsWith(ext));
+}
 
 interface FileMessageProps {
   fileId: number;
@@ -25,6 +43,15 @@ export function FileMessage({ fileId, filename, mimeType, size, className = '' }
 
   if (mimeType.startsWith('video/')) {
     return <VideoPreview fileId={fileId} filename={filename} className={className} />;
+  }
+
+  // Voice/audio messages get the voice player
+  if (isVoiceMessage(mimeType, filename)) {
+    return (
+      <div className={className}>
+        <VoiceMessagePlayer fileId={fileId} filename={filename} />
+      </div>
+    );
   }
 
   // Generic file download UI for other types
