@@ -11,12 +11,14 @@
 import { useChat } from '@/stores/chat';
 import { useMessages } from '@/stores/messages';
 import { useContactsStore } from '@/stores/contacts';
+import { useVoiceRecording } from '@/stores/voiceRecording';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { TypingIndicator } from './TypingIndicator';
 import { FileUpload } from './FileUpload';
 import { TransferProgress } from './TransferProgress';
 import { ResumableTransfers } from './ResumableTransfers';
+import { VoiceRecorder } from './VoiceRecorder';
 
 // SVG path for icons
 const ICONS = {
@@ -24,6 +26,7 @@ const ICONS = {
   wifi: 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.14 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0',
   wifiOff: 'M1 1l22 22M8.111 16.404A5.5 5.5 0 0112 15c1.24 0 2.428.41 3.396 1.164M12 20h.01',
   loader: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+  mic: 'M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2 M12 19v4 M8 23h8',
 };
 
 function Icon({ path, className = 'w-4 h-4', spin = false }: { path: string; className?: string; spin?: boolean }) {
@@ -43,6 +46,7 @@ export function ChatPanel() {
   const { activeContactId, p2pStates, initiateConnection, typingContacts } = useChat();
   const { messagesByContact, loading, hasMore, loadMessages, sendMessage } = useMessages();
   const contacts = useContactsStore((s) => s.contacts);
+  const { isRecording, startRecording, reset: resetRecording } = useVoiceRecording();
 
   const contact = contacts.find((c) => c.id === activeContactId);
   const messages = activeContactId ? messagesByContact[activeContactId] || [] : [];
@@ -78,6 +82,18 @@ export function ChatPanel() {
     if (!activeContactId || !messages.length) return;
     const oldestTimestamp = messages[0]?.timestamp;
     loadMessages(activeContactId, oldestTimestamp);
+  };
+
+  const handleStartRecording = async () => {
+    await startRecording();
+  };
+
+  const handleRecordingSent = () => {
+    resetRecording();
+  };
+
+  const handleRecordingCancel = () => {
+    resetRecording();
   };
 
   return (
@@ -149,19 +165,38 @@ export function ChatPanel() {
       {/* Transfer progress */}
       <TransferProgress contactId={activeContactId} />
 
-      {/* Input area with file upload */}
+      {/* Input area with file upload and voice recording */}
       <div className="border-t border-cosmic-border p-4">
-        <div className="flex items-end gap-2">
-          <FileUpload
+        {isRecording ? (
+          // Voice recording mode
+          <VoiceRecorder
             contactId={activeContactId}
-            disabled={p2pState !== 'connected'}
+            onSent={handleRecordingSent}
+            onCancel={handleRecordingCancel}
           />
-          <MessageInput
-            contactId={activeContactId}
-            onSend={handleSend}
-            disabled={p2pState !== 'connected'}
-          />
-        </div>
+        ) : (
+          // Normal input mode
+          <div className="flex items-end gap-2">
+            <FileUpload
+              contactId={activeContactId}
+              disabled={p2pState !== 'connected'}
+            />
+            <button
+              type="button"
+              onClick={handleStartRecording}
+              disabled={p2pState !== 'connected'}
+              className="p-2 text-cosmic-muted hover:text-cosmic-text hover:bg-cosmic-surface rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Record voice message"
+            >
+              <Icon path={ICONS.mic} className="w-5 h-5" />
+            </button>
+            <MessageInput
+              contactId={activeContactId}
+              onSend={handleSend}
+              disabled={p2pState !== 'connected'}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
