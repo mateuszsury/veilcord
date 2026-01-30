@@ -6,6 +6,10 @@
  * exist when window.onload fires.
  */
 
+// Connection and presence types
+export type ConnectionState = 'disconnected' | 'connecting' | 'authenticating' | 'connected';
+export type UserStatus = 'online' | 'away' | 'busy' | 'invisible' | 'offline' | 'unknown';
+
 // Type definitions for Python API methods
 export interface PyWebViewAPI {
   // Identity
@@ -22,6 +26,13 @@ export interface PyWebViewAPI {
   add_contact(public_key: string, display_name: string): Promise<ContactResponse>;
   remove_contact(id: number): Promise<void>;
   set_contact_verified(id: number, verified: boolean): Promise<void>;
+
+  // Network
+  get_connection_state(): Promise<ConnectionState>;
+  get_signaling_server(): Promise<string>;
+  set_signaling_server(url: string): Promise<void>;
+  get_user_status(): Promise<UserStatus>;
+  set_user_status(status: UserStatus): Promise<void>;
 
   // System
   ping(): Promise<string>;
@@ -46,14 +57,20 @@ export interface ContactResponse {
   displayName: string;
   verified: boolean;
   addedAt: string;
+  onlineStatus: UserStatus;
 }
 
-// Declare global window type extension
+// Custom events dispatched by Python backend
 declare global {
   interface Window {
     pywebview?: {
       api: PyWebViewAPI;
     };
+  }
+
+  interface WindowEventMap {
+    'discordopus:connection': CustomEvent<{ state: ConnectionState }>;
+    'discordopus:presence': CustomEvent<{ publicKey: string; status: UserStatus }>;
   }
 }
 
