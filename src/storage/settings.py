@@ -22,7 +22,7 @@ class Settings:
     # Default values
     _defaults = {
         USER_STATUS: "online",
-        SIGNALING_SERVER_URL: "wss://signaling.discordopus.example/ws",
+        SIGNALING_SERVER_URL: "ws://localhost:8765",  # Local dev server
     }
 
     @classmethod
