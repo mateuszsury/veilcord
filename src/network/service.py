@@ -1,9 +1,10 @@
 """
-Network service orchestrator for signaling and presence.
+Network service orchestrator for signaling, presence, and P2P messaging.
 
 Manages the lifecycle of network components:
 - SignalingClient for WebSocket connection
 - PresenceManager for status tracking
+- MessagingService for P2P encrypted messaging
 - Frontend notification via window.evaluate_js()
 
 Runs in a background thread started by webview.start(func=...).
@@ -12,12 +13,14 @@ Runs in a background thread started by webview.start(func=...).
 import asyncio
 import logging
 import threading
-from typing import Optional
+from typing import Optional, Dict, Any
 
 import webview
 
 from src.network.signaling_client import SignalingClient, ConnectionState
 from src.network.presence import PresenceManager, UserStatus
+from src.network.messaging import MessagingService
+from src.network.peer_connection import P2PConnectionState
 from src.storage.settings import get_setting, set_setting, Settings
 
 
@@ -26,12 +29,14 @@ logger = logging.getLogger(__name__)
 
 class NetworkService:
     """
-    Orchestrates signaling client and presence management.
+    Orchestrates signaling client, presence management, and P2P messaging.
 
     Runs in a background thread with its own asyncio event loop.
     Communicates with frontend via window.evaluate_js() for:
     - Connection state changes
     - Contact presence updates
+    - P2P connection state changes
+    - Incoming messages
 
     Usage:
         service = NetworkService(window)
@@ -51,6 +56,7 @@ class NetworkService:
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._signaling: Optional[SignalingClient] = None
         self._presence: Optional[PresenceManager] = None
+        self._messaging: Optional[MessagingService] = None
         self._state = ConnectionState.DISCONNECTED
         self._running = False
         self._startup_task: Optional[asyncio.Task] = None
@@ -117,6 +123,14 @@ class NetworkService:
                 self._notify_frontend(event_type, detail)
             self._pending_events.clear()
 
+            # Create messaging service with callbacks
+            self._messaging = MessagingService()
+            self._messaging.on_message = self._on_incoming_message
+            self._messaging.on_connection_state = self._on_p2p_state_change
+            self._messaging.send_signaling = lambda msg: asyncio.create_task(
+                self._async_send(msg)
+            )
+
             # Start signaling client
             await self._signaling.start()
         except Exception as e:
@@ -152,6 +166,8 @@ class NetworkService:
 
     async def _async_stop(self) -> None:
         """Async shutdown sequence."""
+        if self._messaging:
+            await self._messaging.close_all()
         if self._signaling:
             await self._signaling.stop()
 
@@ -202,6 +218,21 @@ class NetworkService:
             status = message.get('status')
             if public_key and status and self._presence:
                 self._presence.update_contact_presence(public_key, status)
+
+        elif msg_type == 'p2p_offer':
+            # Incoming P2P connection offer
+            from_key = message.get('from')
+            sdp = message.get('sdp')
+            if from_key and sdp and self._messaging:
+                await self._messaging.handle_offer(from_key, sdp)
+
+        elif msg_type == 'p2p_answer':
+            # Incoming P2P connection answer
+            from_key = message.get('from')
+            sdp = message.get('sdp')
+            if from_key and sdp and self._messaging:
+                await self._messaging.handle_answer(from_key, sdp)
+
         else:
             logger.debug(f"Unhandled message type: {msg_type}")
 
@@ -211,6 +242,22 @@ class NetworkService:
         self._notify_frontend('discordopus:presence', {
             'publicKey': public_key,
             'status': status
+        })
+
+    def _on_incoming_message(self, contact_id: int, message_dict: Dict[str, Any]) -> None:
+        """Handle incoming message from MessagingService."""
+        logger.debug(f"Incoming message for contact {contact_id}: {message_dict.get('type', 'text')}")
+        self._notify_frontend('discordopus:message', {
+            'contactId': contact_id,
+            'message': message_dict
+        })
+
+    def _on_p2p_state_change(self, contact_id: int, state: P2PConnectionState) -> None:
+        """Handle P2P connection state change."""
+        logger.debug(f"P2P state for contact {contact_id}: {state.value}")
+        self._notify_frontend('discordopus:p2p_state', {
+            'contactId': contact_id,
+            'state': state.value
         })
 
     def _notify_frontend(self, event_type: str, detail: dict) -> None:
@@ -332,6 +379,76 @@ class NetworkService:
                 await self._signaling.send(message)
             except Exception as e:
                 logger.error(f"Failed to send message: {e}")
+
+    # ========== P2P Messaging Methods ==========
+
+    def initiate_p2p_connection(self, contact_id: int) -> None:
+        """
+        Initiate P2P connection to a contact.
+
+        Args:
+            contact_id: Contact database ID
+        """
+        if self._loop and self._messaging:
+            asyncio.run_coroutine_threadsafe(
+                self._messaging.initiate_connection(contact_id),
+                self._loop
+            )
+
+    def send_text_message(
+        self,
+        contact_id: int,
+        body: str,
+        reply_to: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Send encrypted text message to a contact.
+
+        Args:
+            contact_id: Contact database ID
+            body: Message text
+            reply_to: Optional message ID being replied to
+
+        Returns:
+            Message dict or None if failed
+        """
+        if not self._loop or not self._messaging:
+            return None
+
+        future = asyncio.run_coroutine_threadsafe(
+            self._messaging.send_text_message(contact_id, body, reply_to),
+            self._loop
+        )
+        try:
+            return future.result(timeout=10.0)
+        except Exception as e:
+            logger.error(f"Failed to send message: {e}")
+            return None
+
+    def get_p2p_connection_state(self, contact_id: int) -> str:
+        """
+        Get P2P connection state for a contact.
+
+        Args:
+            contact_id: Contact database ID
+
+        Returns:
+            P2P state as string
+        """
+        if self._messaging:
+            return self._messaging.get_connection_state(contact_id).value
+        return P2PConnectionState.DISCONNECTED.value
+
+    def send_typing_indicator(self, contact_id: int, active: bool = True) -> None:
+        """
+        Send typing indicator to a contact.
+
+        Args:
+            contact_id: Contact database ID
+            active: True if typing, False if stopped
+        """
+        if self._messaging:
+            self._messaging.send_typing(contact_id, active)
 
 
 # ========== Module-level singleton ==========

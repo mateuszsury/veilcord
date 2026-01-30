@@ -171,6 +171,93 @@ class API:
         service = get_network_service()
         service.set_user_status(status)
 
+    # ========== Messaging Methods ==========
+
+    def initiate_p2p_connection(self, contact_id: int) -> None:
+        """
+        Initiate P2P connection to a contact.
+
+        Sends WebRTC offer via signaling server.
+        Connection state updates come via discordopus:p2p_state events.
+
+        Args:
+            contact_id: Contact database ID
+        """
+        service = get_network_service()
+        service.initiate_p2p_connection(contact_id)
+
+    def send_message(
+        self,
+        contact_id: int,
+        body: str,
+        reply_to: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Send encrypted text message to a contact.
+
+        The message is encrypted with Signal Protocol and sent over
+        the P2P data channel. Also stored locally.
+
+        Args:
+            contact_id: Contact database ID
+            body: Message text
+            reply_to: Optional message ID being replied to
+
+        Returns:
+            Message dict with id, timestamp, etc. or None if failed
+        """
+        service = get_network_service()
+        return service.send_text_message(contact_id, body, reply_to)
+
+    def get_messages(
+        self,
+        contact_id: int,
+        limit: int = 50,
+        before: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Get messages for a conversation.
+
+        Args:
+            contact_id: Contact database ID
+            limit: Maximum messages to return
+            before: Timestamp for pagination (get older messages)
+
+        Returns:
+            List of message dicts (most recent first)
+        """
+        # Use MessagingService for this
+        service = get_network_service()
+        if service._messaging:
+            return service._messaging.get_messages(contact_id, limit, before)
+        return []
+
+    def get_p2p_state(self, contact_id: int) -> str:
+        """
+        Get P2P connection state for a contact.
+
+        Args:
+            contact_id: Contact database ID
+
+        Returns:
+            State string: new, connecting, connected, disconnected, failed, closed
+        """
+        service = get_network_service()
+        return service.get_p2p_connection_state(contact_id)
+
+    def send_typing(self, contact_id: int, active: bool = True) -> None:
+        """
+        Send typing indicator to a contact.
+
+        Throttled to max once per 3 seconds.
+
+        Args:
+            contact_id: Contact database ID
+            active: True if typing, False if stopped
+        """
+        service = get_network_service()
+        service.send_typing_indicator(contact_id, active)
+
     # ========== System Methods ==========
 
     def ping(self) -> str:

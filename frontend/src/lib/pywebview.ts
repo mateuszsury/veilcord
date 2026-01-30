@@ -9,6 +9,7 @@
 // Connection and presence types
 export type ConnectionState = 'disconnected' | 'connecting' | 'authenticating' | 'connected';
 export type UserStatus = 'online' | 'away' | 'busy' | 'invisible' | 'offline' | 'unknown';
+export type P2PConnectionState = 'new' | 'connecting' | 'connected' | 'disconnected' | 'failed' | 'closed';
 
 // Type definitions for Python API methods
 export interface PyWebViewAPI {
@@ -33,6 +34,13 @@ export interface PyWebViewAPI {
   set_signaling_server(url: string): Promise<void>;
   get_user_status(): Promise<UserStatus>;
   set_user_status(status: UserStatus): Promise<void>;
+
+  // Messaging
+  initiate_p2p_connection(contact_id: number): Promise<void>;
+  send_message(contact_id: number, body: string, reply_to?: string): Promise<MessageResponse | null>;
+  get_messages(contact_id: number, limit?: number, before?: number): Promise<MessageResponse[]>;
+  get_p2p_state(contact_id: number): Promise<P2PConnectionState>;
+  send_typing(contact_id: number, active?: boolean): Promise<void>;
 
   // System
   ping(): Promise<string>;
@@ -60,6 +68,56 @@ export interface ContactResponse {
   onlineStatus: UserStatus;
 }
 
+export interface MessageResponse {
+  id: string;
+  conversationId: number;
+  senderId: string;
+  type: 'text' | 'edit' | 'delete';
+  body: string | null;
+  replyTo: string | null;
+  edited: boolean;
+  deleted: boolean;
+  timestamp: number;
+  receivedAt: number | null;
+}
+
+// Event payload types for incoming messages
+export interface MessageEventPayload {
+  contactId: number;
+  message: MessageResponse | EditEventData | DeleteEventData | ReactionEventData | TypingEventData;
+}
+
+export interface EditEventData {
+  type: 'edit';
+  targetId: string;
+  newBody: string;
+  timestamp: number;
+}
+
+export interface DeleteEventData {
+  type: 'delete';
+  targetId: string;
+  timestamp: number;
+}
+
+export interface ReactionEventData {
+  type: 'reaction';
+  targetId: string;
+  emoji: string;
+  action: 'add' | 'remove';
+  senderId: string;
+}
+
+export interface TypingEventData {
+  type: 'typing';
+  active: boolean;
+}
+
+export interface P2PStateEventPayload {
+  contactId: number;
+  state: P2PConnectionState;
+}
+
 // Custom events dispatched by Python backend
 declare global {
   interface Window {
@@ -71,6 +129,8 @@ declare global {
   interface WindowEventMap {
     'discordopus:connection': CustomEvent<{ state: ConnectionState }>;
     'discordopus:presence': CustomEvent<{ publicKey: string; status: UserStatus }>;
+    'discordopus:message': CustomEvent<MessageEventPayload>;
+    'discordopus:p2p_state': CustomEvent<P2PStateEventPayload>;
   }
 }
 
