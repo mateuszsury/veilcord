@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 2 - Signaling Infrastructure & Presence
-**Status:** Not Started
+**Status:** In Progress
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -15,13 +15,13 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[==========>                                                            ] 12.5% (Phase 1/8 COMPLETE)
+[============>                                                          ] 14% (Phase 2 in progress)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
 |-------|------|--------|-------|--------------|
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
-| 2 | Signaling Infrastructure & Presence | Pending | 0/? | 12 |
+| 2 | Signaling Infrastructure & Presence | In Progress | 1/? | 12 |
 | 3 | P2P Text Messaging | Pending | 0/? | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
@@ -34,8 +34,8 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 6
-- Average plan duration: 4.5m
+- Plans completed: 8
+- Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -66,6 +66,8 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Versioned backup format with embedded KDF params | Future versions can read old backups by using embedded parameters | Forward compatibility for backup files |
 | 2026-01-30 | Contact X25519 keys use placeholder | X25519 public keys exchanged during P2P connection, not at contact add time | Contact storage works before Phase 2 networking |
 | 2026-01-30 | API methods return JSON-serializable dicts | Complex Python objects converted to dicts for JavaScript consumption | Clean API bridge pattern |
+| 2026-01-30 | ed25519_private_key property on Identity | SignalingClient needs key object, not PEM bytes; added property to Identity class | Clean access to signing key |
+| 2026-01-30 | websockets>=15.0 (not 16.0) | v15.0.1 already installed, API compatible with requirements | No additional install needed |
 
 ### Active TODOs
 
@@ -77,6 +79,8 @@ See: .planning/PROJECT.md
 - [x] Execute 01-04-PLAN.md (password-based key backup)
 - [x] Execute 01-06-PLAN.md (Settings panel and identity UI)
 - [x] Execute 01-07-PLAN.md (PyInstaller packaging) - PHASE 1 COMPLETE
+- [x] Execute 02-01-PLAN.md (WebSocket signaling client)
+- [ ] Execute 02-02-PLAN.md (presence system)
 - [ ] Research aiortc data channels before Phase 3 planning
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
@@ -101,33 +105,32 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed Phase 1 (01-07-PLAN.md)
+**Last session:** 2026-01-30 - Completed 02-01-PLAN.md
 
 **What we were doing:**
-- Executed Phase 1 Plan 07: PyInstaller Packaging
-- Created build.spec with all hidden imports
-- Fixed SQLite threading issue for PyWebView
-- User verified packaged .exe works correctly
+- Executed Phase 2 Plan 01: WebSocket Signaling Client
+- Created SignalingClient with auto-reconnect and Ed25519 auth
+- Created STUN configuration for P2P
 
 **What's next:**
-- Plan Phase 2: Signaling Infrastructure & Presence
-- WebSocket signaling server connection
-- Friend request protocol
-- Online/offline presence
+- Execute 02-02-PLAN.md (presence system)
+- Presence broadcasting and contact status
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- build.spec
-- assets/icon.ico
-- .planning/phases/01-cryptographic-foundation-packaging/01-07-SUMMARY.md
+- src/network/__init__.py
+- src/network/signaling_client.py
+- src/network/auth.py
+- src/network/stun.py
+- .planning/phases/02-signaling-infrastructure--presence/02-01-SUMMARY.md
 
 **Files modified this session:**
-- src/storage/db.py (SQLite threading fix)
-- .gitignore (allow build.spec)
+- src/crypto/identity.py (ed25519_private_key property)
+- requirements.txt (websockets>=15.0)
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after 01-06-PLAN.md execution*
+*Last updated: 2026-01-30 after 02-01-PLAN.md execution*
