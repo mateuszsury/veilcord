@@ -8,7 +8,8 @@ cryptography==46.0.4
 pywin32>=306
 
 # SQLCipher for encrypted local database
-sqlcipher3-binary>=0.5.3
+# Note: sqlcipher3 (not -binary) has Python 3.13 wheels
+sqlcipher3>=0.6.2
 
 # PyWebView for desktop window with React frontend
 pywebview>=6.1
