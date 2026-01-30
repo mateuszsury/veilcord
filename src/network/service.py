@@ -635,6 +635,28 @@ class NetworkService:
     def _on_file_received(self, contact_id: int, file_meta: FileMetadata) -> None:
         """Handle file reception completion."""
         logger.info(f"File received: {file_meta.filename} from contact {contact_id}")
+
+        # Get contact public key for sender_id
+        from src.storage.contacts import get_contact
+        contact = get_contact(contact_id)
+        if not contact:
+            logger.error(f"Contact {contact_id} not found for file message")
+            return
+
+        # Create file message in database
+        from src.storage.messages import save_file_message
+        try:
+            message = save_file_message(
+                conversation_id=contact_id,
+                sender_id=contact.ed25519_public_pem,
+                file_id=file_meta.id,
+                filename=file_meta.filename
+            )
+            logger.debug(f"Created file message {message.id} for file {file_meta.id}")
+        except Exception as e:
+            logger.error(f"Failed to create file message: {e}")
+
+        # Notify frontend with file data
         self._notify_frontend('discordopus:file_received', {
             'contactId': contact_id,
             'file': {
@@ -643,6 +665,24 @@ class NetworkService:
                 'size': file_meta.size,
                 'mimeType': file_meta.mime_type,
                 'transferId': file_meta.transfer_id
+            }
+        })
+
+        # Also send message event so it appears in chat
+        self._notify_frontend('discordopus:message', {
+            'contactId': contact_id,
+            'message': {
+                'id': message.id,
+                'conversationId': message.conversation_id,
+                'senderId': message.sender_id,
+                'type': message.type,
+                'body': message.body,
+                'replyTo': message.reply_to,
+                'edited': message.edited,
+                'deleted': message.deleted,
+                'timestamp': message.timestamp,
+                'receivedAt': message.received_at,
+                'fileId': message.file_id
             }
         })
 

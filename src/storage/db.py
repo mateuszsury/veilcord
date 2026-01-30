@@ -179,13 +179,23 @@ def init_database() -> sqlcipher3.Connection:
             deleted INTEGER DEFAULT 0,
             timestamp INTEGER NOT NULL,
             received_at INTEGER,
-            FOREIGN KEY (conversation_id) REFERENCES contacts(id)
+            file_id INTEGER,
+            FOREIGN KEY (conversation_id) REFERENCES contacts(id),
+            FOREIGN KEY (file_id) REFERENCES files(id)
         )
     """)
     conn.execute("""
         CREATE INDEX IF NOT EXISTS idx_messages_conversation
         ON messages(conversation_id, timestamp)
     """)
+
+    # Migration: add file_id column to existing databases
+    try:
+        conn.execute(
+            "ALTER TABLE messages ADD COLUMN file_id INTEGER REFERENCES files(id)"
+        )
+    except sqlcipher3.OperationalError:
+        pass  # Column already exists
 
     # reactions table: emoji reactions to messages
     conn.execute("""

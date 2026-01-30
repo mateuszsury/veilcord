@@ -19,13 +19,14 @@ class Message:
     id: str
     conversation_id: int  # Contact ID
     sender_id: str  # 'self' for outgoing, public key for incoming
-    type: str  # 'text', 'edit', 'delete'
+    type: str  # 'text', 'edit', 'delete', 'file'
     body: Optional[str]
     reply_to: Optional[str]
     edited: bool
     deleted: bool
     timestamp: int  # Unix ms
     received_at: Optional[int]
+    file_id: Optional[int] = None  # Reference to files table
 
 
 @dataclass
@@ -45,7 +46,8 @@ def save_message(
     msg_type: str = "text",
     reply_to: Optional[str] = None,
     message_id: Optional[str] = None,
-    timestamp: Optional[int] = None
+    timestamp: Optional[int] = None,
+    file_id: Optional[int] = None
 ) -> Message:
     """
     Save a new message to the database.
@@ -54,10 +56,11 @@ def save_message(
         conversation_id: Contact ID for the conversation
         sender_id: 'self' for outgoing, public key for incoming
         body: Message text content
-        msg_type: Message type ('text', 'edit', 'delete')
+        msg_type: Message type ('text', 'edit', 'delete', 'file')
         reply_to: ID of message being replied to
         message_id: Optional custom message ID (generated if not provided)
         timestamp: Optional custom timestamp (current time if not provided)
+        file_id: Optional file ID for file messages
 
     Returns:
         Created Message object
@@ -69,9 +72,9 @@ def save_message(
     received_at = int(time.time() * 1000) if sender_id != 'self' else None
 
     conn.execute("""
-        INSERT INTO messages (id, conversation_id, sender_id, type, body, reply_to, timestamp, received_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (msg_id, conversation_id, sender_id, msg_type, body, reply_to, ts, received_at))
+        INSERT INTO messages (id, conversation_id, sender_id, type, body, reply_to, timestamp, received_at, file_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (msg_id, conversation_id, sender_id, msg_type, body, reply_to, ts, received_at, file_id))
     conn.commit()
 
     return Message(
@@ -84,7 +87,41 @@ def save_message(
         edited=False,
         deleted=False,
         timestamp=ts,
-        received_at=received_at
+        received_at=received_at,
+        file_id=file_id
+    )
+
+
+def save_file_message(
+    conversation_id: int,
+    sender_id: str,
+    file_id: int,
+    filename: str,
+    message_id: Optional[str] = None,
+    timestamp: Optional[int] = None
+) -> Message:
+    """
+    Save a file message to the database.
+
+    Args:
+        conversation_id: Contact ID for the conversation
+        sender_id: 'self' for outgoing, public key for incoming
+        file_id: ID from files table
+        filename: Name of the file (used as message body)
+        message_id: Optional custom message ID (generated if not provided)
+        timestamp: Optional custom timestamp (current time if not provided)
+
+    Returns:
+        Created Message object
+    """
+    return save_message(
+        conversation_id=conversation_id,
+        sender_id=sender_id,
+        body=filename,
+        msg_type="file",
+        file_id=file_id,
+        message_id=message_id,
+        timestamp=timestamp
     )
 
 
@@ -108,7 +145,7 @@ def get_messages(
 
     if before_timestamp:
         rows = conn.execute("""
-            SELECT id, conversation_id, sender_id, type, body, reply_to, edited, deleted, timestamp, received_at
+            SELECT id, conversation_id, sender_id, type, body, reply_to, edited, deleted, timestamp, received_at, file_id
             FROM messages
             WHERE conversation_id = ? AND timestamp < ? AND deleted = 0
             ORDER BY timestamp DESC
@@ -116,7 +153,7 @@ def get_messages(
         """, (conversation_id, before_timestamp, limit)).fetchall()
     else:
         rows = conn.execute("""
-            SELECT id, conversation_id, sender_id, type, body, reply_to, edited, deleted, timestamp, received_at
+            SELECT id, conversation_id, sender_id, type, body, reply_to, edited, deleted, timestamp, received_at, file_id
             FROM messages
             WHERE conversation_id = ? AND deleted = 0
             ORDER BY timestamp DESC
@@ -133,7 +170,8 @@ def get_messages(
         edited=bool(row[6]),
         deleted=bool(row[7]),
         timestamp=row[8],
-        received_at=row[9]
+        received_at=row[9],
+        file_id=row[10]
     ) for row in rows]
 
 
@@ -141,7 +179,7 @@ def get_message(message_id: str) -> Optional[Message]:
     """Get a single message by ID."""
     conn = get_database()
     row = conn.execute("""
-        SELECT id, conversation_id, sender_id, type, body, reply_to, edited, deleted, timestamp, received_at
+        SELECT id, conversation_id, sender_id, type, body, reply_to, edited, deleted, timestamp, received_at, file_id
         FROM messages WHERE id = ?
     """, (message_id,)).fetchone()
 
@@ -158,7 +196,8 @@ def get_message(message_id: str) -> Optional[Message]:
         edited=bool(row[6]),
         deleted=bool(row[7]),
         timestamp=row[8],
-        received_at=row[9]
+        received_at=row[9],
+        file_id=row[10]
     )
 
 
