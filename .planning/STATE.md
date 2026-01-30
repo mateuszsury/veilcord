@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 3 - P2P Text Messaging
-**Status:** Not Started
+**Status:** In Progress (Plan 1/7 complete)
 **Last Updated:** 2026-01-30
 
 ## Project Reference
@@ -22,7 +22,7 @@ See: .planning/PROJECT.md
 |-------|------|--------|-------|--------------|
 | 1 | Cryptographic Foundation & Packaging | COMPLETE | 7/7 | 14 |
 | 2 | Signaling Infrastructure & Presence | COMPLETE | 5/5 | 12 |
-| 3 | P2P Text Messaging | Pending | 0/? | 10 |
+| 3 | P2P Text Messaging | In Progress | 1/7 | 10 |
 | 4 | File Transfer | Pending | 0/? | 7 |
 | 5 | Voice Calls (1-on-1) | Pending | 0/? | 9 |
 | 6 | Video & Screen Sharing | Pending | 0/? | 8 |
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 12
+- Plans completed: 13
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -74,6 +74,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Frontend events via CustomEvent | evaluate_js dispatches discordopus:* events | Clean JS notification pattern |
 | 2026-01-30 | Network store initializes on Sidebar mount | Centralized initialization point for network state | Consistent state on app load |
 | 2026-01-30 | Contact status matching uses includes() | Partial public key matching from presence events | Handles truncated keys in events |
+| 2026-01-30 | Soft delete pattern for messages | delete_message with hard_delete=False sets deleted=1 and body=NULL | Preserves message metadata for conversation integrity |
+| 2026-01-30 | UNIQUE constraint for reactions | Database-level enforcement on (message_id, sender_id, emoji) | Prevents duplicate reactions automatically |
+| 2026-01-30 | BLOB for Signal session state | Binary BLOB type for signal_sessions.session_state | Flexibility in serialization format (pickle, msgpack, custom) |
 
 ### Active TODOs
 
@@ -90,6 +93,13 @@ See: .planning/PROJECT.md
 - [x] Execute 02-03-PLAN.md (network integration)
 - [x] Execute 02-04-PLAN.md (presence UI)
 - [x] Execute 02-05-PLAN.md (visual verification) - PHASE 2 COMPLETE
+- [x] Execute 03-01-PLAN.md (message storage layer)
+- [ ] Execute 03-02-PLAN.md (Signal Protocol)
+- [ ] Execute 03-03-PLAN.md (WebRTC data channels)
+- [ ] Execute 03-04-PLAN.md (message protocol)
+- [ ] Execute 03-05-PLAN.md (chat UI)
+- [ ] Execute 03-06-PLAN.md (message features)
+- [ ] Execute 03-07-PLAN.md (integration)
 - [ ] Research aiortc data channels before Phase 3 planning
 - [ ] Research aiortc audio codec interop before Phase 5 planning
 - [ ] Research Sender Keys protocol before Phase 7 planning
@@ -114,43 +124,28 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed Phase 2 (all 5 plans)
+**Last session:** 2026-01-30 - Completed 03-01-PLAN.md (message storage layer)
 
 **What we were doing:**
-- Executed all Phase 2 plans (02-01 through 02-05)
-- User verified packaged application works correctly
-- Phase 2 verification passed (6/6 must-haves)
+- Executed plan 03-01 (message storage layer)
+- Extended SQLCipher schema with messages, reactions, signal_sessions tables
+- Created messages.py with complete CRUD operations
 
 **What's next:**
-- Plan Phase 3 P2P text messaging
-- Research aiortc data channels before planning
+- Execute 03-02-PLAN.md (Signal Protocol implementation)
+- Continue with remaining Phase 3 plans
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/network/signaling_client.py
-- src/network/auth.py
-- src/network/stun.py
-- src/network/service.py
-- src/network/presence.py
-- src/storage/settings.py
-- frontend/src/stores/network.ts
-- frontend/src/components/layout/StatusSelector.tsx
-- frontend/src/components/layout/ConnectionIndicator.tsx
-- frontend/src/components/settings/NetworkSection.tsx
+- src/storage/messages.py
 
 **Files modified this session:**
-- src/storage/db.py (settings table, online_status migration)
-- src/storage/contacts.py (online_status field)
-- src/api/bridge.py (network methods)
-- src/main.py (network service lifecycle)
-- frontend/src/lib/pywebview.ts (network types)
-- frontend/src/stores/contacts.ts (presence events)
-- frontend/src/components/layout/Sidebar.tsx (status UI)
-- frontend/src/components/settings/SettingsPanel.tsx (NetworkSection)
+- src/storage/db.py (messages, reactions, signal_sessions tables)
+- src/storage/__init__.py (exported message functions)
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after Phase 2 completion*
+*Last updated: 2026-01-30 after 03-01 completion*
