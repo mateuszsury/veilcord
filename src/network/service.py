@@ -1,0 +1,388 @@
+"""
+Network service orchestrator for signaling and presence.
+
+Manages the lifecycle of network components:
+- SignalingClient for WebSocket connection
+- PresenceManager for status tracking
+- Frontend notification via window.evaluate_js()
+
+Runs in a background thread started by webview.start(func=...).
+"""
+
+import asyncio
+import logging
+import threading
+from typing import Optional
+
+import webview
+
+from src.network.signaling_client import SignalingClient, ConnectionState
+from src.network.presence import PresenceManager, UserStatus
+from src.storage.settings import get_setting, set_setting, Settings
+
+
+logger = logging.getLogger(__name__)
+
+
+class NetworkService:
+    """
+    Orchestrates signaling client and presence management.
+
+    Runs in a background thread with its own asyncio event loop.
+    Communicates with frontend via window.evaluate_js() for:
+    - Connection state changes
+    - Contact presence updates
+
+    Usage:
+        service = NetworkService(window)
+        service.start()  # Blocks in background thread
+        ...
+        service.stop()   # Call from main thread to shutdown
+    """
+
+    def __init__(self, window: webview.Window) -> None:
+        """
+        Initialize network service.
+
+        Args:
+            window: PyWebView window for JS callbacks
+        """
+        self._window = window
+        self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._signaling: Optional[SignalingClient] = None
+        self._presence: Optional[PresenceManager] = None
+        self._state = ConnectionState.DISCONNECTED
+        self._running = False
+        self._startup_task: Optional[asyncio.Task] = None
+        self._pending_events: list[tuple[str, dict]] = []  # Events before window ready
+        self._window_ready = False
+
+    def start(self) -> None:
+        """
+        Start the network service.
+
+        Called by webview.start(func=...) in a background thread.
+        Creates asyncio event loop and runs forever.
+        """
+        if self._running:
+            logger.warning("NetworkService already running")
+            return
+
+        self._running = True
+        logger.info("Starting NetworkService in background thread")
+
+        # Create new event loop for this thread
+        self._loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self._loop)
+
+        # Create presence manager with callback
+        self._presence = PresenceManager(
+            on_status_change=lambda pk, status: self._schedule_presence_notify(pk, status)
+        )
+
+        # Get signaling server URL
+        server_url = get_setting(Settings.SIGNALING_SERVER_URL)
+        if not server_url:
+            server_url = Settings.get_default(Settings.SIGNALING_SERVER_URL)
+
+        # Create signaling client
+        self._signaling = SignalingClient(
+            server_url=server_url,
+            on_state_change=lambda state: self._schedule_state_notify(state),
+            on_message=lambda msg: self._schedule_message_handle(msg)
+        )
+
+        # Schedule startup
+        self._startup_task = self._loop.create_task(self._async_start())
+
+        # Run event loop forever
+        try:
+            self._loop.run_forever()
+        finally:
+            # Cleanup
+            if self._loop.is_running():
+                self._loop.stop()
+            self._loop.close()
+            logger.info("NetworkService stopped")
+
+    async def _async_start(self) -> None:
+        """Async startup sequence."""
+        try:
+            # Wait a moment for window to be ready
+            await asyncio.sleep(0.5)
+            self._window_ready = True
+
+            # Replay any pending events
+            for event_type, detail in self._pending_events:
+                self._notify_frontend(event_type, detail)
+            self._pending_events.clear()
+
+            # Start signaling client
+            await self._signaling.start()
+        except Exception as e:
+            logger.error(f"Error during async startup: {e}")
+
+    def stop(self) -> None:
+        """
+        Stop the network service gracefully.
+
+        Sends offline status before disconnecting.
+        Safe to call from any thread.
+        """
+        if not self._running:
+            return
+
+        self._running = False
+        logger.info("Stopping NetworkService...")
+
+        if self._loop and self._loop.is_running():
+            # Schedule async shutdown
+            future = asyncio.run_coroutine_threadsafe(
+                self._async_stop(),
+                self._loop
+            )
+            try:
+                # Wait for shutdown with timeout
+                future.result(timeout=5.0)
+            except Exception as e:
+                logger.error(f"Error during shutdown: {e}")
+
+            # Stop the event loop
+            self._loop.call_soon_threadsafe(self._loop.stop)
+
+    async def _async_stop(self) -> None:
+        """Async shutdown sequence."""
+        if self._signaling:
+            await self._signaling.stop()
+
+    def _schedule_state_notify(self, state: ConnectionState) -> None:
+        """Schedule state change notification (thread-safe)."""
+        self._state = state
+        if self._loop:
+            self._loop.call_soon_threadsafe(
+                lambda: asyncio.create_task(self._on_state_change(state))
+            )
+
+    def _schedule_presence_notify(self, public_key: str, status: str) -> None:
+        """Schedule presence change notification (thread-safe)."""
+        if self._loop:
+            self._loop.call_soon_threadsafe(
+                lambda: asyncio.create_task(self._on_presence_change(public_key, status))
+            )
+
+    def _schedule_message_handle(self, message: dict) -> None:
+        """Schedule message handling (thread-safe)."""
+        if self._loop:
+            self._loop.call_soon_threadsafe(
+                lambda: asyncio.create_task(self._on_message(message))
+            )
+
+    async def _on_state_change(self, state: ConnectionState) -> None:
+        """Handle connection state change."""
+        logger.debug(f"Connection state changed: {state.value}")
+        self._notify_frontend('discordopus:connection', {'state': state.value})
+
+        # Send initial status when connected
+        if state == ConnectionState.CONNECTED and self._signaling and self._presence:
+            try:
+                status_msg = self._presence.build_status_message()
+                await self._signaling.send(status_msg)
+                logger.info(f"Sent initial status: {status_msg['status']}")
+            except Exception as e:
+                logger.error(f"Failed to send initial status: {e}")
+
+    async def _on_message(self, message: dict) -> None:
+        """Handle incoming message from signaling server."""
+        msg_type = message.get('type')
+        logger.debug(f"Handling message: {msg_type}")
+
+        if msg_type == 'presence_update':
+            # Update contact presence
+            public_key = message.get('public_key')
+            status = message.get('status')
+            if public_key and status and self._presence:
+                self._presence.update_contact_presence(public_key, status)
+        else:
+            logger.debug(f"Unhandled message type: {msg_type}")
+
+    async def _on_presence_change(self, public_key: str, status: str) -> None:
+        """Handle contact presence change."""
+        logger.debug(f"Presence change: {public_key[:16]}... -> {status}")
+        self._notify_frontend('discordopus:presence', {
+            'publicKey': public_key,
+            'status': status
+        })
+
+    def _notify_frontend(self, event_type: str, detail: dict) -> None:
+        """
+        Notify frontend via window.evaluate_js().
+
+        Queues events if window not ready yet.
+        """
+        if not self._window_ready:
+            self._pending_events.append((event_type, detail))
+            return
+
+        try:
+            # Build JavaScript to dispatch custom event
+            detail_json = str(detail).replace("'", '"')  # Python dict to JSON
+            js_code = f'''
+                window.dispatchEvent(new CustomEvent('{event_type}', {{
+                    detail: {detail_json}
+                }}));
+            '''
+            self._window.evaluate_js(js_code)
+        except Exception as e:
+            logger.debug(f"Could not notify frontend: {e}")
+
+    # ========== Sync methods for API bridge ==========
+
+    def get_connection_state(self) -> str:
+        """Get current connection state as string."""
+        return self._state.value
+
+    def get_signaling_server(self) -> str:
+        """Get configured signaling server URL."""
+        url = get_setting(Settings.SIGNALING_SERVER_URL)
+        return url if url else Settings.get_default(Settings.SIGNALING_SERVER_URL)
+
+    def set_signaling_server(self, url: str) -> None:
+        """
+        Set signaling server URL and reconnect.
+
+        Args:
+            url: New WebSocket URL
+        """
+        set_setting(Settings.SIGNALING_SERVER_URL, url)
+
+        # Reconnect with new URL
+        if self._loop and self._signaling:
+            asyncio.run_coroutine_threadsafe(
+                self._reconnect(url),
+                self._loop
+            )
+
+    async def _reconnect(self, url: str) -> None:
+        """Reconnect signaling client with new URL."""
+        if self._signaling:
+            await self._signaling.stop()
+
+        self._signaling = SignalingClient(
+            server_url=url,
+            on_state_change=lambda state: self._schedule_state_notify(state),
+            on_message=lambda msg: self._schedule_message_handle(msg)
+        )
+        await self._signaling.start()
+
+    def get_user_status(self) -> str:
+        """Get user's presence status."""
+        if self._presence:
+            return self._presence.get_user_status().value
+        return UserStatus.ONLINE.value
+
+    def set_user_status(self, status: str) -> None:
+        """
+        Set user's presence status and notify server.
+
+        Args:
+            status: Status string (online, away, busy, invisible)
+        """
+        if not self._presence:
+            return
+
+        try:
+            user_status = UserStatus(status)
+            self._presence.set_user_status(user_status)
+
+            # Send update to server
+            if self._loop and self._signaling and self._state == ConnectionState.CONNECTED:
+                asyncio.run_coroutine_threadsafe(
+                    self._send_status_update(),
+                    self._loop
+                )
+        except ValueError:
+            logger.error(f"Invalid status: {status}")
+
+    async def _send_status_update(self) -> None:
+        """Send status update to signaling server."""
+        if self._signaling and self._presence:
+            try:
+                status_msg = self._presence.build_status_message()
+                await self._signaling.send(status_msg)
+            except Exception as e:
+                logger.error(f"Failed to send status update: {e}")
+
+    def send_message(self, message: dict) -> None:
+        """
+        Queue a message to send via signaling.
+
+        Args:
+            message: Message dict to send
+        """
+        if self._loop and self._signaling:
+            asyncio.run_coroutine_threadsafe(
+                self._async_send(message),
+                self._loop
+            )
+
+    async def _async_send(self, message: dict) -> None:
+        """Send message to signaling server."""
+        if self._signaling and self._state == ConnectionState.CONNECTED:
+            try:
+                await self._signaling.send(message)
+            except Exception as e:
+                logger.error(f"Failed to send message: {e}")
+
+
+# ========== Module-level singleton ==========
+
+_service: Optional[NetworkService] = None
+_service_lock = threading.Lock()
+
+
+def start_network(window: webview.Window) -> None:
+    """
+    Start the network service singleton.
+
+    Called by webview.start(func=...) in background thread.
+
+    Args:
+        window: PyWebView window for JS callbacks
+    """
+    global _service
+    with _service_lock:
+        if _service is not None:
+            logger.warning("Network service already started")
+            return
+        _service = NetworkService(window)
+
+    # This blocks in the background thread
+    _service.start()
+
+
+def stop_network() -> None:
+    """
+    Stop the network service.
+
+    Safe to call from any thread.
+    """
+    global _service
+    with _service_lock:
+        if _service is not None:
+            _service.stop()
+            _service = None
+
+
+def get_network_service() -> NetworkService:
+    """
+    Get the network service singleton.
+
+    Returns:
+        NetworkService instance
+
+    Raises:
+        RuntimeError: If service not started
+    """
+    if _service is None:
+        raise RuntimeError("Network service not started")
+    return _service

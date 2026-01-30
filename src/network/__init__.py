@@ -8,6 +8,12 @@ from src.network.signaling_client import SignalingClient, ConnectionState
 from src.network.auth import create_auth_response, verify_challenge
 from src.network.stun import get_ice_servers, DEFAULT_STUN_SERVERS
 from src.network.presence import PresenceManager, UserStatus
+from src.network.service import (
+    NetworkService,
+    start_network,
+    stop_network,
+    get_network_service,
+)
 
 __all__ = [
     "SignalingClient",
@@ -18,4 +24,8 @@ __all__ = [
     "DEFAULT_STUN_SERVERS",
     "PresenceManager",
     "UserStatus",
+    "NetworkService",
+    "start_network",
+    "stop_network",
+    "get_network_service",
 ]
