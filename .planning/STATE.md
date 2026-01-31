@@ -1,8 +1,8 @@
 # Project State: DiscordOpus
 
-**Current Phase:** Phase 5 - Voice Calls
-**Status:** COMPLETE
-**Last Updated:** 2026-01-30
+**Current Phase:** Phase 6 - Video & Screen Sharing
+**Status:** In Progress
+**Last Updated:** 2026-01-31
 
 ## Project Reference
 
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 5 COMPLETE - Voice calls with audio device management, WebRTC audio tracks, and call lifecycle state machine. Ready for Phase 6.
+**Current focus:** Phase 6 IN PROGRESS - Video track infrastructure complete. CameraVideoTrack and ScreenShareTrack ready for WebRTC video calls and screen sharing.
 
 ## Progress
 
 ```
-[================================================================>      ] 85% (Phase 5 COMPLETE - 8/8 plans)
+[==================================================================>    ] 86% (Phase 6 IN PROGRESS - 1/6 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -25,16 +25,16 @@ See: .planning/PROJECT.md
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
-| 6 | Video & Screen Sharing | Pending | 0/? | 8 |
+| 6 | Video & Screen Sharing | In Progress | 1/6 | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 62/73 requirements completed (85%)
+**Total:** 63/73 requirements completed (86%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 35
+- Plans completed: 36
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -130,6 +130,9 @@ See: .planning/PROJECT.md
 | 2026-01-30 | Duration polling every 100ms for voice recording | Smooth UI updates without pushing duration from backend | Clean polling pattern in Zustand store |
 | 2026-01-30 | Audio file detection via MIME type and extension | Robust detection using both mimeType.startsWith('audio/') and file extension list | Handles edge cases where MIME type is generic |
 | 2026-01-30 | 5 minute max recording with 4:30 warning | Reasonable limit for voice messages, warning gives time to finish | Prevents very large recordings, good UX |
+| 2026-01-31 | mss package name (not python-mss) | PyPI package is 'mss', not 'python-mss' as originally planned | Corrected requirements.txt |
+| 2026-01-31 | 15 FPS for screen sharing | Screen sharing is less demanding than camera, reduces bandwidth | Default fps=15 for ScreenShareTrack |
+| 2026-01-31 | last_frame buffer for API access | Store most recent frame for API access without blocking WebRTC pipeline | Enables frontend to request frames without timing issues |
 
 ### Active TODOs
 
@@ -169,6 +172,7 @@ See: .planning/PROJECT.md
 - [x] Execute 05-06-PLAN.md (call UI components)
 - [x] Execute 05-07-PLAN.md (voice message UI)
 - [x] Execute 05-08-PLAN.md (integration testing) - PHASE 5 COMPLETE
+- [x] Execute 06-01-PLAN.md (video track infrastructure)
 
 ### Blockers
 
@@ -187,32 +191,32 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-30 - Completed 05-08-PLAN.md (voice calling integration) - PHASE 5 COMPLETE
+**Last session:** 2026-01-31 - Completed 06-01-PLAN.md (video track infrastructure)
 
 **What we just completed:**
-- Executed plan 05-08 (voice calling integration)
-- Created AudioSection component for audio device selection in settings
-- Added call button to chat header for voice call initiation
-- Integrated AudioSection into SettingsPanel
-- Verified AppLayout already has call UI components from 05-06
-- Human verification checkpoint deferred by user
+- Executed plan 06-01 (video track infrastructure)
+- Created CameraVideoTrack and ScreenShareTrack classes
+- Added opencv-python, mss, cv2-enumerate-cameras dependencies
+- Implemented camera and monitor enumeration functions
+- Exported all new video classes and functions from src/voice package
 
 **What's next:**
-- Plan Phase 6 (Video & Screen Sharing)
+- Execute 06-02-PLAN.md (video call signaling)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- frontend/src/components/settings/AudioSection.tsx
-- .planning/phases/05-voice-calls/05-08-SUMMARY.md
+- src/voice/video_track.py
+- .planning/phases/06-video-screen-sharing/06-01-SUMMARY.md
 
 **Files modified this session:**
-- frontend/src/components/settings/SettingsPanel.tsx
-- frontend/src/components/chat/ChatPanel.tsx
+- requirements.txt
+- src/voice/device_manager.py
+- src/voice/__init__.py
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-30 after completing 05-08-PLAN.md - PHASE 5 COMPLETE*
+*Last updated: 2026-01-31 after completing 06-01-PLAN.md*
