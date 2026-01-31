@@ -69,6 +69,11 @@ class VoiceCall:
     end_reason: Optional[CallEndReason] = None
     muted: bool = False  # Local mute state
     remote_muted: bool = False  # Peer's mute state
+    # Video state fields
+    video_enabled: bool = False  # Local video is on/off
+    video_source: Optional[str] = None  # "camera" or "screen"
+    remote_video: bool = False  # Remote party has video
+    camera_device_id: Optional[int] = None  # Selected camera index
 
     @classmethod
     def create_outgoing(cls, contact_id: int, contact_public_key: str) -> 'VoiceCall':
@@ -150,13 +155,16 @@ class CallEvent:
     Used to coordinate call setup and teardown between peers
     via the signaling server.
     """
-    type: Literal['call_offer', 'call_answer', 'call_reject', 'call_end', 'call_mute']
+    type: Literal['call_offer', 'call_answer', 'call_reject', 'call_end', 'call_mute', 'call_video_renegotiate']
     call_id: str
     from_key: str  # Sender's public key
     to_key: str  # Recipient's public key
     sdp: Optional[str] = None  # For offer/answer events
     reason: Optional[CallEndReason] = None  # For end events
     muted: Optional[bool] = None  # For mute events
+    # Video renegotiation fields
+    video_enabled: Optional[bool] = None  # For video renegotiation events
+    video_source: Optional[str] = None  # "camera" or "screen"
 
     @classmethod
     def create_offer(cls, call_id: str, from_key: str, to_key: str, sdp: str) -> 'CallEvent':
@@ -213,6 +221,42 @@ class CallEvent:
             muted=muted
         )
 
+    @classmethod
+    def create_video_renegotiate(
+        cls,
+        call_id: str,
+        from_key: str,
+        to_key: str,
+        sdp: str,
+        video_enabled: bool,
+        video_source: Optional[str]
+    ) -> 'CallEvent':
+        """
+        Create a video renegotiation event.
+
+        Used when video track is added/removed/switched during a call.
+
+        Args:
+            call_id: Current call ID.
+            from_key: Sender's public key.
+            to_key: Recipient's public key.
+            sdp: New SDP offer for renegotiation.
+            video_enabled: Whether video is enabled after renegotiation.
+            video_source: Video source type ("camera" or "screen"), None if video disabled.
+
+        Returns:
+            CallEvent for video renegotiation.
+        """
+        return cls(
+            type='call_video_renegotiate',
+            call_id=call_id,
+            from_key=from_key,
+            to_key=to_key,
+            sdp=sdp,
+            video_enabled=video_enabled,
+            video_source=video_source
+        )
+
     def to_dict(self) -> dict:
         """Convert to dictionary for serialization."""
         result = {
@@ -227,6 +271,10 @@ class CallEvent:
             result['reason'] = self.reason.value
         if self.muted is not None:
             result['muted'] = self.muted
+        if self.video_enabled is not None:
+            result['video_enabled'] = self.video_enabled
+        if self.video_source is not None:
+            result['video_source'] = self.video_source
         return result
 
     @classmethod
@@ -243,5 +291,7 @@ class CallEvent:
             to_key=data['to_key'],
             sdp=data.get('sdp'),
             reason=reason,
-            muted=data.get('muted')
+            muted=data.get('muted'),
+            video_enabled=data.get('video_enabled'),
+            video_source=data.get('video_source')
         )
