@@ -5,6 +5,7 @@ import { BackupSection } from './BackupSection';
 import { ContactsSection } from './ContactsSection';
 import { AudioSection } from './AudioSection';
 import { VideoSection } from './VideoSection';
+import { NotificationSection } from './NotificationSection';
 
 export function SettingsPanel() {
   return (
@@ -17,6 +18,7 @@ export function SettingsPanel() {
 
       <IdentitySection />
       <NetworkSection />
+      <NotificationSection />
       <AudioSection />
       <VideoSection />
       <BackupSection />

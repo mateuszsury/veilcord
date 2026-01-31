@@ -100,6 +100,18 @@ export interface PyWebViewAPI {
   set_group_call_muted(group_id: string, muted: boolean): Promise<boolean>;
   get_group_call_bandwidth(participant_count: number): Promise<BandwidthEstimate>;
 
+  // Update
+  get_app_version(): Promise<string>;
+  check_for_updates(): Promise<UpdateInfo | null>;
+  download_update(): Promise<UpdateResult>;
+  get_update_status(): Promise<UpdateStatus>;
+
+  // Notification Settings
+  get_notification_settings(): Promise<NotificationSettings>;
+  set_notification_enabled(enabled: boolean): Promise<void>;
+  set_notification_messages(enabled: boolean): Promise<void>;
+  set_notification_calls(enabled: boolean): Promise<void>;
+
   // System
   ping(): Promise<string>;
 }
@@ -273,6 +285,34 @@ export interface BandwidthEstimate {
   participant_count: number;
   warning: boolean;
   message: string | null;
+}
+
+// Update types
+export interface UpdateInfo {
+  version: string;
+  changelog: string;
+  size_bytes?: number;
+  is_patch?: boolean;
+}
+
+export interface UpdateResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
+export interface UpdateStatus {
+  currentVersion: string;
+  updateAvailable: boolean;
+  availableUpdate: UpdateInfo | null;
+  error?: string;
+}
+
+// Notification Settings types
+export interface NotificationSettings {
+  enabled: boolean;
+  messages: boolean;
+  calls: boolean;
 }
 
 // File Transfer types
@@ -471,6 +511,16 @@ export interface GroupMessageEventPayload {
   };
 }
 
+// Update event payloads
+export interface UpdateAvailableEventPayload {
+  version: string;
+}
+
+// Notification event payloads
+export interface OpenChatEventPayload {
+  contactId: number;
+}
+
 // Custom events dispatched by Python backend
 declare global {
   interface Window {
@@ -503,6 +553,8 @@ declare global {
     'discordopus:group_member_removed': CustomEvent<GroupMemberRemovedEventPayload>;
     'discordopus:group_call_state': CustomEvent<GroupCallStateEventPayload>;
     'discordopus:group_message': CustomEvent<GroupMessageEventPayload>;
+    'discordopus:update_available': CustomEvent<UpdateAvailableEventPayload>;
+    'discordopus:open_chat': CustomEvent<OpenChatEventPayload>;
   }
 }
 
