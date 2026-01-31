@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
-**Current Phase:** Phase 7 - Group Features
-**Status:** COMPLETE (8/8 plans)
+**Current Phase:** Phase 8 - Notifications & Polish
+**Status:** IN PROGRESS (1/5 plans)
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 7 - Group UI components complete (07-07). Ready for group chat integration.
+**Current focus:** Phase 8 - Windows notification service foundation complete (08-01). Ready for network integration.
 
 ## Progress
 
 ```
-[==========================================================================] 100% (Phase 7 COMPLETE - 8/8 plans)
+[==========================================================================-] 98% (Phase 8 IN PROGRESS - 1/5 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -27,14 +27,14 @@ See: .planning/PROJECT.md
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
-| 8 | Notifications & Polish | Pending | 0/? | 5 |
+| 8 | Notifications & Polish | IN PROGRESS | 1/5 | 5 |
 
-**Total:** 73/73 requirements completed (100%)
+**Total:** 74/78 requirements completed (95%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 48
+- Plans completed: 50
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -163,6 +163,10 @@ See: .planning/PROJECT.md
 | 2026-01-31 | Mutual exclusion for contact/group selection | setSelectedContact clears group, setSelectedGroup clears contact | Clean UX - only one chat active at a time |
 | 2026-01-31 | Group event listeners at module level | Store registers listeners on load, not in components | Global state updates regardless of mounted components |
 | 2026-01-31 | Admin detection via creator_public_key | Compare group.creator_public_key to identity.publicKey | Simple admin check without role system |
+| 2026-01-31 | InteractableWindowsToaster for notifications | Use InteractableWindowsToaster (not WindowsToaster) for Action Center button callbacks | Callbacks work after notification relegation |
+| 2026-01-31 | Custom AUMID for notifications | "DiscordOpus.SecureMessenger" for consistent notification identification | May need Windows registration for production |
+| 2026-01-31 | Lazy toaster initialization | Avoid startup delays by creating toaster on first notification | Better app startup time |
+| 2026-01-31 | Callback-based notification responses | on_open_chat, on_accept_call, on_reject_call hooks | NetworkService integration pattern |
 
 ### Active TODOs
 
@@ -216,6 +220,11 @@ See: .planning/PROJECT.md
 - [x] Execute 07-06-PLAN.md (Group network integration)
 - [x] Execute 07-07-PLAN.md (Group UI components)
 - [x] Execute 07-08-PLAN.md (Group chat integration - verification deferred) - PHASE 7 COMPLETE
+- [x] Execute 08-01-PLAN.md (Windows notification service)
+- [ ] Execute 08-02-PLAN.md (Notification integration)
+- [ ] Execute 08-03-PLAN.md (Settings UI for notifications)
+- [ ] Execute 08-04-PLAN.md (Auto-updater)
+- [ ] Execute 08-05-PLAN.md (Final polish)
 
 ### Blockers
 
@@ -234,33 +243,33 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 07-08-PLAN.md (Group Chat Integration)
+**Last session:** 2026-01-31 - Completed 08-01-PLAN.md (Windows Notification Service)
 
 **What we just completed:**
-- 07-08: Group messages store, GroupChatPanel, GroupCallControls
-- ChatPanel integration - renders GroupChatPanel when group selected
-- MainPanel syncs selectedGroupId to groups store
-- End-to-end verification deferred by user request
+- 08-01: NotificationService with InteractableWindowsToaster
+- windows-toasts>=1.3.1 dependency added
+- NOTIFICATIONS_ENABLED, NOTIFICATIONS_MESSAGES, NOTIFICATIONS_CALLS settings
+- show_message_notification() and show_call_notification() methods
+- Callback hooks: on_open_chat, on_accept_call, on_reject_call
 
 **What's next:**
-- Plan Phase 8 (Notifications & Polish)
+- Execute 08-02-PLAN.md (Notification integration with NetworkService)
 
 **Open questions:**
 - Phase 7 verification tests should be run before Phase 8 completion
+- AUMID may need Windows registration for production deployment
 
 **Files created this session:**
-- .planning/phases/07-group-features/07-08-SUMMARY.md
-- frontend/src/stores/groupMessages.ts
-- frontend/src/components/groups/GroupChatPanel.tsx
-- frontend/src/components/groups/GroupCallControls.tsx
+- .planning/phases/08-notifications-polish/08-01-SUMMARY.md
+- src/notifications/__init__.py
+- src/notifications/service.py
 
 **Files modified this session:**
-- frontend/src/components/groups/index.ts (+2 exports)
-- frontend/src/components/chat/ChatPanel.tsx (+GroupChatPanel integration)
-- frontend/src/components/layout/MainPanel.tsx (+group ID sync)
+- requirements.txt (+windows-toasts>=1.3.1)
+- src/storage/settings.py (+notification settings)
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 07-08-PLAN.md - PHASE 7 COMPLETE*
+*Last updated: 2026-01-31 after completing 08-01-PLAN.md*
