@@ -2,23 +2,79 @@
 Voice call service for managing call lifecycle.
 
 Provides VoiceCallService class that orchestrates voice calls,
-handling signaling, WebRTC peer connections, and audio tracks.
+handling signaling, WebRTC peer connections, and audio/video tracks.
 """
 
 import asyncio
 import logging
 import time
 import uuid
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Union
 
+import cv2
+import numpy as np
 from aiortc import RTCPeerConnection, RTCConfiguration, RTCSessionDescription, RTCIceServer
 
 from src.voice.models import CallState, CallEndReason, VoiceCall, CallEvent
 from src.voice.audio_track import MicrophoneAudioTrack, AudioPlaybackTrack
+from src.voice.video_track import CameraVideoTrack, ScreenShareTrack
 from src.network.stun import get_ice_servers
 
 
 logger = logging.getLogger(__name__)
+
+
+class RemoteVideoHandler:
+    """
+    Handles incoming video track and stores frames.
+
+    Processes video frames from remote peer and maintains
+    the most recent frame for API access.
+    """
+
+    def __init__(self):
+        """Initialize the remote video handler."""
+        self._last_frame: Optional[np.ndarray] = None
+        self._running = False
+
+    async def handle_track(self, track) -> None:
+        """
+        Process incoming video track.
+
+        Receives frames from the remote peer and stores them
+        for retrieval via the last_frame property.
+
+        Args:
+            track: aiortc video track from remote peer.
+        """
+        self._running = True
+        logger.info("Started remote video handler")
+
+        try:
+            while self._running:
+                try:
+                    frame = await asyncio.wait_for(track.recv(), timeout=1.0)
+                    # Convert VideoFrame to numpy array
+                    img = frame.to_ndarray(format='rgb24')
+                    # Convert RGB to BGR for OpenCV (for JPEG encoding later)
+                    self._last_frame = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+                except asyncio.TimeoutError:
+                    continue  # No frame available, keep waiting
+                except Exception as e:
+                    if self._running:
+                        logger.debug(f"Remote video frame error: {e}")
+                    break
+        finally:
+            logger.info("Remote video handler stopped")
+
+    async def stop(self) -> None:
+        """Stop handling remote video."""
+        self._running = False
+
+    @property
+    def last_frame(self) -> Optional[np.ndarray]:
+        """Get last received frame."""
+        return self._last_frame
 
 
 class VoiceCallService:
@@ -58,6 +114,15 @@ class VoiceCallService:
         # Audio device settings
         self._input_device_id: Optional[int] = None
         self._output_device_id: Optional[int] = None
+
+        # Video track management
+        self._video_track: Optional[Union[CameraVideoTrack, ScreenShareTrack]] = None
+        self._remote_video_handler: Optional[RemoteVideoHandler] = None
+        self._camera_device_id: Optional[int] = None
+        self._screen_monitor_index: int = 1
+
+        # Callback for remote video state changes
+        self.on_remote_video: Optional[Callable[[bool, Any], None]] = None
 
         # Timeouts
         self._ring_timeout = 30.0  # seconds
@@ -128,6 +193,23 @@ class VoiceCallService:
                 # Start task to handle incoming audio
                 asyncio.create_task(self._playback.handle_track(track))
                 logger.info("Started audio playback for remote track")
+            elif track.kind == "video":
+                # Create handler for remote video
+                self._remote_video_handler = RemoteVideoHandler()
+                # Start processing remote video frames
+                asyncio.create_task(self._remote_video_handler.handle_track(track))
+                logger.info("Started remote video handler for incoming track")
+
+                # Update call state
+                if self._current_call:
+                    self._current_call.remote_video = True
+
+                # Notify via callback
+                if self.on_remote_video:
+                    try:
+                        self.on_remote_video(True, track)
+                    except Exception as e:
+                        logger.error(f"Error in remote video callback: {e}")
 
         logger.debug("Created peer connection for voice call")
         return pc
@@ -558,6 +640,22 @@ class VoiceCallService:
                 logger.debug(f"Error stopping playback: {e}")
             self._playback = None
 
+        # Clean up video track
+        if self._video_track:
+            try:
+                await self._video_track.stop()
+            except Exception as e:
+                logger.debug(f"Error stopping video track: {e}")
+            self._video_track = None
+
+        # Clean up remote video handler
+        if self._remote_video_handler:
+            try:
+                await self._remote_video_handler.stop()
+            except Exception as e:
+                logger.debug(f"Error stopping remote video handler: {e}")
+            self._remote_video_handler = None
+
         if self._pc:
             try:
                 await self._pc.close()
@@ -779,3 +877,293 @@ class VoiceCallService:
         """
         self._local_public_key = public_key
         logger.debug("Local public key set")
+
+    # Video track management methods
+
+    async def enable_video(self, video_source: str = "camera") -> bool:
+        """
+        Enable video during an active call.
+
+        Creates a video track (camera or screen share) and adds it to the
+        peer connection, triggering SDP renegotiation.
+
+        Args:
+            video_source: Type of video source - "camera" or "screen".
+
+        Returns:
+            True on success, False if call not active or error.
+        """
+        if not self._current_call:
+            logger.warning("Cannot enable video: no active call")
+            return False
+
+        if self._current_call.state not in (CallState.ACTIVE, CallState.CONNECTING):
+            logger.warning(f"Cannot enable video in state: {self._current_call.state}")
+            return False
+
+        if not self._pc:
+            logger.warning("Cannot enable video: no peer connection")
+            return False
+
+        # If video already enabled with same source, no-op
+        if (self._current_call.video_enabled and
+                self._current_call.video_source == video_source):
+            logger.debug(f"Video already enabled with source: {video_source}")
+            return True
+
+        # If video enabled with different source, disable first
+        if self._current_call.video_enabled:
+            logger.info(f"Switching video source from {self._current_call.video_source} to {video_source}")
+            await self.disable_video()
+
+        try:
+            # Create appropriate video track
+            if video_source == "camera":
+                self._video_track = CameraVideoTrack(
+                    device_id=self._camera_device_id or 0
+                )
+                logger.info(f"Created camera video track (device: {self._camera_device_id})")
+            elif video_source == "screen":
+                self._video_track = ScreenShareTrack(
+                    monitor_index=self._screen_monitor_index
+                )
+                logger.info(f"Created screen share track (monitor: {self._screen_monitor_index})")
+            else:
+                logger.error(f"Unknown video source: {video_source}")
+                return False
+
+            # Add track to peer connection
+            self._pc.addTrack(self._video_track)
+            logger.debug("Added video track to peer connection")
+
+            # Trigger renegotiation
+            offer = await self._pc.createOffer()
+            await self._pc.setLocalDescription(offer)
+
+            # Wait for ICE gathering
+            try:
+                await self._wait_for_ice(timeout=30.0)
+            except asyncio.TimeoutError:
+                logger.error("ICE gathering timeout during video enable")
+                await self._video_track.stop()
+                self._video_track = None
+                return False
+
+            # Send renegotiation event via signaling
+            event = CallEvent.create_video_renegotiate(
+                call_id=self._current_call.call_id,
+                from_key=self._local_public_key or "",
+                to_key=self._current_call.contact_public_key,
+                sdp=self._pc.localDescription.sdp,
+                video_enabled=True,
+                video_source=video_source
+            )
+
+            if self.send_signaling:
+                await self._send_signaling_async(event.to_dict())
+                logger.debug("Sent video renegotiation offer")
+
+            # Update call state
+            self._current_call.video_enabled = True
+            self._current_call.video_source = video_source
+
+            logger.info(f"Video enabled: {video_source}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to enable video: {e}")
+            if self._video_track:
+                try:
+                    await self._video_track.stop()
+                except Exception:
+                    pass
+                self._video_track = None
+            return False
+
+    async def disable_video(self) -> bool:
+        """
+        Disable video during an active call.
+
+        Stops the video track and triggers SDP renegotiation.
+
+        Returns:
+            True on success, False if video not enabled or error.
+        """
+        if not self._current_call or not self._current_call.video_enabled:
+            logger.debug("Video not enabled, nothing to disable")
+            return True
+
+        if not self._pc:
+            logger.warning("Cannot disable video: no peer connection")
+            return False
+
+        try:
+            # Stop current video track
+            if self._video_track:
+                await self._video_track.stop()
+                self._video_track = None
+                logger.debug("Stopped video track")
+
+            # Trigger renegotiation
+            # Note: aiortc doesn't support removeTrack, but stopping the track
+            # should be sufficient. We create a new offer to update the SDP.
+            offer = await self._pc.createOffer()
+            await self._pc.setLocalDescription(offer)
+
+            # Wait for ICE gathering
+            try:
+                await self._wait_for_ice(timeout=30.0)
+            except asyncio.TimeoutError:
+                logger.error("ICE gathering timeout during video disable")
+                # Continue anyway - video is already stopped locally
+
+            # Send renegotiation event via signaling
+            event = CallEvent.create_video_renegotiate(
+                call_id=self._current_call.call_id,
+                from_key=self._local_public_key or "",
+                to_key=self._current_call.contact_public_key,
+                sdp=self._pc.localDescription.sdp,
+                video_enabled=False,
+                video_source=None
+            )
+
+            if self.send_signaling:
+                await self._send_signaling_async(event.to_dict())
+                logger.debug("Sent video disable renegotiation")
+
+            # Update call state
+            self._current_call.video_enabled = False
+            self._current_call.video_source = None
+
+            logger.info("Video disabled")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to disable video: {e}")
+            return False
+
+    def set_camera_device(self, device_id: int) -> None:
+        """
+        Set the camera device to use for video calls.
+
+        Should be called before enabling video.
+
+        Args:
+            device_id: Camera device ID from device enumeration.
+        """
+        self._camera_device_id = device_id
+        logger.debug(f"Camera device set: {device_id}")
+
+    def set_screen_monitor(self, monitor_index: int) -> None:
+        """
+        Set the monitor to use for screen sharing.
+
+        Should be called before enabling screen share.
+
+        Args:
+            monitor_index: Monitor index (1=primary, 2+=additional).
+        """
+        self._screen_monitor_index = monitor_index
+        logger.debug(f"Screen monitor set: {monitor_index}")
+
+    def get_local_video_frame(self) -> Optional[np.ndarray]:
+        """
+        Get the last captured local video frame.
+
+        Returns:
+            BGR numpy array of the last frame, or None if no video active.
+        """
+        if self._video_track and hasattr(self._video_track, 'last_frame'):
+            frame = self._video_track.last_frame
+            if frame is not None:
+                # Convert from RGB (video track format) to BGR (for JPEG encoding)
+                return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        return None
+
+    def get_remote_video_frame(self) -> Optional[np.ndarray]:
+        """
+        Get the last received remote video frame.
+
+        Returns:
+            BGR numpy array of the last frame, or None if no remote video.
+        """
+        if self._remote_video_handler:
+            return self._remote_video_handler.last_frame
+        return None
+
+    async def handle_video_renegotiate(self, event: CallEvent) -> None:
+        """
+        Handle a video renegotiation event from remote peer.
+
+        Called when remote peer enables/disables/switches video.
+
+        Args:
+            event: Video renegotiation event from signaling.
+        """
+        if not self._current_call:
+            logger.warning("No current call for video renegotiate")
+            return
+
+        if self._current_call.call_id != event.call_id:
+            logger.warning(f"Call ID mismatch: {self._current_call.call_id} vs {event.call_id}")
+            return
+
+        if not self._pc:
+            logger.warning("No peer connection for video renegotiate")
+            return
+
+        logger.info(f"Handling video renegotiation: video_enabled={event.video_enabled}, source={event.video_source}")
+
+        try:
+            # Set remote description from the offer
+            offer = RTCSessionDescription(
+                sdp=event.sdp,
+                type="offer"
+            )
+            await self._pc.setRemoteDescription(offer)
+            logger.debug("Set remote video renegotiation offer")
+
+            # Create and send answer
+            answer = await self._pc.createAnswer()
+            await self._pc.setLocalDescription(answer)
+
+            # Wait for ICE gathering
+            try:
+                await self._wait_for_ice(timeout=30.0)
+            except asyncio.TimeoutError:
+                logger.error("ICE gathering timeout during video renegotiate answer")
+                return
+
+            # Send answer back via signaling
+            # Use the same event type but with our SDP as the answer
+            answer_event = CallEvent(
+                type='call_video_renegotiate',
+                call_id=self._current_call.call_id,
+                from_key=self._local_public_key or "",
+                to_key=self._current_call.contact_public_key,
+                sdp=self._pc.localDescription.sdp,
+                video_enabled=event.video_enabled,
+                video_source=event.video_source
+            )
+
+            if self.send_signaling:
+                await self._send_signaling_async(answer_event.to_dict())
+                logger.debug("Sent video renegotiation answer")
+
+            # Log video state change
+            if event.video_enabled:
+                logger.info(f"Remote enabled video: {event.video_source}")
+            else:
+                logger.info("Remote disabled video")
+                # Clear remote video state
+                if self._current_call:
+                    self._current_call.remote_video = False
+                # Notify via callback
+                if self.on_remote_video:
+                    try:
+                        self.on_remote_video(False, None)
+                    except Exception as e:
+                        logger.error(f"Error in remote video callback: {e}")
+
+        except Exception as e:
+            logger.error(f"Failed to handle video renegotiate: {e}")
