@@ -73,6 +73,8 @@ export interface PyWebViewAPI {
   get_video_state(): Promise<VideoState>;
   get_cameras(): Promise<CamerasResult>;
   get_monitors(): Promise<MonitorsResult>;
+  get_local_video_frame(): Promise<VideoFrameResult>;
+  get_remote_video_frame(): Promise<VideoFrameResult>;
 
   // Voice Messages
   start_voice_recording(): Promise<VoiceRecordingResult>;
@@ -195,6 +197,11 @@ export interface CamerasResult {
 
 export interface MonitorsResult {
   monitors: Monitor[];
+  error?: string;
+}
+
+export interface VideoFrameResult {
+  frame?: string | null;  // Base64-encoded JPEG
   error?: string;
 }
 

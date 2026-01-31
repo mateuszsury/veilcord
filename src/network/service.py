@@ -1216,6 +1216,55 @@ class NetworkService:
         """
         return get_available_monitors()
 
+    def get_local_video_frame(self) -> Optional[str]:
+        """
+        Get current local video frame as base64 JPEG.
+
+        Returns base64-encoded JPEG for efficient transmission to frontend.
+        Returns None if no local video active.
+        """
+        if not self._voice_call or not self._voice_call._video_track:
+            return None
+
+        try:
+            # Calls VoiceCallService.get_local_video_frame() (implemented in 06-02)
+            frame = self._voice_call.get_local_video_frame()
+            if frame is None:
+                return None
+
+            # Convert to JPEG base64
+            import cv2
+            import base64
+            _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
+            return base64.b64encode(buffer).decode('utf-8')
+        except Exception as e:
+            logger.debug(f"Error getting local video frame: {e}")
+            return None
+
+    def get_remote_video_frame(self) -> Optional[str]:
+        """
+        Get current remote video frame as base64 JPEG.
+
+        Returns base64-encoded JPEG for display in frontend.
+        Returns None if no remote video active.
+        """
+        if not self._voice_call:
+            return None
+
+        try:
+            # Calls VoiceCallService.get_remote_video_frame() (implemented in 06-02)
+            frame = self._voice_call.get_remote_video_frame()
+            if frame is None:
+                return None
+
+            import cv2
+            import base64
+            _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
+            return base64.b64encode(buffer).decode('utf-8')
+        except Exception as e:
+            logger.debug(f"Error getting remote video frame: {e}")
+            return None
+
 
 # ========== Module-level singleton ==========
 

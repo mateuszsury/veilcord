@@ -945,6 +945,34 @@ class API:
         except Exception as e:
             return {"monitors": [], "error": str(e)}
 
+    # ========== Video Frame Methods ==========
+
+    def get_local_video_frame(self) -> Dict:
+        """Get current local video frame as base64."""
+        try:
+            service = get_network_service()
+            frame = service.get_local_video_frame()
+            if frame:
+                return {"frame": frame}
+            return {"frame": None}
+        except RuntimeError:
+            return {"error": "Network not initialized"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_remote_video_frame(self) -> Dict:
+        """Get current remote video frame as base64."""
+        try:
+            service = get_network_service()
+            frame = service.get_remote_video_frame()
+            if frame:
+                return {"frame": frame}
+            return {"frame": None}
+        except RuntimeError:
+            return {"error": "Network not initialized"}
+        except Exception as e:
+            return {"error": str(e)}
+
     # ========== System Methods ==========
 
     def ping(self) -> str:
