@@ -1167,3 +1167,106 @@ class VoiceCallService:
 
         except Exception as e:
             logger.error(f"Failed to handle video renegotiate: {e}")
+
+    async def handle_video_renegotiate_offer(self, event: CallEvent) -> bool:
+        """
+        Handle a video renegotiation offer from remote peer.
+
+        Remote party is adding/changing/removing video.
+
+        Args:
+            event: CallEvent with video renegotiation offer
+
+        Returns:
+            True on success, False on failure
+        """
+        if not self._current_call or not self._pc:
+            logger.warning("Cannot handle video offer: no call/connection")
+            return False
+
+        logger.info(f"Handling video renegotiation offer: video_enabled={event.video_enabled}")
+
+        try:
+            # Set remote description from the offer
+            offer = RTCSessionDescription(
+                sdp=event.sdp,
+                type="offer"
+            )
+            await self._pc.setRemoteDescription(offer)
+            logger.debug("Set remote video renegotiation offer")
+
+            # Create and send answer
+            answer = await self._pc.createAnswer()
+            await self._pc.setLocalDescription(answer)
+
+            # Wait for ICE gathering
+            try:
+                await self._wait_for_ice(timeout=30.0)
+            except asyncio.TimeoutError:
+                logger.error("ICE gathering timeout during video renegotiate answer")
+                return False
+
+            # Send answer back via signaling
+            answer_msg = {
+                'type': 'call_video_renegotiate',
+                'call_id': self._current_call.call_id,
+                'from': self._local_public_key or "",
+                'to': self._current_call.contact_public_key,
+                'sdp': self._pc.localDescription.sdp,
+                'sdp_type': 'answer',
+                'video_enabled': event.video_enabled,
+                'video_source': event.video_source
+            }
+
+            if self.send_signaling:
+                await self._send_signaling_async(answer_msg)
+                logger.debug("Sent video renegotiation answer")
+
+            # Update remote video state
+            self._current_call.remote_video = event.video_enabled or False
+
+            # Notify via callback
+            if self.on_remote_video:
+                try:
+                    self.on_remote_video(event.video_enabled or False, None)
+                except Exception as e:
+                    logger.error(f"Error in remote video callback: {e}")
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to handle video renegotiation offer: {e}")
+            return False
+
+    async def handle_video_renegotiate_answer(self, event: CallEvent) -> bool:
+        """
+        Handle a video renegotiation answer from remote peer.
+
+        Response to our video enable/disable request.
+
+        Args:
+            event: CallEvent with video renegotiation answer
+
+        Returns:
+            True on success, False on failure
+        """
+        if not self._current_call or not self._pc:
+            logger.warning("Cannot handle video answer: no call/connection")
+            return False
+
+        logger.info("Handling video renegotiation answer")
+
+        try:
+            # Set remote description (the answer)
+            answer = RTCSessionDescription(
+                sdp=event.sdp,
+                type="answer"
+            )
+            await self._pc.setRemoteDescription(answer)
+            logger.debug("Set remote video renegotiation answer")
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to handle video renegotiation answer: {e}")
+            return False

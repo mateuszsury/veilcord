@@ -28,6 +28,7 @@ from src.file_transfer.models import TransferProgress
 from src.storage.files import FileMetadata
 from src.voice.call_service import VoiceCallService
 from src.voice.models import CallState, CallEvent, CallEndReason
+from src.voice import get_available_cameras, get_available_monitors
 
 
 logger = logging.getLogger(__name__)
@@ -149,6 +150,7 @@ class NetworkService:
             # Create voice call service with callbacks
             self._voice_call = VoiceCallService()
             self._voice_call.on_state_change = self._on_call_state_change
+            self._voice_call.on_remote_video = self._on_remote_video
             self._voice_call.send_signaling = lambda msg: asyncio.create_task(
                 self._async_send(msg)
             )
@@ -376,6 +378,40 @@ class NetworkService:
                     'muted': muted
                 })
 
+        elif msg_type == 'call_video_renegotiate':
+            # Video renegotiation from remote party
+            call_id = message.get('call_id')
+            sdp = message.get('sdp')
+            sdp_type = message.get('sdp_type', 'offer')  # 'offer' or 'answer'
+            video_enabled = message.get('video_enabled', False)
+            video_source = message.get('video_source')
+            from_key = message.get('from')
+
+            if self._voice_call and call_id and sdp:
+                event = CallEvent(
+                    type='call_video_renegotiate',
+                    call_id=call_id,
+                    from_key=from_key or '',
+                    to_key=message.get('to', ''),
+                    sdp=sdp,
+                    video_enabled=video_enabled,
+                    video_source=video_source
+                )
+
+                if sdp_type == 'offer':
+                    # Remote is adding/changing video - handle offer
+                    await self._voice_call.handle_video_renegotiate_offer(event)
+                else:
+                    # Response to our video change - handle answer
+                    await self._voice_call.handle_video_renegotiate_answer(event)
+
+                # Notify frontend of video state change
+                self._notify_frontend('discordopus:video_state', {
+                    'videoEnabled': self._voice_call.current_call.video_enabled if self._voice_call.current_call else False,
+                    'videoSource': self._voice_call.current_call.video_source if self._voice_call.current_call else None,
+                    'remoteVideo': self._voice_call.current_call.remote_video if self._voice_call.current_call else False
+                })
+
         else:
             logger.debug(f"Unhandled message type: {msg_type}")
 
@@ -462,6 +498,25 @@ class NetworkService:
         self._notify_frontend('discordopus:call_state', {
             'contactId': contact_id,
             'state': state.value
+        })
+
+    def _on_remote_video(self, has_video: bool, track=None) -> None:
+        """
+        Handle remote video state change.
+
+        Called by VoiceCallService when remote party enables/disables video.
+
+        Args:
+            has_video: Whether remote now has video enabled
+            track: The video track (for frame access), or None if disabled
+        """
+        logger.debug(f"Remote video changed: has_video={has_video}")
+        # Store track reference for potential frame access
+        if self._voice_call and self._voice_call.current_call:
+            self._voice_call.current_call.remote_video = has_video
+
+        self._notify_frontend('discordopus:remote_video_changed', {
+            'hasVideo': has_video
         })
 
     def _notify_frontend(self, event_type: str, detail: dict) -> None:
@@ -1030,6 +1085,136 @@ class NetworkService:
             'muted': call.muted,
             'duration': self._voice_call.get_call_duration()
         }
+
+    # ========== Video Call Methods ==========
+
+    def enable_video(self, source: str = "camera") -> bool:
+        """
+        Enable video (camera or screen) during active call.
+
+        Args:
+            source: "camera" or "screen"
+
+        Returns:
+            True on success, False on failure
+        """
+        if not self._voice_call:
+            return False
+        if not self._loop:
+            return False
+
+        try:
+            result = asyncio.run_coroutine_threadsafe(
+                self._voice_call.enable_video(source),
+                self._loop
+            ).result(timeout=10.0)
+
+            # Notify frontend of video state change
+            if result and self._voice_call.current_call:
+                self._notify_frontend('discordopus:video_state', {
+                    'videoEnabled': self._voice_call.current_call.video_enabled,
+                    'videoSource': self._voice_call.current_call.video_source,
+                    'remoteVideo': self._voice_call.current_call.remote_video
+                })
+
+            return result
+        except Exception as e:
+            logger.error(f"Failed to enable video: {e}")
+            return False
+
+    def disable_video(self) -> bool:
+        """
+        Disable video during call.
+
+        Returns:
+            True on success, False on failure
+        """
+        if not self._voice_call:
+            return False
+        if not self._loop:
+            return False
+
+        try:
+            result = asyncio.run_coroutine_threadsafe(
+                self._voice_call.disable_video(),
+                self._loop
+            ).result(timeout=10.0)
+
+            # Notify frontend of video state change
+            if result and self._voice_call.current_call:
+                self._notify_frontend('discordopus:video_state', {
+                    'videoEnabled': self._voice_call.current_call.video_enabled,
+                    'videoSource': self._voice_call.current_call.video_source,
+                    'remoteVideo': self._voice_call.current_call.remote_video
+                })
+
+            return result
+        except Exception as e:
+            logger.error(f"Failed to disable video: {e}")
+            return False
+
+    def set_camera_device(self, device_id: int) -> None:
+        """
+        Set camera device for video calls.
+
+        Args:
+            device_id: Camera device ID from get_available_cameras()
+        """
+        if self._voice_call:
+            self._voice_call.set_camera_device(device_id)
+
+    def set_screen_monitor(self, monitor_index: int) -> None:
+        """
+        Set monitor for screen sharing.
+
+        Args:
+            monitor_index: Monitor index from get_available_monitors()
+        """
+        if self._voice_call:
+            self._voice_call.set_screen_monitor(monitor_index)
+
+    def get_video_state(self) -> Optional[Dict]:
+        """
+        Get current video state.
+
+        Returns:
+            Video state dict or None if no call
+        """
+        if not self._voice_call or not self._voice_call.current_call:
+            return None
+        call = self._voice_call.current_call
+        return {
+            'videoEnabled': call.video_enabled,
+            'videoSource': call.video_source,
+            'remoteVideo': call.remote_video
+        }
+
+    def list_cameras(self) -> List[Dict]:
+        """
+        List available cameras.
+
+        Returns:
+            List of camera info dicts with keys:
+            - index: Camera device ID
+            - name: Human-readable name
+            - backend: OpenCV backend ID
+            - path: Device path
+        """
+        return get_available_cameras()
+
+    def list_monitors(self) -> List[Dict]:
+        """
+        List available monitors for screen sharing.
+
+        Returns:
+            List of monitor info dicts with keys:
+            - index: Monitor index (1-based, 0 = all screens combined)
+            - width: Width in pixels
+            - height: Height in pixels
+            - left: Left position
+            - top: Top position
+        """
+        return get_available_monitors()
 
 
 # ========== Module-level singleton ==========
