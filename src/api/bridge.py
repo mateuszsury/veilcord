@@ -820,6 +820,131 @@ class API:
         if service._voice_call:
             service._voice_call.set_audio_devices(input_id, output_id)
 
+    # ========== Video Call Methods ==========
+
+    def enable_video(self, source: str = "camera") -> Dict:
+        """
+        Enable video during call.
+
+        Args:
+            source: "camera" or "screen"
+
+        Returns:
+            {"success": True} or {"error": str}
+        """
+        try:
+            service = get_network_service()
+            success = service.enable_video(source)
+            if success:
+                return {"success": True, "source": source}
+            return {"error": "Failed to enable video"}
+        except RuntimeError:
+            return {"error": "Network not initialized"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def disable_video(self) -> Dict:
+        """
+        Disable video during call.
+
+        Returns:
+            {"success": True} or {"error": str}
+        """
+        try:
+            service = get_network_service()
+            success = service.disable_video()
+            if success:
+                return {"success": True}
+            return {"error": "Failed to disable video"}
+        except RuntimeError:
+            return {"error": "Network not initialized"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def set_camera(self, device_id: int) -> Dict:
+        """
+        Set camera device for video calls.
+
+        Args:
+            device_id: Camera device ID from get_cameras()
+
+        Returns:
+            {"success": True} or {"error": str}
+        """
+        try:
+            service = get_network_service()
+            service.set_camera_device(device_id)
+            return {"success": True}
+        except RuntimeError:
+            return {"error": "Network not initialized"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def set_screen_monitor(self, monitor_index: int) -> Dict:
+        """
+        Set monitor for screen sharing.
+
+        Args:
+            monitor_index: Monitor index from get_monitors()
+
+        Returns:
+            {"success": True} or {"error": str}
+        """
+        try:
+            service = get_network_service()
+            service.set_screen_monitor(monitor_index)
+            return {"success": True}
+        except RuntimeError:
+            return {"error": "Network not initialized"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_video_state(self) -> Dict:
+        """
+        Get current video state.
+
+        Returns:
+            Video state dict with videoEnabled, videoSource, remoteVideo
+        """
+        try:
+            service = get_network_service()
+            state = service.get_video_state()
+            if state:
+                return state
+            return {"videoEnabled": False, "videoSource": None, "remoteVideo": False}
+        except RuntimeError:
+            return {"videoEnabled": False, "videoSource": None, "remoteVideo": False}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_cameras(self) -> Dict:
+        """
+        List available cameras.
+
+        Returns:
+            {"cameras": [...]} with list of camera info dicts
+        """
+        try:
+            from src.voice import get_available_cameras
+            cameras = get_available_cameras()
+            return {"cameras": cameras}
+        except Exception as e:
+            return {"cameras": [], "error": str(e)}
+
+    def get_monitors(self) -> Dict:
+        """
+        List available monitors for screen sharing.
+
+        Returns:
+            {"monitors": [...]} with list of monitor info dicts
+        """
+        try:
+            from src.voice import get_available_monitors
+            monitors = get_available_monitors()
+            return {"monitors": monitors}
+        except Exception as e:
+            return {"monitors": [], "error": str(e)}
+
     # ========== System Methods ==========
 
     def ping(self) -> str:
