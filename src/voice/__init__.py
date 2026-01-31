@@ -1,8 +1,8 @@
 """
-Voice calling package.
+Voice and video calling package.
 
-Provides audio device management and voice call data models
-for the DiscordOpus P2P voice calling system.
+Provides audio/video device management, voice call data models,
+and video tracks for the DiscordOpus P2P communication system.
 """
 
 from .device_manager import (
@@ -11,7 +11,11 @@ from .device_manager import (
     get_output_devices,
     get_default_input,
     get_default_output,
-    test_device
+    test_device,
+    # Video device functions
+    get_available_cameras,
+    get_available_monitors,
+    test_camera
 )
 
 from .models import (
@@ -27,6 +31,11 @@ from .audio_track import (
     AudioPlaybackTrack
 )
 
+from .video_track import (
+    CameraVideoTrack,
+    ScreenShareTrack
+)
+
 from .voice_message import (
     VoiceMessageRecorder,
     VoiceMessagePlayer
@@ -35,13 +44,17 @@ from .voice_message import (
 from .call_service import VoiceCallService
 
 __all__ = [
-    # Device management
+    # Device management - audio
     'AudioDeviceManager',
     'get_input_devices',
     'get_output_devices',
     'get_default_input',
     'get_default_output',
     'test_device',
+    # Device management - video
+    'get_available_cameras',
+    'get_available_monitors',
+    'test_camera',
     # Models
     'CallState',
     'CallEndReason',
@@ -51,6 +64,9 @@ __all__ = [
     # Audio tracks
     'MicrophoneAudioTrack',
     'AudioPlaybackTrack',
+    # Video tracks
+    'CameraVideoTrack',
+    'ScreenShareTrack',
     # Voice messages
     'VoiceMessageRecorder',
     'VoiceMessagePlayer',
