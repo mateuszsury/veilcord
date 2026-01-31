@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import type { ContactResponse, UserStatus } from '@/lib/pywebview';
+import type { ContactResponse, UserStatus, OpenChatEventPayload } from '@/lib/pywebview';
+import { useUIStore } from './ui';
 
 interface ContactsState {
   contacts: ContactResponse[];
@@ -55,5 +56,12 @@ export const useContactsStore = create<ContactsState>((set) => ({
 if (typeof window !== 'undefined') {
   window.addEventListener('discordopus:presence', ((e: CustomEvent) => {
     useContactsStore.getState().updateContactStatus(e.detail.publicKey, e.detail.status);
+  }) as EventListener);
+
+  // Listen for notification open chat events
+  window.addEventListener('discordopus:open_chat', ((event: CustomEvent<OpenChatEventPayload>) => {
+    const { contactId } = event.detail;
+    console.log('Notification: opening chat for contact', contactId);
+    useUIStore.getState().setSelectedContact(contactId);
   }) as EventListener);
 }
