@@ -973,6 +973,291 @@ class API:
         except Exception as e:
             return {"error": str(e)}
 
+    # ========== Group Methods ==========
+
+    def create_group(self, name: str) -> Dict[str, Any]:
+        """
+        Create a new group.
+
+        Args:
+            name: Group display name
+
+        Returns:
+            Created group object
+        """
+        try:
+            service = get_network_service()
+            return service.create_group(name)
+        except RuntimeError:
+            return {"error": "Network not initialized"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_groups(self) -> List[Dict[str, Any]]:
+        """
+        Get all groups the user is in.
+
+        Returns:
+            List of group objects
+        """
+        try:
+            service = get_network_service()
+            return service.get_groups()
+        except RuntimeError:
+            return []
+        except Exception as e:
+            return []
+
+    def get_group(self, group_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get a specific group by ID.
+
+        Args:
+            group_id: Group UUID
+
+        Returns:
+            Group object or None
+        """
+        try:
+            service = get_network_service()
+            return service.get_group(group_id)
+        except RuntimeError:
+            return None
+        except Exception as e:
+            return None
+
+    def generate_group_invite(self, group_id: str) -> Dict[str, Any]:
+        """
+        Generate invite code for a group.
+
+        Args:
+            group_id: Group UUID
+
+        Returns:
+            Dict with invite URL or error
+        """
+        try:
+            service = get_network_service()
+            invite = service.generate_invite(group_id)
+            return {"invite": invite}
+        except RuntimeError:
+            return {"error": "Network not initialized"}
+        except PermissionError as e:
+            return {"error": str(e)}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def join_group(self, invite_code: str) -> Dict[str, Any]:
+        """
+        Join a group via invite code.
+
+        Args:
+            invite_code: Invite URL or raw code
+
+        Returns:
+            Joined group object or error
+        """
+        try:
+            service = get_network_service()
+            return service.join_group(invite_code)
+        except RuntimeError:
+            return {"error": "Network not initialized"}
+        except ValueError as e:
+            return {"error": str(e)}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def leave_group(self, group_id: str) -> Dict[str, Any]:
+        """
+        Leave a group.
+
+        Args:
+            group_id: Group UUID
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.leave_group(group_id)
+            return {"success": success}
+        except RuntimeError:
+            return {"success": False, "error": "Network not initialized"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_group_members(self, group_id: str) -> List[Dict[str, Any]]:
+        """
+        Get members of a group.
+
+        Args:
+            group_id: Group UUID
+
+        Returns:
+            List of member objects
+        """
+        try:
+            service = get_network_service()
+            return service.get_group_members(group_id)
+        except RuntimeError:
+            return []
+        except Exception as e:
+            return []
+
+    def remove_group_member(self, group_id: str, public_key: str) -> Dict[str, Any]:
+        """
+        Remove a member from a group (admin only).
+
+        Args:
+            group_id: Group UUID
+            public_key: Member's public key to remove
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.remove_group_member(group_id, public_key)
+            return {"success": success}
+        except RuntimeError:
+            return {"success": False, "error": "Network not initialized"}
+        except PermissionError as e:
+            return {"success": False, "error": str(e)}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    # ========== Group Messaging Methods ==========
+
+    def send_group_message(self, group_id: str, message_id: str, text: str) -> Dict[str, Any]:
+        """
+        Send a message to a group.
+
+        Args:
+            group_id: Group UUID
+            message_id: Unique message ID
+            text: Message text
+
+        Returns:
+            Sent message object or error
+        """
+        try:
+            import asyncio
+            service = get_network_service()
+            if not service._loop:
+                return {"error": "Network not initialized"}
+            future = asyncio.run_coroutine_threadsafe(
+                service.send_group_message(group_id, message_id, text),
+                service._loop
+            )
+            return future.result(timeout=10.0)
+        except RuntimeError as e:
+            return {"error": str(e)}
+        except Exception as e:
+            return {"error": str(e)}
+
+    # ========== Group Call Methods ==========
+
+    def start_group_call(self, group_id: str, call_id: str) -> Dict[str, Any]:
+        """
+        Start a group voice call.
+
+        Args:
+            group_id: Group UUID
+            call_id: Unique call ID
+
+        Returns:
+            Call status object
+        """
+        try:
+            service = get_network_service()
+            return service.start_group_call(group_id, call_id)
+        except RuntimeError as e:
+            return {"error": str(e)}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def join_group_call(self, group_id: str, call_id: str) -> Dict[str, Any]:
+        """
+        Join an existing group call.
+
+        Args:
+            group_id: Group UUID
+            call_id: Call ID to join
+
+        Returns:
+            Call status object
+        """
+        try:
+            service = get_network_service()
+            return service.join_group_call(group_id, call_id)
+        except RuntimeError as e:
+            return {"error": str(e)}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def leave_group_call(self, group_id: str) -> Dict[str, Any]:
+        """
+        Leave a group call.
+
+        Args:
+            group_id: Group UUID
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.leave_group_call(group_id)
+            return {"success": success}
+        except RuntimeError:
+            return {"success": False, "error": "Network not initialized"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def set_group_call_muted(self, group_id: str, muted: bool) -> Dict[str, Any]:
+        """
+        Mute/unmute microphone in group call.
+
+        Args:
+            group_id: Group UUID
+            muted: True to mute
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.set_group_call_muted(group_id, muted)
+            return {"success": success}
+        except RuntimeError:
+            return {"success": False, "error": "Network not initialized"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_group_call_bandwidth(self, participant_count: int) -> Dict[str, Any]:
+        """
+        Estimate bandwidth requirements for group call.
+
+        Args:
+            participant_count: Number of participants
+
+        Returns:
+            Bandwidth estimate with warning if needed
+        """
+        try:
+            from src.groups import GroupCallMesh
+            estimate = GroupCallMesh.estimate_bandwidth(participant_count)
+            return {
+                "upload_kbps": estimate.upload_kbps,
+                "download_kbps": estimate.download_kbps,
+                "total_kbps": estimate.total_kbps,
+                "participant_count": estimate.participant_count,
+                "warning": estimate.warning,
+                "message": estimate.message
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
     # ========== System Methods ==========
 
     def ping(self) -> str:
