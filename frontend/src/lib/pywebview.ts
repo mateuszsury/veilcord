@@ -84,6 +84,22 @@ export interface PyWebViewAPI {
   get_audio_devices(): Promise<{ inputs: AudioDevice[]; outputs: AudioDevice[]; error?: string }>;
   set_audio_devices(input_id: number | null, output_id: number | null): Promise<void>;
 
+  // Groups
+  create_group(name: string): Promise<Group>;
+  get_groups(): Promise<Group[]>;
+  get_group(group_id: string): Promise<Group | null>;
+  generate_group_invite(group_id: string): Promise<string>;
+  join_group(invite_code: string): Promise<Group>;
+  leave_group(group_id: string): Promise<boolean>;
+  get_group_members(group_id: string): Promise<GroupMember[]>;
+  remove_group_member(group_id: string, public_key: string): Promise<boolean>;
+  send_group_message(group_id: string, message_id: string, text: string): Promise<GroupMessage>;
+  start_group_call(group_id: string, call_id: string): Promise<GroupCallStatus>;
+  join_group_call(group_id: string, call_id: string): Promise<GroupCallStatus>;
+  leave_group_call(group_id: string): Promise<boolean>;
+  set_group_call_muted(group_id: string, muted: boolean): Promise<boolean>;
+  get_group_call_bandwidth(participant_count: number): Promise<BandwidthEstimate>;
+
   // System
   ping(): Promise<string>;
 }
@@ -211,6 +227,52 @@ export interface VoiceRecordingResult {
   duration?: number;
   path?: string;
   error?: string;
+}
+
+// Group types
+export interface Group {
+  id: string;
+  name: string;
+  creator_public_key: string;
+  created_at: number;
+  updated_at: number;
+  invite_code: string | null;
+  is_active: boolean;
+}
+
+export interface GroupMember {
+  id: number | null;
+  group_id: string;
+  public_key: string;
+  display_name: string;
+  joined_at: number;
+  is_admin: boolean;
+}
+
+export interface GroupMessage {
+  type: string;
+  group_id: string;
+  message_id: string;
+  sender_public_key: string;
+  timestamp: number;
+  message_index: number;
+  ciphertext: string;
+  signature: string;
+}
+
+export interface GroupCallStatus {
+  group_id: string;
+  call_id: string;
+  status: string;
+}
+
+export interface BandwidthEstimate {
+  upload_kbps: number;
+  download_kbps: number;
+  total_kbps: number;
+  participant_count: number;
+  warning: boolean;
+  message: string | null;
 }
 
 // File Transfer types
@@ -371,6 +433,44 @@ export interface RemoteVideoEventPayload {
   hasVideo: boolean;
 }
 
+// Group event payloads
+export interface GroupCreatedEventPayload {
+  group: Group;
+}
+
+export interface GroupJoinedEventPayload {
+  group: Group;
+}
+
+export interface GroupLeftEventPayload {
+  group_id: string;
+}
+
+export interface GroupMemberAddedEventPayload {
+  group_id: string;
+  member: GroupMember;
+}
+
+export interface GroupMemberRemovedEventPayload {
+  group_id: string;
+  public_key: string;
+}
+
+export interface GroupCallStateEventPayload {
+  group_id: string;
+  state: string;
+}
+
+export interface GroupMessageEventPayload {
+  group_id: string;
+  message: {
+    message_id: string;
+    sender_public_key: string;
+    body: string;
+    timestamp: number;
+  };
+}
+
 // Custom events dispatched by Python backend
 declare global {
   interface Window {
@@ -396,6 +496,13 @@ declare global {
     'discordopus:remote_mute': CustomEvent<RemoteMuteEventPayload>;
     'discordopus:video_state': CustomEvent<VideoStateEventPayload>;
     'discordopus:remote_video_changed': CustomEvent<RemoteVideoEventPayload>;
+    'discordopus:group_created': CustomEvent<GroupCreatedEventPayload>;
+    'discordopus:group_joined': CustomEvent<GroupJoinedEventPayload>;
+    'discordopus:group_left': CustomEvent<GroupLeftEventPayload>;
+    'discordopus:group_member_added': CustomEvent<GroupMemberAddedEventPayload>;
+    'discordopus:group_member_removed': CustomEvent<GroupMemberRemovedEventPayload>;
+    'discordopus:group_call_state': CustomEvent<GroupCallStateEventPayload>;
+    'discordopus:group_message': CustomEvent<GroupMessageEventPayload>;
   }
 }
 
