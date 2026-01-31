@@ -8,6 +8,12 @@ from src.groups.invite import (
     validate_invite_code,
     InviteData
 )
+from src.groups.group_messaging import (
+    GroupMessagingService,
+    GroupMessagingCallbacks,
+    GroupMessage,
+    SenderKeyDistribution
+)
 
 __all__ = [
     # Models
@@ -26,4 +32,9 @@ __all__ = [
     "parse_invite_code",
     "validate_invite_code",
     "InviteData",
+    # Messaging
+    "GroupMessagingService",
+    "GroupMessagingCallbacks",
+    "GroupMessage",
+    "SenderKeyDistribution",
 ]
