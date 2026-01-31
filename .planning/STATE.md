@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 7 - Group Features
-**Status:** In Progress (6/8 plans)
+**Status:** In Progress (7/8 plans)
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 7 - Group network integration complete (07-06). Ready for group UI implementation.
+**Current focus:** Phase 7 - Group UI components complete (07-07). Ready for group chat integration.
 
 ## Progress
 
 ```
-[==========================================================================] 97% (Phase 7 IN PROGRESS - 6/8 plans)
+[==========================================================================] 98% (Phase 7 IN PROGRESS - 7/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
-| 7 | Group Features | In Progress | 6/8 | 8 |
+| 7 | Group Features | In Progress | 7/8 | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
 **Total:** 72/73 requirements completed (99%)
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 47
+- Plans completed: 48
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -160,6 +160,9 @@ See: .planning/PROJECT.md
 | 2026-01-31 | 50 kbps per audio stream | Opus codec at standard quality | Consistent with 1:1 calls |
 | 2026-01-31 | Callback-based broadcast for groups | GroupMessagingCallbacks.broadcast_group_message | Consistent with messaging/file transfer patterns |
 | 2026-01-31 | Key rotation on member removal | Regenerate sender key when member leaves | Forward secrecy - removed member can't decrypt future messages |
+| 2026-01-31 | Mutual exclusion for contact/group selection | setSelectedContact clears group, setSelectedGroup clears contact | Clean UX - only one chat active at a time |
+| 2026-01-31 | Group event listeners at module level | Store registers listeners on load, not in components | Global state updates regardless of mounted components |
+| 2026-01-31 | Admin detection via creator_public_key | Compare group.creator_public_key to identity.publicKey | Simple admin check without role system |
 
 ### Active TODOs
 
@@ -211,6 +214,7 @@ See: .planning/PROJECT.md
 - [x] Execute 07-04-PLAN.md (Group messaging)
 - [x] Execute 07-05-PLAN.md (WebRTC mesh topology)
 - [x] Execute 07-06-PLAN.md (Group network integration)
+- [x] Execute 07-07-PLAN.md (Group UI components)
 
 ### Blockers
 
@@ -229,29 +233,37 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 07-06-PLAN.md (Group network integration)
+**Last session:** 2026-01-31 - Completed 07-07-PLAN.md (Group UI components)
 
 **What we just completed:**
-- 07-06: NetworkService extended with GroupService, GroupMessagingService, GroupCallMesh integration
-- Message routing for group_message, sender_key_distribution, and group_call_* types
-- API bridge with 14 group methods for frontend access
-- Full backend support for group features now accessible via API
+- 07-07: Zustand groups store with CRUD operations, member management, group call state
+- Group API types added to pywebview.ts (14 methods, 5 types, event payloads)
+- CreateGroupDialog, JoinGroupDialog, GroupMemberList, GroupHeader components
+- Sidebar groups section with create/join buttons and group selection
+- UI store updated with mutual exclusion for contact/group selection
 
 **What's next:**
-- Execute 07-07-PLAN.md (Group UI components)
+- Execute 07-08-PLAN.md (Group chat integration and testing)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- .planning/phases/07-group-features/07-06-SUMMARY.md
+- .planning/phases/07-group-features/07-07-SUMMARY.md
+- frontend/src/stores/groups.ts
+- frontend/src/components/groups/CreateGroupDialog.tsx
+- frontend/src/components/groups/JoinGroupDialog.tsx
+- frontend/src/components/groups/GroupMemberList.tsx
+- frontend/src/components/groups/GroupHeader.tsx
+- frontend/src/components/groups/index.ts
 
 **Files modified this session:**
-- src/network/service.py (+449 lines - group integration)
-- src/api/bridge.py (+285 lines - group API methods)
+- frontend/src/lib/pywebview.ts (+75 lines - group types and API methods)
+- frontend/src/stores/ui.ts (+8 lines - group selection support)
+- frontend/src/components/layout/Sidebar.tsx (+75 lines - groups section)
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 07-06-PLAN.md - Group Network Integration*
+*Last updated: 2026-01-31 after completing 07-07-PLAN.md - Group UI Components*
