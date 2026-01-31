@@ -6,6 +6,7 @@
  * - Message list
  * - Message input
  * - Connection controls
+ * - Or GroupChatPanel when a group is selected
  */
 
 import { useChat } from '@/stores/chat';
@@ -13,6 +14,7 @@ import { useMessages } from '@/stores/messages';
 import { useContactsStore } from '@/stores/contacts';
 import { useVoiceRecording } from '@/stores/voiceRecording';
 import { useCall } from '@/stores/call';
+import { useGroupStore } from '@/stores/groups';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { TypingIndicator } from './TypingIndicator';
@@ -20,6 +22,7 @@ import { FileUpload } from './FileUpload';
 import { TransferProgress } from './TransferProgress';
 import { ResumableTransfers } from './ResumableTransfers';
 import { VoiceRecorder } from './VoiceRecorder';
+import { GroupChatPanel } from '@/components/groups/GroupChatPanel';
 
 // SVG path for icons
 const ICONS = {
@@ -50,6 +53,7 @@ export function ChatPanel() {
   const contacts = useContactsStore((s) => s.contacts);
   const { isRecording, startRecording, reset: resetRecording } = useVoiceRecording();
   const { startCall, state: callState } = useCall();
+  const selectedGroupId = useGroupStore((s) => s.selectedGroupId);
 
   const contact = contacts.find((c) => c.id === activeContactId);
   const messages = activeContactId ? messagesByContact[activeContactId] || [] : [];
@@ -58,13 +62,18 @@ export function ChatPanel() {
   const p2pState = activeContactId ? p2pStates[activeContactId] || 'disconnected' : 'disconnected';
   const isTyping = activeContactId ? typingContacts.has(activeContactId) : false;
 
+  // If a group is selected, show group chat
+  if (selectedGroupId) {
+    return <GroupChatPanel groupId={selectedGroupId} />;
+  }
+
   // No contact selected
   if (!activeContactId || !contact) {
     return (
       <div className="flex-1 flex items-center justify-center bg-cosmic-bg/50">
         <div className="text-center text-cosmic-muted">
           <Icon path={ICONS.message} className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p className="text-lg">Select a contact to start chatting</p>
+          <p className="text-lg">Select a contact or group to start chatting</p>
         </div>
       </div>
     );
