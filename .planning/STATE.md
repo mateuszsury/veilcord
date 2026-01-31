@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 7 - Group Features
-**Status:** In Progress (1/8 plans)
+**Status:** In Progress (2/8 plans)
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 7 - Group storage schema complete (07-01). Building Sender Keys encryption for group messaging.
+**Current focus:** Phase 7 - Sender Keys encryption complete (07-02). Ready for group service implementation.
 
 ## Progress
 
 ```
-[=========================================================================] 94% (Phase 7 IN PROGRESS - 1/8 plans)
+[=========================================================================] 94% (Phase 7 IN PROGRESS - 2/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
-| 7 | Group Features | In Progress | 1/8 | 8 |
+| 7 | Group Features | In Progress | 2/8 | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
 **Total:** 70/73 requirements completed (96%)
@@ -144,6 +144,9 @@ See: .planning/PROJECT.md
 | 2026-01-31 | Soft delete for groups | is_active flag instead of hard delete | Preserves group history |
 | 2026-01-31 | UNIQUE constraint on group members | (group_id, public_key) enforced at DB level | Prevents duplicate members |
 | 2026-01-31 | Hex encoding for sender key blobs | chain_key and signature_public as hex in to_dict() | JSON-safe serialization |
+| 2026-01-31 | Domain separation for sender keys | Unique HKDF info strings (DiscordOpus_SenderKey_*) | Prevents key reuse vulnerabilities |
+| 2026-01-31 | Max 1000 message skip for out-of-order | Limit skipped key cache size | Balance out-of-order tolerance with memory safety |
+| 2026-01-31 | Signature verification before decrypt | Verify Ed25519 signature first in decrypt() | Fail fast on tampered messages |
 
 ### Active TODOs
 
@@ -190,6 +193,7 @@ See: .planning/PROJECT.md
 - [x] Execute 06-05-PLAN.md (video display components)
 - [x] Execute 06-06-PLAN.md (integration verification - deferred) - PHASE 6 COMPLETE
 - [x] Execute 07-01-PLAN.md (group storage schema)
+- [x] Execute 07-02-PLAN.md (Sender Keys encryption)
 
 ### Blockers
 
@@ -208,30 +212,29 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 07-01-PLAN.md (group storage schema)
+**Last session:** 2026-01-31 - Completed 07-02-PLAN.md (Sender Keys encryption)
 
 **What we just completed:**
-- 07-01: Group storage schema - SQLCipher tables for groups, members, sender keys
-- Created Group, GroupMember, SenderKeyState dataclasses
-- Implemented full CRUD storage operations
+- 07-02: Sender Keys protocol - symmetric chain-key ratchet with Ed25519 signing
+- SenderKey class for encryption with forward secrecy
+- SenderKeyReceiver class for decryption with out-of-order handling
+- EncryptedGroupMessage dataclass with serialization
 
 **What's next:**
-- Execute 07-02-PLAN.md (Sender Keys protocol encryption/decryption)
+- Execute 07-03-PLAN.md (Group service)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/groups/__init__.py
-- src/groups/models.py
-- src/storage/groups.py
-- .planning/phases/07-group-features/07-01-SUMMARY.md
+- src/groups/sender_keys.py (406 lines)
+- .planning/phases/07-group-features/07-02-SUMMARY.md
 
 **Files modified this session:**
-- src/storage/db.py (added group tables)
+- src/groups/__init__.py (export sender_keys)
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 07-01-PLAN.md - Group Storage Schema*
+*Last updated: 2026-01-31 after completing 07-02-PLAN.md - Sender Keys Protocol*
