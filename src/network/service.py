@@ -41,6 +41,7 @@ from src.groups import (
 )
 from src.groups.models import Group, GroupMember
 from src.storage import groups as group_storage
+from src.notifications.service import get_notification_service, NotificationService
 
 
 logger = logging.getLogger(__name__)
@@ -89,6 +90,9 @@ class NetworkService:
         self._group_messaging: Optional[GroupMessagingService] = None
         self._group_calls: Dict[str, GroupCallMesh] = {}  # group_id -> mesh
         self._identity: Optional[Any] = None  # Loaded identity for group operations
+
+        # Notification service
+        self._notifications: Optional[NotificationService] = None
 
     def start(self) -> None:
         """
@@ -182,6 +186,12 @@ class NetworkService:
 
             # Initialize group services
             self._init_group_services()
+
+            # Create notification service with callbacks
+            self._notifications = get_notification_service()
+            self._notifications.on_open_chat = self._on_notification_open_chat
+            self._notifications.on_accept_call = self._on_notification_accept_call
+            self._notifications.on_reject_call = self._on_notification_reject_call
 
             # Start signaling client
             await self._signaling.start()
@@ -307,6 +317,17 @@ class NetworkService:
                     'callId': call_id,
                     'fromKey': from_key
                 })
+                # Show Windows notification for incoming call
+                if self._notifications:
+                    from src.storage.contacts import get_contacts as get_all_contacts
+                    contact = None
+                    for c in get_all_contacts():
+                        if c.ed25519_public_pem == from_key or from_key in c.ed25519_public_pem:
+                            contact = c
+                            break
+                    caller_name = contact.display_name if contact else from_key[:16] + "..."
+                    contact_id = contact.id if contact else 0
+                    self._notifications.show_call_notification(caller_name, call_id, contact_id)
 
         elif msg_type == 'call_answer':
             # Answer to our outgoing call
@@ -559,6 +580,14 @@ class NetworkService:
                 'message': message
             })
 
+            # Show notification for incoming text messages
+            if self._notifications and msg_type == 'text':
+                from src.storage.contacts import get_contact
+                contact = get_contact(contact_id)
+                sender_name = contact.display_name if contact else "Unknown"
+                body = message.get('body', '')[:100]
+                self._notifications.show_message_notification(sender_name, body, contact_id)
+
     def _on_p2p_state_change(self, contact_id: int, state: P2PConnectionState) -> None:
         """Handle P2P connection state change."""
         logger.debug(f"P2P state for contact {contact_id}: {state.value}")
@@ -803,6 +832,36 @@ class NetworkService:
             "group_id": group_id,
             "state": state.value
         })
+
+    # ========== Notification Callbacks ==========
+
+    def _on_notification_open_chat(self, contact_id: int) -> None:
+        """Handle notification click to open chat."""
+        logger.debug(f"Notification: open chat {contact_id}")
+        # Notify frontend to switch to this chat
+        self._notify_frontend('discordopus:open_chat', {
+            'contactId': contact_id
+        })
+
+    def _on_notification_accept_call(self, call_id: str) -> None:
+        """Handle notification accept call button."""
+        logger.debug(f"Notification: accept call {call_id}")
+        if self._voice_call:
+            if self._loop:
+                asyncio.run_coroutine_threadsafe(
+                    self._voice_call.accept_call(),
+                    self._loop
+                )
+
+    def _on_notification_reject_call(self, call_id: str) -> None:
+        """Handle notification reject call button."""
+        logger.debug(f"Notification: reject call {call_id}")
+        if self._voice_call:
+            if self._loop:
+                asyncio.run_coroutine_threadsafe(
+                    self._voice_call.reject_call(),
+                    self._loop
+                )
 
     def _notify_frontend(self, event_type: str, detail: dict) -> None:
         """

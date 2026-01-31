@@ -33,6 +33,7 @@ from src.crypto.fingerprint import format_fingerprint
 from src.network.service import get_network_service
 from src.updates.service import get_update_service
 from src.updates.settings import CURRENT_VERSION
+from src.storage.settings import get_setting, set_setting, Settings
 
 
 class API:
@@ -1329,6 +1330,28 @@ class API:
                 'availableUpdate': None,
                 'error': str(e)
             }
+
+    # ========== Notification Settings Methods ==========
+
+    def get_notification_settings(self) -> Dict[str, bool]:
+        """Get notification settings."""
+        return {
+            'enabled': get_setting(Settings.NOTIFICATIONS_ENABLED) == "true",
+            'messages': get_setting(Settings.NOTIFICATIONS_MESSAGES) == "true",
+            'calls': get_setting(Settings.NOTIFICATIONS_CALLS) == "true",
+        }
+
+    def set_notification_enabled(self, enabled: bool) -> None:
+        """Enable or disable all notifications."""
+        set_setting(Settings.NOTIFICATIONS_ENABLED, "true" if enabled else "false")
+
+    def set_notification_messages(self, enabled: bool) -> None:
+        """Enable or disable message notifications."""
+        set_setting(Settings.NOTIFICATIONS_MESSAGES, "true" if enabled else "false")
+
+    def set_notification_calls(self, enabled: bool) -> None:
+        """Enable or disable call notifications."""
+        set_setting(Settings.NOTIFICATIONS_CALLS, "true" if enabled else "false")
 
     # ========== System Methods ==========
 
