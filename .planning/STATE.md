@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 8 - Notifications & Polish
-**Status:** IN PROGRESS (2/5 plans)
+**Status:** IN PROGRESS (3/5 plans)
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 8 - Auto-update service complete (08-02). Ready for API integration.
+**Current focus:** Phase 8 - Notification API integration complete (08-03). Full notification flow operational.
 
 ## Progress
 
 ```
-[==========================================================================-] 98% (Phase 8 IN PROGRESS - 2/5 plans)
+[==========================================================================-] 98% (Phase 8 IN PROGRESS - 3/5 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -27,14 +27,14 @@ See: .planning/PROJECT.md
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
-| 8 | Notifications & Polish | IN PROGRESS | 2/5 | 5 |
+| 8 | Notifications & Polish | IN PROGRESS | 3/5 | 5 |
 
-**Total:** 74/78 requirements completed (95%)
+**Total:** 75/78 requirements completed (96%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 51
+- Plans completed: 52
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -171,6 +171,8 @@ See: .planning/PROJECT.md
 | 2026-01-31 | Graceful degradation for missing root.json | Return None from check_for_updates() when root.json missing | Development mode works without TUF repo |
 | 2026-01-31 | Callback hooks for UpdateService | on_update_available, on_download_progress, on_update_ready, on_error | UI integration points for update notifications |
 | 2026-01-31 | UpdateService singleton pattern | get_update_service() matches other service patterns | Consistent service access pattern |
+| 2026-01-31 | NotificationService init in _async_start | Initialize after messaging service, wire callbacks to NetworkService methods | Clean integration point for notifications |
+| 2026-01-31 | discordopus:open_chat event for notification clicks | Frontend event listener in contacts store routes to UIStore.setSelectedContact | Notification click switches to relevant chat |
 
 ### Active TODOs
 
@@ -226,7 +228,7 @@ See: .planning/PROJECT.md
 - [x] Execute 07-08-PLAN.md (Group chat integration - verification deferred) - PHASE 7 COMPLETE
 - [x] Execute 08-01-PLAN.md (Windows notification service)
 - [x] Execute 08-02-PLAN.md (Auto-update service)
-- [ ] Execute 08-03-PLAN.md (Notification + update API integration)
+- [x] Execute 08-03-PLAN.md (Notification API integration)
 - [ ] Execute 08-04-PLAN.md (Settings UI for notifications/updates)
 - [ ] Execute 08-05-PLAN.md (Final polish)
 
@@ -247,32 +249,34 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 08-02-PLAN.md (Auto-Update Service)
+**Last session:** 2026-01-31 - Completed 08-03-PLAN.md (Notification API Integration)
 
 **What we just completed:**
-- 08-02: UpdateService with tufup integration
-- tufup>=0.10.0 dependency added (TUF-based secure updates)
-- Settings module with frozen/unfrozen path detection
-- Singleton pattern and callback hooks for UI integration
+- 08-03: NotificationService wired to NetworkService
+- Notification settings UI in SettingsPanel
+- API bridge methods for notification get/set
+- Frontend event listener for open chat from notification
 
 **What's next:**
-- Execute 08-03-PLAN.md (Notification + update API integration)
+- Execute 08-04-PLAN.md (Settings UI for notifications/updates)
 
 **Open questions:**
 - Phase 7 verification tests should be run before Phase 8 completion
 - Production deployment requires TUF repository initialization and root.json bundling
 
 **Files created this session:**
-- .planning/phases/08-notifications-polish/08-02-SUMMARY.md
-- src/updates/__init__.py
-- src/updates/service.py
-- src/updates/settings.py
+- .planning/phases/08-notifications-polish/08-03-SUMMARY.md
+- frontend/src/components/settings/NotificationSection.tsx
 
 **Files modified this session:**
-- requirements.txt (+tufup>=0.10.0)
+- src/network/service.py (NotificationService integration)
+- src/api/bridge.py (notification settings API)
+- frontend/src/components/settings/SettingsPanel.tsx
+- frontend/src/lib/pywebview.ts (TypeScript types)
+- frontend/src/stores/contacts.ts (open_chat event listener)
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 08-02-PLAN.md*
+*Last updated: 2026-01-31 after completing 08-03-PLAN.md*
