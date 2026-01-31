@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
-**Current Phase:** Phase 6 - Video & Screen Sharing
-**Status:** COMPLETE
+**Current Phase:** Phase 7 - Group Features
+**Status:** In Progress (1/8 plans)
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 6 COMPLETE - Video calling with camera/screen sharing, remote video display, video controls in call overlay. Ready for Phase 7.
+**Current focus:** Phase 7 - Group storage schema complete (07-01). Building Sender Keys encryption for group messaging.
 
 ## Progress
 
 ```
-[========================================================================>] 93% (Phase 6 COMPLETE - 6/6 plans)
+[=========================================================================] 94% (Phase 7 IN PROGRESS - 1/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
-| 7 | Group Features | Pending | 0/? | 8 |
+| 7 | Group Features | In Progress | 1/8 | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
 **Total:** 70/73 requirements completed (96%)
@@ -141,6 +141,9 @@ See: .planning/PROJECT.md
 | 2026-01-31 | 30 FPS frame polling | Poll video frames at 33ms interval for smooth playback | Balance between smoothness and CPU usage |
 | 2026-01-31 | JPEG at 70% quality for frames | Good compression for real-time transmission | Acceptable quality with small payload size |
 | 2026-01-31 | Expandable call overlay | Compact for audio-only, 480x380 for video | Good UX for both call types |
+| 2026-01-31 | Soft delete for groups | is_active flag instead of hard delete | Preserves group history |
+| 2026-01-31 | UNIQUE constraint on group members | (group_id, public_key) enforced at DB level | Prevents duplicate members |
+| 2026-01-31 | Hex encoding for sender key blobs | chain_key and signature_public as hex in to_dict() | JSON-safe serialization |
 
 ### Active TODOs
 
@@ -186,6 +189,7 @@ See: .planning/PROJECT.md
 - [x] Execute 06-04-PLAN.md (video UI components)
 - [x] Execute 06-05-PLAN.md (video display components)
 - [x] Execute 06-06-PLAN.md (integration verification - deferred) - PHASE 6 COMPLETE
+- [x] Execute 07-01-PLAN.md (group storage schema)
 
 ### Blockers
 
@@ -204,47 +208,30 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed Phase 6 (Video & Screen Sharing) - PHASE 6 COMPLETE
+**Last session:** 2026-01-31 - Completed 07-01-PLAN.md (group storage schema)
 
 **What we just completed:**
-- Executed all 6 plans in Phase 6 (video calling and screen sharing)
-- 06-01: Video track infrastructure (CameraVideoTrack, ScreenShareTrack)
-- 06-02: VoiceCallService video support with renegotiation
-- 06-03: NetworkService and API video integration
-- 06-04: VideoSection settings, ScreenPicker dialog, call store video state
-- 06-05: VideoPlayer, LocalPreview, ActiveCallOverlay video controls
-- 06-06: Integration verification checkpoint (deferred by user)
-- Verification passed 11/11 automated checks
+- 07-01: Group storage schema - SQLCipher tables for groups, members, sender keys
+- Created Group, GroupMember, SenderKeyState dataclasses
+- Implemented full CRUD storage operations
 
 **What's next:**
-- Plan Phase 7 (Group Features)
+- Execute 07-02-PLAN.md (Sender Keys protocol encryption/decryption)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/voice/video_track.py (293 lines)
-- frontend/src/components/call/VideoPlayer.tsx (88 lines)
-- frontend/src/components/call/LocalPreview.tsx (32 lines)
-- frontend/src/components/settings/VideoSection.tsx (128 lines)
-- frontend/src/components/call/ScreenPicker.tsx (217 lines)
-- .planning/phases/06-video-screen-sharing/06-*-SUMMARY.md (6 files)
-- .planning/phases/06-video-screen-sharing/06-VERIFICATION.md
+- src/groups/__init__.py
+- src/groups/models.py
+- src/storage/groups.py
+- .planning/phases/07-group-features/07-01-SUMMARY.md
 
 **Files modified this session:**
-- src/voice/call_service.py (video track management)
-- src/voice/models.py (video state fields)
-- src/voice/device_manager.py (camera/monitor enumeration)
-- src/network/service.py (video signaling)
-- src/api/bridge.py (video API methods)
-- frontend/src/stores/call.ts (video state)
-- frontend/src/components/call/ActiveCallOverlay.tsx (video display/controls)
-- frontend/src/components/settings/SettingsPanel.tsx (VideoSection)
-- frontend/src/lib/pywebview.ts (video types)
-- .planning/ROADMAP.md
+- src/storage/db.py (added group tables)
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing Phase 6 - Video & Screen Sharing*
+*Last updated: 2026-01-31 after completing 07-01-PLAN.md - Group Storage Schema*
