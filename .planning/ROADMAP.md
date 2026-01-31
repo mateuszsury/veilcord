@@ -232,6 +232,20 @@ Plans:
 - VID-01, VID-02, VID-03, VID-04
 - SCRN-01, SCRN-02, SCRN-03, SCRN-04
 
+**Plans:** 6 plans
+
+Plans:
+- [x] 06-01-PLAN.md - Video track infrastructure (CameraVideoTrack, ScreenShareTrack, camera enumeration)
+- [x] 06-02-PLAN.md - Extend VoiceCallService to support video (add/remove tracks, renegotiation)
+- [x] 06-03-PLAN.md - NetworkService and API integration for video
+- [x] 06-04-PLAN.md - Video settings UI (camera selection, screen picker)
+- [x] 06-05-PLAN.md - Video playback UI (remote video display, local preview)
+- [x] 06-06-PLAN.md - Integration and verification checkpoint (deferred)
+
+**Status:** Complete (2026-01-31)
+
+**Verification Notes:** 06-VERIFICATION.md passed automated checks with 11/11 artifacts verified. Human verification checkpoint deferred by user.
+
 **Success Criteria:**
 1. User starts video call and sees own camera preview
 2. User enables/disables camera during call and remote participant sees change
@@ -247,7 +261,7 @@ Plans:
 
 **Dependencies:** Phase 5 (audio pipeline established, video adds media track)
 
-**Research Notes:** Cross-browser compatibility testing needed (Safari SDP differences). Screen capture APIs vary by OS.
+**Research Notes:** Research completed (06-RESEARCH.md). Using OpenCV for camera capture, python-mss for screen capture, cv2-enumerate-cameras for camera enumeration. Video tracks follow same pattern as audio tracks from Phase 5.
 
 ---
 
@@ -365,7 +379,7 @@ Phase 8: Notifications & Polish
 - **Phase 3**: aiortc data channel reliability, offline message store-and-forward (MEDIUM complexity) - RESEARCH COMPLETE
 - **Phase 4**: File chunking and resume protocol (MEDIUM complexity) - RESEARCH COMPLETE
 - **Phase 5**: aiortc audio codec interop with browsers, cross-platform audio (HIGH priority) - RESEARCH COMPLETE
-- **Phase 6**: Cross-browser WebRTC compatibility, screen capture APIs (MEDIUM complexity)
+- **Phase 6**: Cross-browser WebRTC compatibility, screen capture APIs (MEDIUM complexity) - RESEARCH COMPLETE
 - **Phase 7**: Sender Keys protocol, WebRTC mesh optimization (HIGH complexity, consider research-phase)
 
 **Phases with standard patterns (skip research-phase):**
@@ -377,4 +391,4 @@ Phase 8: Notifications & Polish
 ---
 
 *Roadmap created: 2026-01-30*
-*Last updated: 2026-01-30*
+*Last updated: 2026-01-31*
