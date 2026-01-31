@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 6 IN PROGRESS - Video UI components complete. Call store with video state, VideoSection for camera selection, ScreenPicker for monitor selection.
+**Current focus:** Phase 6 IN PROGRESS - Video display components complete. VideoPlayer for remote video, LocalPreview for camera/screen PiP, video controls in call overlay.
 
 ## Progress
 
 ```
-[======================================================================> ] 92% (Phase 6 IN PROGRESS - 4/6 plans)
+[========================================================================>] 93% (Phase 6 IN PROGRESS - 5/6 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -25,16 +25,16 @@ See: .planning/PROJECT.md
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
-| 6 | Video & Screen Sharing | In Progress | 4/6 | 8 |
+| 6 | Video & Screen Sharing | In Progress | 5/6 | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 65/73 requirements completed (89%)
+**Total:** 66/73 requirements completed (90%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 39
+- Plans completed: 40
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -138,6 +138,9 @@ See: .planning/PROJECT.md
 | 2026-01-31 | Renegotiation via new offer | Create new SDP offer for video enable/disable | aiortc doesn't support removeTrack, renegotiation via new offer works |
 | 2026-01-31 | sdp_type field for renegotiation | Use sdp_type field to distinguish offer/answer in call_video_renegotiate messages | Same message type for both directions, field disambiguates |
 | 2026-01-31 | Video state in call store | Single source of truth for video-related state during calls | Enables reactive UI updates when video state changes |
+| 2026-01-31 | 30 FPS frame polling | Poll video frames at 33ms interval for smooth playback | Balance between smoothness and CPU usage |
+| 2026-01-31 | JPEG at 70% quality for frames | Good compression for real-time transmission | Acceptable quality with small payload size |
+| 2026-01-31 | Expandable call overlay | Compact for audio-only, 480x380 for video | Good UX for both call types |
 
 ### Active TODOs
 
@@ -181,6 +184,7 @@ See: .planning/PROJECT.md
 - [x] Execute 06-02-PLAN.md (video track management)
 - [x] Execute 06-03-PLAN.md (video signaling integration)
 - [x] Execute 06-04-PLAN.md (video UI components)
+- [x] Execute 06-05-PLAN.md (video display components)
 
 ### Blockers
 
@@ -199,36 +203,36 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 06-04-PLAN.md (video UI components)
+**Last session:** 2026-01-31 - Completed 06-05-PLAN.md (video display components)
 
 **What we just completed:**
-- Executed plan 06-04 (video UI components)
-- Extended call store with video state (videoEnabled, videoSource, remoteVideo, selectedCamera, selectedMonitor)
-- Added video actions (enableVideo, disableVideo, setVideoEnabled, setRemoteVideo, etc.)
-- Added event listeners for discordopus:video_state and discordopus:remote_video_changed
-- Created VideoSection component for camera selection in settings
-- Created ScreenPicker dialog for monitor selection
-- Integrated VideoSection into SettingsPanel
-- Fixed pre-existing TypeScript errors in AudioSection.tsx
+- Executed plan 06-05 (video display components)
+- Video frame API already in bridge.py and service.py (committed previously)
+- VideoPlayer component for canvas-based video rendering (committed previously)
+- LocalPreview component for PiP-style self-view (committed previously)
+- Updated ActiveCallOverlay with video controls and expandable layout
+- Added camera toggle button and screen share button
+- Integrated ScreenPicker dialog for monitor selection
+- Overlay expands to 480x380 when video is active
 
 **What's next:**
-- Execute 06-05-PLAN.md (video display components)
+- Execute 06-06-PLAN.md (integration testing)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- frontend/src/components/settings/VideoSection.tsx
-- frontend/src/components/call/ScreenPicker.tsx
-- .planning/phases/06-video-screen-sharing/06-04-SUMMARY.md
+- frontend/src/components/call/VideoPlayer.tsx (committed previously)
+- frontend/src/components/call/LocalPreview.tsx (committed previously)
+- .planning/phases/06-video-screen-sharing/06-05-SUMMARY.md
 
 **Files modified this session:**
-- frontend/src/stores/call.ts
-- frontend/src/components/settings/SettingsPanel.tsx
-- frontend/src/components/settings/AudioSection.tsx
+- src/api/bridge.py (committed previously)
+- src/network/service.py (committed previously)
+- frontend/src/components/call/ActiveCallOverlay.tsx
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 06-04-PLAN.md*
+*Last updated: 2026-01-31 after completing 06-05-PLAN.md*
