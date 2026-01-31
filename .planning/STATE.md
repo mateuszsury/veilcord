@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 6 IN PROGRESS - Video track infrastructure complete. CameraVideoTrack and ScreenShareTrack ready for WebRTC video calls and screen sharing.
+**Current focus:** Phase 6 IN PROGRESS - Video track management complete. VoiceCallService extended with enable_video/disable_video methods and SDP renegotiation support.
 
 ## Progress
 
 ```
-[==================================================================>    ] 86% (Phase 6 IN PROGRESS - 1/6 plans)
+[==================================================================>    ] 88% (Phase 6 IN PROGRESS - 2/6 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -25,16 +25,16 @@ See: .planning/PROJECT.md
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
-| 6 | Video & Screen Sharing | In Progress | 1/6 | 8 |
+| 6 | Video & Screen Sharing | In Progress | 2/6 | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 63/73 requirements completed (86%)
+**Total:** 64/73 requirements completed (88%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 36
+- Plans completed: 37
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -133,6 +133,9 @@ See: .planning/PROJECT.md
 | 2026-01-31 | mss package name (not python-mss) | PyPI package is 'mss', not 'python-mss' as originally planned | Corrected requirements.txt |
 | 2026-01-31 | 15 FPS for screen sharing | Screen sharing is less demanding than camera, reduces bandwidth | Default fps=15 for ScreenShareTrack |
 | 2026-01-31 | last_frame buffer for API access | Store most recent frame for API access without blocking WebRTC pipeline | Enables frontend to request frames without timing issues |
+| 2026-01-31 | RemoteVideoHandler as separate class | Dedicated class for remote video frame handling | Clean separation from VoiceCallService, reusable pattern |
+| 2026-01-31 | BGR output for video frames | Convert to BGR for get_local/remote_video_frame methods | OpenCV uses BGR, ready for JPEG encoding without additional conversion |
+| 2026-01-31 | Renegotiation via new offer | Create new SDP offer for video enable/disable | aiortc doesn't support removeTrack, renegotiation via new offer works |
 
 ### Active TODOs
 
@@ -173,6 +176,7 @@ See: .planning/PROJECT.md
 - [x] Execute 05-07-PLAN.md (voice message UI)
 - [x] Execute 05-08-PLAN.md (integration testing) - PHASE 5 COMPLETE
 - [x] Execute 06-01-PLAN.md (video track infrastructure)
+- [x] Execute 06-02-PLAN.md (video track management)
 
 ### Blockers
 
@@ -191,32 +195,31 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 06-01-PLAN.md (video track infrastructure)
+**Last session:** 2026-01-31 - Completed 06-02-PLAN.md (video track management)
 
 **What we just completed:**
-- Executed plan 06-01 (video track infrastructure)
-- Created CameraVideoTrack and ScreenShareTrack classes
-- Added opencv-python, mss, cv2-enumerate-cameras dependencies
-- Implemented camera and monitor enumeration functions
-- Exported all new video classes and functions from src/voice package
+- Executed plan 06-02 (video track management)
+- Extended VoiceCall and CallEvent models with video state fields
+- Added RemoteVideoHandler class for incoming video tracks
+- Extended VoiceCallService with enable_video/disable_video methods
+- Added frame access methods (get_local_video_frame, get_remote_video_frame)
+- Implemented video SDP renegotiation via signaling
 
 **What's next:**
-- Execute 06-02-PLAN.md (video call signaling)
+- Execute 06-03-PLAN.md (video API layer)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/voice/video_track.py
-- .planning/phases/06-video-screen-sharing/06-01-SUMMARY.md
+- .planning/phases/06-video-screen-sharing/06-02-SUMMARY.md
 
 **Files modified this session:**
-- requirements.txt
-- src/voice/device_manager.py
-- src/voice/__init__.py
+- src/voice/models.py
+- src/voice/call_service.py
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 06-01-PLAN.md*
+*Last updated: 2026-01-31 after completing 06-02-PLAN.md*
