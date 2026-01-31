@@ -5,12 +5,16 @@ Manages the lifecycle of network components:
 - SignalingClient for WebSocket connection
 - PresenceManager for status tracking
 - MessagingService for P2P encrypted messaging
+- GroupService for group lifecycle
+- GroupMessagingService for group messaging
+- GroupCallMesh for group voice calls
 - Frontend notification via window.evaluate_js()
 
 Runs in a background thread started by webview.start(func=...).
 """
 
 import asyncio
+import json
 import logging
 import threading
 from typing import Optional, Dict, Any, List
@@ -29,6 +33,14 @@ from src.storage.files import FileMetadata
 from src.voice.call_service import VoiceCallService
 from src.voice.models import CallState, CallEvent, CallEndReason
 from src.voice import get_available_cameras, get_available_monitors
+from src.groups import (
+    GroupService, GroupServiceCallbacks,
+    GroupMessagingService, GroupMessagingCallbacks,
+    GroupCallMesh, GroupCallCallbacks, GroupCallState,
+    GroupMessage, SenderKeyDistribution
+)
+from src.groups.models import Group, GroupMember
+from src.storage import groups as group_storage
 
 
 logger = logging.getLogger(__name__)
@@ -71,6 +83,12 @@ class NetworkService:
         self._startup_task: Optional[asyncio.Task] = None
         self._pending_events: list[tuple[str, dict]] = []  # Events before window ready
         self._window_ready = False
+
+        # Group services (initialized when identity is set)
+        self._group_service: Optional[GroupService] = None
+        self._group_messaging: Optional[GroupMessagingService] = None
+        self._group_calls: Dict[str, GroupCallMesh] = {}  # group_id -> mesh
+        self._identity: Optional[Any] = None  # Loaded identity for group operations
 
     def start(self) -> None:
         """
@@ -158,8 +176,12 @@ class NetworkService:
             # Set local public key for voice call service
             from src.storage.identity_store import load_identity
             identity = load_identity()
+            self._identity = identity
             if identity and self._voice_call:
                 self._voice_call.set_local_public_key(identity.shareable_id)
+
+            # Initialize group services
+            self._init_group_services()
 
             # Start signaling client
             await self._signaling.start()
@@ -478,7 +500,60 @@ class NetworkService:
 
         # Regular message - should be a dict
         if isinstance(message, dict):
-            logger.debug(f"Incoming message for contact {contact_id}: {message.get('type', 'text')}")
+            msg_type = message.get('type', 'text')
+            logger.debug(f"Incoming message for contact {contact_id}: {msg_type}")
+
+            # Handle group message types
+            if msg_type == "group_message":
+                if self._group_messaging and self._loop:
+                    asyncio.run_coroutine_threadsafe(
+                        self._group_messaging.handle_group_message(message),
+                        self._loop
+                    )
+                return
+
+            if msg_type == "sender_key_distribution":
+                if self._group_messaging and self._loop:
+                    dist = SenderKeyDistribution.from_dict(message)
+                    asyncio.run_coroutine_threadsafe(
+                        self._group_messaging.handle_sender_key_distribution(dist),
+                        self._loop
+                    )
+                return
+
+            if msg_type == "group_call_start":
+                self._handle_group_call_start(message)
+                return
+
+            if msg_type == "group_call_join":
+                self._handle_group_call_join(message)
+                return
+
+            if msg_type == "group_call_offer":
+                if self._loop:
+                    asyncio.run_coroutine_threadsafe(
+                        self._handle_group_call_offer(message),
+                        self._loop
+                    )
+                return
+
+            if msg_type == "group_call_answer":
+                if self._loop:
+                    asyncio.run_coroutine_threadsafe(
+                        self._handle_group_call_answer(message),
+                        self._loop
+                    )
+                return
+
+            if msg_type == "group_call_leave":
+                if self._loop:
+                    asyncio.run_coroutine_threadsafe(
+                        self._handle_group_call_leave(message),
+                        self._loop
+                    )
+                return
+
+            # Regular P2P message
             self._notify_frontend('discordopus:message', {
                 'contactId': contact_id,
                 'message': message
@@ -517,6 +592,216 @@ class NetworkService:
 
         self._notify_frontend('discordopus:remote_video_changed', {
             'hasVideo': has_video
+        })
+
+    # ========== Group Service Methods ==========
+
+    def _init_group_services(self) -> None:
+        """Initialize group services after identity is available."""
+        if not self._identity:
+            return
+
+        public_key = self._identity.ed25519_public_pem
+        display_name = self._identity.display_name or "Anonymous"
+
+        # Group service
+        self._group_service = GroupService(public_key, display_name)
+        self._group_service.set_callbacks(GroupServiceCallbacks(
+            on_group_created=self._on_group_created,
+            on_group_joined=self._on_group_joined,
+            on_group_left=self._on_group_left,
+            on_member_added=self._on_member_added,
+            on_member_removed=self._on_member_removed,
+        ))
+
+        # Group messaging service
+        self._group_messaging = GroupMessagingService(public_key)
+        self._group_messaging.set_callbacks(GroupMessagingCallbacks(
+            send_pairwise=self._send_pairwise_for_group,
+            broadcast_group_message=self._broadcast_group_message,
+            on_group_message=self._on_group_message_received,
+        ))
+
+    def _on_group_created(self, group: Group) -> None:
+        """Handle group created event."""
+        self._notify_frontend("discordopus:group_created", group.to_dict())
+
+    def _on_group_joined(self, group: Group) -> None:
+        """Handle group joined event."""
+        self._notify_frontend("discordopus:group_joined", group.to_dict())
+        # Distribute our sender key to existing members
+        if self._group_messaging and self._loop:
+            asyncio.run_coroutine_threadsafe(
+                self._group_messaging.distribute_sender_key(group.id),
+                self._loop
+            )
+
+    def _on_group_left(self, group_id: str) -> None:
+        """Handle group left event."""
+        self._notify_frontend("discordopus:group_left", {"group_id": group_id})
+        # Clean up group call if active
+        if group_id in self._group_calls:
+            if self._loop:
+                asyncio.run_coroutine_threadsafe(
+                    self._group_calls[group_id].leave_call(),
+                    self._loop
+                )
+            del self._group_calls[group_id]
+
+    def _on_member_added(self, group_id: str, member: GroupMember) -> None:
+        """Handle member added to group."""
+        self._notify_frontend("discordopus:group_member_added", {
+            "group_id": group_id,
+            "member": member.to_dict()
+        })
+        # Send our sender key to new member
+        if self._group_messaging and self._loop:
+            asyncio.run_coroutine_threadsafe(
+                self._group_messaging.handle_member_joined(group_id, member.public_key),
+                self._loop
+            )
+
+    def _on_member_removed(self, group_id: str, public_key: str) -> None:
+        """Handle member removed from group."""
+        self._notify_frontend("discordopus:group_member_removed", {
+            "group_id": group_id,
+            "public_key": public_key
+        })
+        # Trigger key rotation
+        if self._group_messaging and self._loop:
+            asyncio.run_coroutine_threadsafe(
+                self._group_messaging.handle_member_removed(group_id, public_key),
+                self._loop
+            )
+
+    # Group messaging callbacks
+
+    def _send_pairwise_for_group(self, contact_key: str, message: dict) -> None:
+        """Send pairwise encrypted message for group (sender key distribution)."""
+        contact = self._find_contact_by_key(contact_key)
+        if contact and self._messaging:
+            peer = self._messaging._connections.get(contact.id)
+            if peer and peer.data_channel and peer.data_channel.readyState == "open":
+                # Encrypt with Signal Protocol and send via data channel
+                if self._loop:
+                    asyncio.run_coroutine_threadsafe(
+                        self._send_encrypted_pairwise(contact.id, json.dumps(message)),
+                        self._loop
+                    )
+
+    async def _send_encrypted_pairwise(self, contact_id: int, plaintext: str) -> None:
+        """Encrypt and send via pairwise Signal session."""
+        from src.crypto.message_crypto import encrypt_message
+        try:
+            encrypted = await encrypt_message(contact_id, plaintext)
+            # Send via data channel
+            if self._messaging:
+                peer = self._messaging._connections.get(contact_id)
+                if peer and peer.data_channel and peer.data_channel.readyState == "open":
+                    peer.data_channel.send(json.dumps(encrypted.to_dict()))
+        except Exception as e:
+            logger.error(f"Failed to send pairwise message: {e}")
+
+    def _broadcast_group_message(self, group_id: str, message: dict) -> None:
+        """Broadcast group message to all members."""
+        members = group_storage.get_members(group_id)
+        for member in members:
+            if self._identity and member.public_key == self._identity.ed25519_public_pem:
+                continue  # Skip self
+            contact = self._find_contact_by_key(member.public_key)
+            if contact and self._messaging:
+                peer = self._messaging._connections.get(contact.id)
+                if peer and peer.data_channel and peer.data_channel.readyState == "open":
+                    peer.data_channel.send(json.dumps(message))
+
+    def _on_group_message_received(
+        self, group_id: str, sender_key: str, message_id: str, plaintext: str, timestamp: int
+    ) -> None:
+        """Handle decrypted group message."""
+        self._notify_frontend("discordopus:group_message", {
+            "group_id": group_id,
+            "sender_public_key": sender_key,
+            "message_id": message_id,
+            "body": plaintext,
+            "timestamp": timestamp
+        })
+
+    def _find_contact_by_key(self, public_key: str) -> Optional[Any]:
+        """Find contact by public key."""
+        from src.storage.contacts import get_all_contacts
+        for contact in get_all_contacts():
+            if contact.ed25519_public_pem == public_key:
+                return contact
+        return None
+
+    # Group call signaling handlers
+
+    def _handle_group_call_start(self, data: dict) -> None:
+        """Handle incoming group call start."""
+        group_id = data["group_id"]
+        call_id = data["call_id"]
+        from_key = data["from"]
+        participants = data.get("participants", [])
+
+        self._notify_frontend("discordopus:group_call_incoming", {
+            "group_id": group_id,
+            "call_id": call_id,
+            "from": from_key,
+            "participants": participants
+        })
+
+    def _handle_group_call_join(self, data: dict) -> None:
+        """Handle participant joining group call."""
+        group_id = data["group_id"]
+        peer_key = data["from"]
+
+        if group_id in self._group_calls and self._loop:
+            asyncio.run_coroutine_threadsafe(
+                self._group_calls[group_id].handle_participant_joined(peer_key),
+                self._loop
+            )
+
+    async def _handle_group_call_offer(self, data: dict) -> None:
+        """Handle WebRTC offer for group call."""
+        group_id = data["group_id"]
+        peer_key = data["from"]
+        sdp = data["sdp"]
+        sdp_type = data.get("sdp_type", "offer")
+
+        if group_id in self._group_calls:
+            await self._group_calls[group_id].handle_offer(peer_key, sdp, sdp_type)
+
+    async def _handle_group_call_answer(self, data: dict) -> None:
+        """Handle WebRTC answer for group call."""
+        group_id = data["group_id"]
+        peer_key = data["from"]
+        sdp = data["sdp"]
+        sdp_type = data.get("sdp_type", "answer")
+
+        if group_id in self._group_calls:
+            await self._group_calls[group_id].handle_answer(peer_key, sdp, sdp_type)
+
+    async def _handle_group_call_leave(self, data: dict) -> None:
+        """Handle participant leaving group call."""
+        group_id = data["group_id"]
+        peer_key = data["from"]
+
+        if group_id in self._group_calls:
+            await self._group_calls[group_id].handle_participant_left(peer_key)
+
+    def _send_group_call_signaling(self, peer_key: str, message: dict) -> None:
+        """Send signaling message to specific peer."""
+        contact = self._find_contact_by_key(peer_key)
+        if contact and self._messaging:
+            peer = self._messaging._connections.get(contact.id)
+            if peer and peer.data_channel and peer.data_channel.readyState == "open":
+                peer.data_channel.send(json.dumps(message))
+
+    def _on_group_call_state_change(self, state: GroupCallState, group_id: str) -> None:
+        """Handle group call state change."""
+        self._notify_frontend("discordopus:group_call_state", {
+            "group_id": group_id,
+            "state": state.value
         })
 
     def _notify_frontend(self, event_type: str, detail: dict) -> None:
@@ -1264,6 +1549,169 @@ class NetworkService:
         except Exception as e:
             logger.debug(f"Error getting remote video frame: {e}")
             return None
+
+    # ========== Group Lifecycle Methods ==========
+
+    def create_group(self, name: str) -> dict:
+        """Create a new group."""
+        if not self._group_service:
+            raise RuntimeError("Group service not initialized")
+        group = self._group_service.create_group(name)
+        return group.to_dict()
+
+    def get_groups(self) -> List[dict]:
+        """Get all groups."""
+        if not self._group_service:
+            return []
+        return [g.to_dict() for g in self._group_service.get_all_groups()]
+
+    def get_group(self, group_id: str) -> Optional[dict]:
+        """Get a specific group."""
+        if not self._group_service:
+            return None
+        group = self._group_service.get_group(group_id)
+        return group.to_dict() if group else None
+
+    def generate_invite(self, group_id: str) -> str:
+        """Generate invite code for group."""
+        if not self._group_service:
+            raise RuntimeError("Group service not initialized")
+        return self._group_service.generate_invite(group_id)
+
+    def join_group(self, invite_code: str) -> dict:
+        """Join group via invite code."""
+        if not self._group_service:
+            raise RuntimeError("Group service not initialized")
+        group = self._group_service.join_group(invite_code)
+        return group.to_dict()
+
+    def leave_group(self, group_id: str) -> bool:
+        """Leave a group."""
+        if not self._group_service:
+            return False
+        return self._group_service.leave_group(group_id)
+
+    def get_group_members(self, group_id: str) -> List[dict]:
+        """Get members of a group."""
+        if not self._group_service:
+            return []
+        return [m.to_dict() for m in self._group_service.get_members(group_id)]
+
+    def remove_group_member(self, group_id: str, public_key: str) -> bool:
+        """Remove member from group (admin only)."""
+        if not self._group_service:
+            return False
+        return self._group_service.remove_member(group_id, public_key)
+
+    # ========== Group Messaging Methods ==========
+
+    async def send_group_message(self, group_id: str, message_id: str, text: str) -> dict:
+        """Send message to group."""
+        if not self._group_messaging:
+            raise RuntimeError("Group messaging not initialized")
+        message = await self._group_messaging.send_group_message(group_id, message_id, text)
+        return message.to_dict()
+
+    # ========== Group Call Methods ==========
+
+    def start_group_call(self, group_id: str, call_id: str) -> dict:
+        """Start a group voice call."""
+        if not self._identity:
+            raise RuntimeError("Identity not initialized")
+
+        members = group_storage.get_members(group_id)
+        participants = [m.public_key for m in members]
+
+        mesh = GroupCallMesh(self._identity.ed25519_public_pem, group_id)
+        mesh.set_callbacks(GroupCallCallbacks(
+            send_signaling=self._send_group_call_signaling,
+            broadcast_signaling=self._broadcast_group_message,
+            on_state_change=self._on_group_call_state_change,
+            on_participant_joined=lambda g, p: self._notify_frontend(
+                "discordopus:group_call_participant_joined", {"group_id": g, "peer": p}
+            ),
+            on_participant_left=lambda g, p: self._notify_frontend(
+                "discordopus:group_call_participant_left", {"group_id": g, "peer": p}
+            ),
+        ))
+
+        self._group_calls[group_id] = mesh
+
+        # Start call asynchronously
+        async def start():
+            estimate = await mesh.start_call(call_id, participants)
+            self._notify_frontend("discordopus:group_call_started", {
+                "group_id": group_id,
+                "call_id": call_id,
+                "bandwidth": {
+                    "upload_kbps": estimate.upload_kbps,
+                    "download_kbps": estimate.download_kbps,
+                    "warning": estimate.warning,
+                    "message": estimate.message
+                }
+            })
+
+        if self._loop:
+            asyncio.run_coroutine_threadsafe(start(), self._loop)
+        return {"group_id": group_id, "call_id": call_id, "status": "starting"}
+
+    def join_group_call(self, group_id: str, call_id: str) -> dict:
+        """Join an existing group call."""
+        if not self._identity:
+            raise RuntimeError("Identity not initialized")
+
+        members = group_storage.get_members(group_id)
+        participants = [m.public_key for m in members]
+
+        mesh = GroupCallMesh(self._identity.ed25519_public_pem, group_id)
+        mesh.set_callbacks(GroupCallCallbacks(
+            send_signaling=self._send_group_call_signaling,
+            broadcast_signaling=self._broadcast_group_message,
+            on_state_change=self._on_group_call_state_change,
+            on_participant_joined=lambda g, p: self._notify_frontend(
+                "discordopus:group_call_participant_joined", {"group_id": g, "peer": p}
+            ),
+            on_participant_left=lambda g, p: self._notify_frontend(
+                "discordopus:group_call_participant_left", {"group_id": g, "peer": p}
+            ),
+        ))
+
+        self._group_calls[group_id] = mesh
+
+        async def join():
+            estimate = await mesh.join_call(call_id, participants)
+            self._notify_frontend("discordopus:group_call_joined", {
+                "group_id": group_id,
+                "call_id": call_id,
+                "bandwidth": {
+                    "upload_kbps": estimate.upload_kbps,
+                    "download_kbps": estimate.download_kbps,
+                    "warning": estimate.warning,
+                    "message": estimate.message
+                }
+            })
+
+        if self._loop:
+            asyncio.run_coroutine_threadsafe(join(), self._loop)
+        return {"group_id": group_id, "call_id": call_id, "status": "joining"}
+
+    def leave_group_call(self, group_id: str) -> bool:
+        """Leave group call."""
+        if group_id not in self._group_calls:
+            return False
+        if self._loop:
+            asyncio.run_coroutine_threadsafe(
+                self._group_calls[group_id].leave_call(),
+                self._loop
+            )
+        return True
+
+    def set_group_call_muted(self, group_id: str, muted: bool) -> bool:
+        """Mute/unmute in group call."""
+        if group_id not in self._group_calls:
+            return False
+        self._group_calls[group_id].set_muted(muted)
+        return True
 
 
 # ========== Module-level singleton ==========
