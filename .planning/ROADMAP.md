@@ -318,6 +318,19 @@ Plans:
 - NOTF-01, NOTF-02, NOTF-03, NOTF-04
 - PKG-03
 
+**Plans:** 5 plans
+
+Plans:
+- [x] 08-01-PLAN.md - Notification service foundation (Windows-Toasts + settings)
+- [x] 08-02-PLAN.md - Auto-update service foundation (tufup)
+- [x] 08-03-PLAN.md - Notification integration (NetworkService + settings UI)
+- [x] 08-04-PLAN.md - Update UI and startup integration
+- [x] 08-05-PLAN.md - Verification checkpoint (deferred)
+
+**Status:** Complete (2026-01-31)
+
+**Verification Notes:** 08-VERIFICATION.md passed automated checks with 7/7 must-haves verified. Human verification checkpoint deferred by user.
+
 **Success Criteria:**
 1. User receives Windows notification when new message arrives (app in background)
 2. User receives notification for incoming call with accept/reject actions
@@ -332,7 +345,7 @@ Plans:
 
 **Dependencies:** Phase 7 (all core features complete, notifications are final polish)
 
-**Research Notes:** Tufup integration for secure updates. Windows notification API usage straightforward.
+**Research Notes:** Research completed (08-RESEARCH.md). Using Windows-Toasts with InteractableWindowsToaster for notifications, tufup for secure updates. Nuitka migration deferred to separate packaging phase.
 
 ---
 
@@ -397,12 +410,12 @@ Phase 8: Notifications & Polish
 - **Phase 5**: aiortc audio codec interop with browsers, cross-platform audio (HIGH priority) - RESEARCH COMPLETE
 - **Phase 6**: Cross-browser WebRTC compatibility, screen capture APIs (MEDIUM complexity) - RESEARCH COMPLETE
 - **Phase 7**: Sender Keys protocol, WebRTC mesh optimization (HIGH complexity) - RESEARCH COMPLETE
+- **Phase 8**: Windows notifications, tufup auto-updater (MEDIUM complexity) - RESEARCH COMPLETE
 
 **Phases with standard patterns (skip research-phase):**
 
 - **Phase 1**: SQLCipher, DPAPI, PyInstaller well-documented
 - **Phase 2**: WebSocket server, JWT auth, STUN setup well-documented
-- **Phase 8**: Tufup and Windows notifications well-documented
 
 ---
 

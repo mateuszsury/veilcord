@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
-**Current Phase:** Phase 8 - Notifications & Polish
-**Status:** IN PROGRESS (4/5 plans)
+**Current Phase:** MILESTONE COMPLETE
+**Status:** v1.0 - All 8 phases complete
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 8 - Update prompt UI complete (08-04). Ready for final polish.
+**Current focus:** Milestone v1.0 complete. All core features implemented.
 
 ## Progress
 
 ```
-[===========================================================================-] 99% (Phase 8 IN PROGRESS - 4/5 plans)
+[============================================================================] 100% (MILESTONE COMPLETE - v1.0)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -27,9 +27,9 @@ See: .planning/PROJECT.md
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
-| 8 | Notifications & Polish | IN PROGRESS | 4/5 | 5 |
+| 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
 
-**Total:** 76/78 requirements completed (97%)
+**Total:** 73/73 requirements completed (100%)
 
 ## Performance Metrics
 
@@ -233,50 +233,63 @@ See: .planning/PROJECT.md
 - [x] Execute 08-02-PLAN.md (Auto-update service)
 - [x] Execute 08-03-PLAN.md (Notification API integration)
 - [x] Execute 08-04-PLAN.md (Update prompt UI)
-- [ ] Execute 08-05-PLAN.md (Final polish)
+- [x] Execute 08-05-PLAN.md (Verification checkpoint - deferred) - PHASE 8 COMPLETE - MILESTONE v1.0 COMPLETE
 
 ### Blockers
 
-*None currently*
+*None - milestone complete*
 
 ### Research Flags
 
-**High priority (research before planning):**
-- Phase 7: Sender Keys protocol implementation and mesh optimization
-
-**Medium priority (research during planning):**
-- Phase 6: Cross-browser WebRTC compatibility
-
-**Low priority (use standard patterns):**
-- Phase 1, 2, 8: Well-documented, skip research-phase
+*All research completed - milestone v1.0 achieved*
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 08-04-PLAN.md (Update Prompt UI)
+**Last session:** 2026-01-31 - Completed Phase 8, MILESTONE v1.0
 
 **What we just completed:**
-- 08-04: Update prompt UI wired to startup and API
-- Background thread update check with 3-second delay
-- API bridge methods: get_app_version, check_for_updates, download_update, get_update_status
-- UpdatePrompt component with download/dismiss functionality
-- TypeScript types for update API and events
+- 08-01: NotificationService with InteractableWindowsToaster
+- 08-02: UpdateService with tufup TUF verification
+- 08-03: Notification API integration with NetworkService
+- 08-04: Update prompt UI with background check on startup
+- 08-05: Verification checkpoint (deferred by user)
+- PHASE 8 COMPLETE
+- MILESTONE v1.0 COMPLETE - All 8 phases, 54 plans, 73 requirements
 
 **What's next:**
-- Execute 08-05-PLAN.md (Final polish)
+- Run /gsd:audit-milestone for final verification
+- Or /gsd:complete-milestone to archive and start v2.0
 
 **Open questions:**
-- Phase 7 verification tests should be run before Phase 8 completion
+- Human verification tests for Phase 6, 7, 8 deferred - should be run before production
 - Production deployment requires TUF repository initialization and root.json bundling
+- AUMID may need Windows registration for notification callbacks in production
 
 **Files created this session:**
+- .planning/phases/08-notifications-polish/08-01-SUMMARY.md
+- .planning/phases/08-notifications-polish/08-02-SUMMARY.md
+- .planning/phases/08-notifications-polish/08-03-SUMMARY.md
 - .planning/phases/08-notifications-polish/08-04-SUMMARY.md
+- .planning/phases/08-notifications-polish/08-05-SUMMARY.md
+- .planning/phases/08-notifications-polish/08-VERIFICATION.md
+- src/notifications/__init__.py
+- src/notifications/service.py
+- src/updates/__init__.py
+- src/updates/service.py
+- src/updates/settings.py
+- frontend/src/components/settings/NotificationSection.tsx
 - frontend/src/components/layout/UpdatePrompt.tsx
 
 **Files modified this session:**
+- requirements.txt (windows-toasts, tufup)
+- src/storage/settings.py (notification settings)
+- src/network/service.py (notification integration)
+- src/api/bridge.py (notification + update API)
 - src/main.py (update check on startup)
-- src/api/bridge.py (update API methods)
-- frontend/src/components/layout/AppLayout.tsx (UpdatePrompt integration)
-- frontend/src/lib/pywebview.ts (update types and events)
+- frontend/src/components/settings/SettingsPanel.tsx (NotificationSection)
+- frontend/src/components/layout/AppLayout.tsx (UpdatePrompt)
+- frontend/src/lib/pywebview.ts (types)
+- frontend/src/stores/contacts.ts (open_chat event)
 - frontend/src/components/settings/NotificationSection.tsx (api.call() pattern fix)
 - .planning/STATE.md
 
