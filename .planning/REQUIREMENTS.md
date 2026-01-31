@@ -56,22 +56,22 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CALL-02**: User can receive incoming voice call
 - [x] **CALL-03**: User can mute/unmute microphone during call
 - [x] **CALL-04**: User can end call
-- [ ] **CALL-05**: User can start group voice call (2-4 participants)
-- [ ] **CALL-06**: User can join ongoing group call
+- [x] **CALL-05**: User can start group voice call (2-4 participants)
+- [x] **CALL-06**: User can join ongoing group call
 
 ### Video Calls
 
-- [ ] **VID-01**: User can start video call with contact (1:1)
-- [ ] **VID-02**: User can enable/disable camera during call
-- [ ] **VID-03**: User can switch between cameras if multiple available
-- [ ] **VID-04**: User can see remote participant's video
+- [x] **VID-01**: User can start video call with contact (1:1)
+- [x] **VID-02**: User can enable/disable camera during call
+- [x] **VID-03**: User can switch between cameras if multiple available
+- [x] **VID-04**: User can see remote participant's video
 
 ### Screen Sharing
 
-- [ ] **SCRN-01**: User can share screen during call
-- [ ] **SCRN-02**: User can select which screen/window to share
-- [ ] **SCRN-03**: User can stop screen sharing
-- [ ] **SCRN-04**: User can view shared screen from other participant
+- [x] **SCRN-01**: User can share screen during call
+- [x] **SCRN-02**: User can select which screen/window to share
+- [x] **SCRN-03**: User can stop screen sharing
+- [x] **SCRN-04**: User can view shared screen from other participant
 
 ### File Transfer
 
@@ -84,12 +84,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Groups
 
-- [ ] **GRP-01**: User can create group with name
-- [ ] **GRP-02**: User can generate invite link/code for group
-- [ ] **GRP-03**: User can join group via invite link/code
-- [ ] **GRP-04**: User can leave group
-- [ ] **GRP-05**: User can see group member list
-- [ ] **GRP-06**: Group creator can remove members
+- [x] **GRP-01**: User can create group with name
+- [x] **GRP-02**: User can generate invite link/code for group
+- [x] **GRP-03**: User can join group via invite link/code
+- [x] **GRP-04**: User can leave group
+- [x] **GRP-05**: User can see group member list
+- [x] **GRP-06**: Group creator can remove members
 
 ### Presence & Status
 

@@ -273,6 +273,22 @@ Plans:
 - GRP-01, GRP-02, GRP-03, GRP-04, GRP-05, GRP-06
 - CALL-05, CALL-06
 
+**Plans:** 8 plans
+
+Plans:
+- [x] 07-01-PLAN.md - Database schema and storage layer for groups, members, sender keys
+- [x] 07-02-PLAN.md - Sender Keys protocol implementation for group encryption
+- [x] 07-03-PLAN.md - Group service and invite system
+- [x] 07-04-PLAN.md - Group messaging service with Sender Keys integration
+- [x] 07-05-PLAN.md - WebRTC mesh topology for group voice calls
+- [x] 07-06-PLAN.md - NetworkService and API bridge integration
+- [x] 07-07-PLAN.md - Frontend UI (sidebar, dialogs, member list)
+- [x] 07-08-PLAN.md - Group chat and call UI with verification checkpoint
+
+**Status:** Complete (2026-01-31)
+
+**Verification Notes:** 07-VERIFICATION.md passed automated checks with 13/13 artifacts verified. Human verification checkpoint deferred by user.
+
 **Success Criteria:**
 1. User creates group with name and it appears in sidebar
 2. User generates invite link/code for group
@@ -290,7 +306,7 @@ Plans:
 
 **Dependencies:** Phase 5 (1-on-1 calls proven before N-way mesh)
 
-**Research Notes:** HIGH complexity. Sender Keys protocol implementation and WebRTC mesh optimization need dedicated research before planning.
+**Research Notes:** Research completed (07-RESEARCH.md). Custom Sender Keys implementation using existing cryptography primitives. WebRTC mesh with polite/impolite peer pattern. Practical limit of 4 participants for acceptable quality.
 
 ---
 
@@ -380,7 +396,7 @@ Phase 8: Notifications & Polish
 - **Phase 4**: File chunking and resume protocol (MEDIUM complexity) - RESEARCH COMPLETE
 - **Phase 5**: aiortc audio codec interop with browsers, cross-platform audio (HIGH priority) - RESEARCH COMPLETE
 - **Phase 6**: Cross-browser WebRTC compatibility, screen capture APIs (MEDIUM complexity) - RESEARCH COMPLETE
-- **Phase 7**: Sender Keys protocol, WebRTC mesh optimization (HIGH complexity, consider research-phase)
+- **Phase 7**: Sender Keys protocol, WebRTC mesh optimization (HIGH complexity) - RESEARCH COMPLETE
 
 **Phases with standard patterns (skip research-phase):**
 
