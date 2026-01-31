@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 8 - Notifications & Polish
-**Status:** IN PROGRESS (3/5 plans)
+**Status:** IN PROGRESS (4/5 plans)
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 8 - Notification API integration complete (08-03). Full notification flow operational.
+**Current focus:** Phase 8 - Update prompt UI complete (08-04). Ready for final polish.
 
 ## Progress
 
 ```
-[==========================================================================-] 98% (Phase 8 IN PROGRESS - 3/5 plans)
+[===========================================================================-] 99% (Phase 8 IN PROGRESS - 4/5 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -27,14 +27,14 @@ See: .planning/PROJECT.md
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
-| 8 | Notifications & Polish | IN PROGRESS | 3/5 | 5 |
+| 8 | Notifications & Polish | IN PROGRESS | 4/5 | 5 |
 
-**Total:** 75/78 requirements completed (96%)
+**Total:** 76/78 requirements completed (97%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 52
+- Plans completed: 53
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -173,6 +173,9 @@ See: .planning/PROJECT.md
 | 2026-01-31 | UpdateService singleton pattern | get_update_service() matches other service patterns | Consistent service access pattern |
 | 2026-01-31 | NotificationService init in _async_start | Initialize after messaging service, wire callbacks to NetworkService methods | Clean integration point for notifications |
 | 2026-01-31 | discordopus:open_chat event for notification clicks | Frontend event listener in contacts store routes to UIStore.setSelectedContact | Notification click switches to relevant chat |
+| 2026-01-31 | 3-second delay before update check | Wait for app to fully initialize before checking updates | Avoids race conditions with frontend loading |
+| 2026-01-31 | UpdatePrompt in AppLayout as global component | Banner appears regardless of active panel | Consistent UX across all views |
+| 2026-01-31 | Session-based dismiss for update banner | User can dismiss, banner returns on restart if update still available | Balance between persistence and user control |
 
 ### Active TODOs
 
@@ -229,7 +232,7 @@ See: .planning/PROJECT.md
 - [x] Execute 08-01-PLAN.md (Windows notification service)
 - [x] Execute 08-02-PLAN.md (Auto-update service)
 - [x] Execute 08-03-PLAN.md (Notification API integration)
-- [ ] Execute 08-04-PLAN.md (Settings UI for notifications/updates)
+- [x] Execute 08-04-PLAN.md (Update prompt UI)
 - [ ] Execute 08-05-PLAN.md (Final polish)
 
 ### Blockers
@@ -249,34 +252,35 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 08-03-PLAN.md (Notification API Integration)
+**Last session:** 2026-01-31 - Completed 08-04-PLAN.md (Update Prompt UI)
 
 **What we just completed:**
-- 08-03: NotificationService wired to NetworkService
-- Notification settings UI in SettingsPanel
-- API bridge methods for notification get/set
-- Frontend event listener for open chat from notification
+- 08-04: Update prompt UI wired to startup and API
+- Background thread update check with 3-second delay
+- API bridge methods: get_app_version, check_for_updates, download_update, get_update_status
+- UpdatePrompt component with download/dismiss functionality
+- TypeScript types for update API and events
 
 **What's next:**
-- Execute 08-04-PLAN.md (Settings UI for notifications/updates)
+- Execute 08-05-PLAN.md (Final polish)
 
 **Open questions:**
 - Phase 7 verification tests should be run before Phase 8 completion
 - Production deployment requires TUF repository initialization and root.json bundling
 
 **Files created this session:**
-- .planning/phases/08-notifications-polish/08-03-SUMMARY.md
-- frontend/src/components/settings/NotificationSection.tsx
+- .planning/phases/08-notifications-polish/08-04-SUMMARY.md
+- frontend/src/components/layout/UpdatePrompt.tsx
 
 **Files modified this session:**
-- src/network/service.py (NotificationService integration)
-- src/api/bridge.py (notification settings API)
-- frontend/src/components/settings/SettingsPanel.tsx
-- frontend/src/lib/pywebview.ts (TypeScript types)
-- frontend/src/stores/contacts.ts (open_chat event listener)
+- src/main.py (update check on startup)
+- src/api/bridge.py (update API methods)
+- frontend/src/components/layout/AppLayout.tsx (UpdatePrompt integration)
+- frontend/src/lib/pywebview.ts (update types and events)
+- frontend/src/components/settings/NotificationSection.tsx (api.call() pattern fix)
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 08-03-PLAN.md*
+*Last updated: 2026-01-31 after completing 08-04-PLAN.md*
