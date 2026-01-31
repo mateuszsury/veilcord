@@ -19,10 +19,22 @@ class Settings:
     SIGNALING_SERVER_URL = "signaling_server_url"
     """WebSocket URL for signaling server."""
 
+    NOTIFICATIONS_ENABLED = "notifications_enabled"
+    """Whether Windows notifications are enabled."""
+
+    NOTIFICATIONS_MESSAGES = "notifications_messages"
+    """Whether to show notifications for new messages."""
+
+    NOTIFICATIONS_CALLS = "notifications_calls"
+    """Whether to show notifications for incoming calls."""
+
     # Default values
     _defaults = {
         USER_STATUS: "online",
         SIGNALING_SERVER_URL: "ws://localhost:8765",  # Local dev server
+        NOTIFICATIONS_ENABLED: "true",
+        NOTIFICATIONS_MESSAGES: "true",
+        NOTIFICATIONS_CALLS: "true",
     }
 
     @classmethod
