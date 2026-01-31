@@ -31,6 +31,8 @@ from src.crypto.backup import (
 from src.crypto.identity import Identity
 from src.crypto.fingerprint import format_fingerprint
 from src.network.service import get_network_service
+from src.updates.service import get_update_service
+from src.updates.settings import CURRENT_VERSION
 
 
 class API:
@@ -1257,6 +1259,76 @@ class API:
             }
         except Exception as e:
             return {"error": str(e)}
+
+    # ========== Update Methods ==========
+
+    def get_app_version(self) -> str:
+        """Get current application version."""
+        return CURRENT_VERSION
+
+    def check_for_updates(self) -> Optional[Dict[str, Any]]:
+        """
+        Check for available updates.
+
+        Returns:
+            Dict with version and changelog if available, None otherwise
+        """
+        try:
+            service = get_update_service()
+            version = service.check_for_updates()
+            if version:
+                return service.get_available_update()
+            return None
+        except Exception as e:
+            print(f"Update check failed: {e}")
+            return None
+
+    def download_update(self) -> Dict[str, Any]:
+        """
+        Download and install available update.
+
+        Returns:
+            Dict with 'success' bool and optional 'error' message
+        """
+        try:
+            service = get_update_service()
+            success = service.download_and_install()
+            if success:
+                return {
+                    'success': True,
+                    'message': 'Update downloaded. Please restart the app to apply.'
+                }
+            return {
+                'success': False,
+                'error': 'Update download failed'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    def get_update_status(self) -> Dict[str, Any]:
+        """
+        Get current update status.
+
+        Returns:
+            Dict with available update info or None
+        """
+        try:
+            service = get_update_service()
+            return {
+                'currentVersion': service.get_current_version(),
+                'updateAvailable': service.is_update_available(),
+                'availableUpdate': service.get_available_update()
+            }
+        except Exception as e:
+            return {
+                'currentVersion': CURRENT_VERSION,
+                'updateAvailable': False,
+                'availableUpdate': None,
+                'error': str(e)
+            }
 
     # ========== System Methods ==========
 
