@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 7 - Group Features
-**Status:** In Progress (2/8 plans)
+**Status:** In Progress (3/8 plans)
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[=========================================================================] 94% (Phase 7 IN PROGRESS - 2/8 plans)
+[=========================================================================] 94% (Phase 7 IN PROGRESS - 3/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -147,6 +147,12 @@ See: .planning/PROJECT.md
 | 2026-01-31 | Domain separation for sender keys | Unique HKDF info strings (DiscordOpus_SenderKey_*) | Prevents key reuse vulnerabilities |
 | 2026-01-31 | Max 1000 message skip for out-of-order | Limit skipped key cache size | Balance out-of-order tolerance with memory safety |
 | 2026-01-31 | Signature verification before decrypt | Verify Ed25519 signature first in decrypt() | Fail fast on tampered messages |
+| 2026-01-31 | discordopus://join/ URL scheme | Custom protocol for invite codes enables deep linking | Self-contained invite URLs |
+| 2026-01-31 | Base64 JSON payload in invites | All invite metadata in URL, no server lookup needed | Offline-capable invite validation |
+| 2026-01-31 | 7-day default invite expiry | Balance security with usability | Reasonable time window for joining |
+| 2026-01-31 | 128-bit random token in invites | Use secrets.token_urlsafe(16) for uniqueness | Prevents invite enumeration attacks |
+| 2026-01-31 | Creator auto-admin on group create | Group creator automatically added as admin member | Consistent permission model |
+| 2026-01-31 | Admin-only invite generation | Only admins can generate invite codes | Controlled group access |
 
 ### Active TODOs
 
@@ -194,6 +200,7 @@ See: .planning/PROJECT.md
 - [x] Execute 06-06-PLAN.md (integration verification - deferred) - PHASE 6 COMPLETE
 - [x] Execute 07-01-PLAN.md (group storage schema)
 - [x] Execute 07-02-PLAN.md (Sender Keys encryption)
+- [x] Execute 07-03-PLAN.md (Group service)
 
 ### Blockers
 
@@ -212,29 +219,30 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 07-02-PLAN.md (Sender Keys encryption)
+**Last session:** 2026-01-31 - Completed 07-03-PLAN.md (Group service)
 
 **What we just completed:**
-- 07-02: Sender Keys protocol - symmetric chain-key ratchet with Ed25519 signing
-- SenderKey class for encryption with forward secrecy
-- SenderKeyReceiver class for decryption with out-of-order handling
-- EncryptedGroupMessage dataclass with serialization
+- 07-03: Group service - lifecycle management and invite system
+- GroupService class for create/join/leave/invite operations
+- Invite code generation with discordopus://join/ URL scheme
+- Member management with admin permission checks
 
 **What's next:**
-- Execute 07-03-PLAN.md (Group service)
+- Execute 07-04-PLAN.md (Group messaging integration)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/groups/sender_keys.py (406 lines)
-- .planning/phases/07-group-features/07-02-SUMMARY.md
+- src/groups/invite.py (178 lines)
+- src/groups/group_service.py (359 lines)
+- .planning/phases/07-group-features/07-03-SUMMARY.md
 
 **Files modified this session:**
-- src/groups/__init__.py (export sender_keys)
+- src/groups/__init__.py (updated exports)
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 07-02-PLAN.md - Sender Keys Protocol*
+*Last updated: 2026-01-31 after completing 07-03-PLAN.md - Group Service*
