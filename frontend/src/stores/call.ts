@@ -1,16 +1,17 @@
 /**
- * Call store - manages voice call state.
+ * Call store - manages voice and video call state.
  *
  * Handles:
  * - Tracking current call state (incoming, active, etc.)
  * - Call duration tracking
  * - Mute state
+ * - Video state (camera/screen sharing)
  * - Initiating calls via API
  */
 
 import { create } from 'zustand';
 import { api } from '@/lib/pywebview';
-import type { VoiceCallState } from '@/lib/pywebview';
+import type { VoiceCallState, VideoSource } from '@/lib/pywebview';
 
 export type CallStateValue = VoiceCallState;
 
@@ -28,12 +29,27 @@ interface CallStoreState {
   muted: boolean;
   duration: number; // seconds
 
+  // Video state
+  videoEnabled: boolean;
+  videoSource: VideoSource;
+  remoteVideo: boolean;
+  selectedCamera: number | null;
+  selectedMonitor: number;
+
   // Actions
   startCall: (contactId: number, contactName?: string) => Promise<boolean>;
   acceptCall: () => Promise<boolean>;
   rejectCall: () => Promise<boolean>;
   endCall: () => Promise<boolean>;
   toggleMute: () => Promise<void>;
+
+  // Video actions
+  setVideoEnabled: (enabled: boolean, source: VideoSource) => void;
+  setRemoteVideo: (hasVideo: boolean) => void;
+  setSelectedCamera: (deviceId: number) => void;
+  setSelectedMonitor: (monitorIndex: number) => void;
+  enableVideo: (source: 'camera' | 'screen') => Promise<boolean>;
+  disableVideo: () => Promise<boolean>;
 
   // Internal actions (called by event listeners)
   setCallState: (state: CallStateValue, contactId?: number, callId?: string) => void;
@@ -47,6 +63,13 @@ export const useCall = create<CallStoreState>((set, get) => ({
   callInfo: null,
   muted: false,
   duration: 0,
+
+  // Video state
+  videoEnabled: false,
+  videoSource: null,
+  remoteVideo: false,
+  selectedCamera: null,
+  selectedMonitor: 1, // Primary monitor by default
 
   startCall: async (contactId: number, contactName?: string) => {
     try {
@@ -115,6 +138,53 @@ export const useCall = create<CallStoreState>((set, get) => ({
     set({ muted: newMuted });
   },
 
+  // Video actions
+  setVideoEnabled: (enabled: boolean, source: VideoSource) => {
+    set({ videoEnabled: enabled, videoSource: source });
+  },
+
+  setRemoteVideo: (hasVideo: boolean) => {
+    set({ remoteVideo: hasVideo });
+  },
+
+  setSelectedCamera: (deviceId: number) => {
+    set({ selectedCamera: deviceId });
+  },
+
+  setSelectedMonitor: (monitorIndex: number) => {
+    set({ selectedMonitor: monitorIndex });
+  },
+
+  enableVideo: async (source: 'camera' | 'screen') => {
+    try {
+      const result = await api.call((a) => a.enable_video(source));
+      if (result.success) {
+        set({ videoEnabled: true, videoSource: source });
+        return true;
+      }
+      console.error('Failed to enable video:', result.error);
+      return false;
+    } catch (error) {
+      console.error('Error enabling video:', error);
+      return false;
+    }
+  },
+
+  disableVideo: async () => {
+    try {
+      const result = await api.call((a) => a.disable_video());
+      if (result.success) {
+        set({ videoEnabled: false, videoSource: null });
+        return true;
+      }
+      console.error('Failed to disable video:', result.error);
+      return false;
+    } catch (error) {
+      console.error('Error disabling video:', error);
+      return false;
+    }
+  },
+
   setCallState: (state: CallStateValue, contactId?: number, callId?: string) => {
     if (state === 'ended' || state === 'idle') {
       set({ state: 'idle', callInfo: null, duration: 0 });
@@ -154,6 +224,9 @@ export const useCall = create<CallStoreState>((set, get) => ({
       callInfo: null,
       muted: false,
       duration: 0,
+      videoEnabled: false,
+      videoSource: null,
+      remoteVideo: false,
     });
   },
 }));
@@ -194,5 +267,18 @@ if (typeof window !== 'undefined') {
     // Remote mute is for display purposes - the remote peer muted/unmuted
     // We could track this in the store if we want to show visual indication
     console.log('Remote peer muted:', event.detail.muted);
+  }) as EventListener);
+
+  // Listen for video state changes
+  window.addEventListener('discordopus:video_state', ((event: CustomEvent) => {
+    const { videoEnabled, videoSource, remoteVideo } = event.detail;
+    useCall.getState().setVideoEnabled(videoEnabled, videoSource);
+    useCall.getState().setRemoteVideo(remoteVideo);
+  }) as EventListener);
+
+  // Listen for remote video changes
+  window.addEventListener('discordopus:remote_video_changed', ((event: CustomEvent) => {
+    const { hasVideo } = event.detail;
+    useCall.getState().setRemoteVideo(hasVideo);
   }) as EventListener);
 }
