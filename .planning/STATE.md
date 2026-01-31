@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 7 - Group Features
-**Status:** In Progress (5/8 plans)
+**Status:** In Progress (6/8 plans)
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 7 - Sender Keys encryption complete (07-02). Ready for group service implementation.
+**Current focus:** Phase 7 - Group network integration complete (07-06). Ready for group UI implementation.
 
 ## Progress
 
 ```
-[=========================================================================] 96% (Phase 7 IN PROGRESS - 5/8 plans)
+[==========================================================================] 97% (Phase 7 IN PROGRESS - 6/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -26,15 +26,15 @@ See: .planning/PROJECT.md
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
-| 7 | Group Features | In Progress | 5/8 | 8 |
+| 7 | Group Features | In Progress | 6/8 | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 71/73 requirements completed (97%)
+**Total:** 72/73 requirements completed (99%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 46
+- Plans completed: 47
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -210,6 +210,7 @@ See: .planning/PROJECT.md
 - [x] Execute 07-03-PLAN.md (Group service)
 - [x] Execute 07-04-PLAN.md (Group messaging)
 - [x] Execute 07-05-PLAN.md (WebRTC mesh topology)
+- [x] Execute 07-06-PLAN.md (Group network integration)
 
 ### Blockers
 
@@ -228,29 +229,29 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 07-04-PLAN.md (Group messaging)
+**Last session:** 2026-01-31 - Completed 07-06-PLAN.md (Group network integration)
 
 **What we just completed:**
-- 07-04: Group messaging service with Sender Keys integration
-- GroupMessagingService for encrypted group message broadcast
-- Sender Key distribution via pairwise Signal sessions (callbacks)
-- Key rotation on member removal for forward secrecy
+- 07-06: NetworkService extended with GroupService, GroupMessagingService, GroupCallMesh integration
+- Message routing for group_message, sender_key_distribution, and group_call_* types
+- API bridge with 14 group methods for frontend access
+- Full backend support for group features now accessible via API
 
 **What's next:**
-- Execute 07-06-PLAN.md (Group network integration)
+- Execute 07-07-PLAN.md (Group UI components)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/groups/group_messaging.py (483 lines)
-- .planning/phases/07-group-features/07-04-SUMMARY.md
+- .planning/phases/07-group-features/07-06-SUMMARY.md
 
 **Files modified this session:**
-- src/groups/__init__.py (added messaging exports)
+- src/network/service.py (+449 lines - group integration)
+- src/api/bridge.py (+285 lines - group API methods)
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 07-04-PLAN.md - Group Messaging*
+*Last updated: 2026-01-31 after completing 07-06-PLAN.md - Group Network Integration*
