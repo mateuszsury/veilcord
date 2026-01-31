@@ -40,10 +40,16 @@ export function AudioSection() {
 
         // Select first device if none selected
         if (result.inputs?.length && selectedInput === null) {
-          setSelectedInput(result.inputs[0].id);
+          const firstInput = result.inputs[0];
+          if (firstInput) {
+            setSelectedInput(firstInput.id);
+          }
         }
         if (result.outputs?.length && selectedOutput === null) {
-          setSelectedOutput(result.outputs[0].id);
+          const firstOutput = result.outputs[0];
+          if (firstOutput) {
+            setSelectedOutput(firstOutput.id);
+          }
         }
       }
     } catch (error) {
@@ -86,7 +92,7 @@ export function AudioSection() {
       if (result.id) {
         setTestStatus('Playing back...');
         // Get file data and play
-        const fileResult = await api.call((a) => a.get_file(result.id));
+        const fileResult = await api.call((a) => a.get_file(result.id as string));
         if (fileResult.data) {
           const audio = new Audio(`data:${fileResult.mimeType};base64,${fileResult.data}`);
           audio.onended = () => setTestStatus('Test complete!');
