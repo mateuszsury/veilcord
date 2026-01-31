@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 6 IN PROGRESS - Video signaling integration complete. NetworkService handles video renegotiation, API bridge exposes video controls, TypeScript types for frontend.
+**Current focus:** Phase 6 IN PROGRESS - Video UI components complete. Call store with video state, VideoSection for camera selection, ScreenPicker for monitor selection.
 
 ## Progress
 
 ```
-[=====================================================================>  ] 89% (Phase 6 IN PROGRESS - 3/6 plans)
+[======================================================================> ] 92% (Phase 6 IN PROGRESS - 4/6 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md
 | 3 | P2P Text Messaging | COMPLETE | 7/7 | 10 |
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
-| 6 | Video & Screen Sharing | In Progress | 3/6 | 8 |
+| 6 | Video & Screen Sharing | In Progress | 4/6 | 8 |
 | 7 | Group Features | Pending | 0/? | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
@@ -34,7 +34,7 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 38
+- Plans completed: 39
 - Average plan duration: 6m
 - Estimated completion: TBD (more data needed)
 
@@ -137,6 +137,7 @@ See: .planning/PROJECT.md
 | 2026-01-31 | BGR output for video frames | Convert to BGR for get_local/remote_video_frame methods | OpenCV uses BGR, ready for JPEG encoding without additional conversion |
 | 2026-01-31 | Renegotiation via new offer | Create new SDP offer for video enable/disable | aiortc doesn't support removeTrack, renegotiation via new offer works |
 | 2026-01-31 | sdp_type field for renegotiation | Use sdp_type field to distinguish offer/answer in call_video_renegotiate messages | Same message type for both directions, field disambiguates |
+| 2026-01-31 | Video state in call store | Single source of truth for video-related state during calls | Enables reactive UI updates when video state changes |
 
 ### Active TODOs
 
@@ -179,6 +180,7 @@ See: .planning/PROJECT.md
 - [x] Execute 06-01-PLAN.md (video track infrastructure)
 - [x] Execute 06-02-PLAN.md (video track management)
 - [x] Execute 06-03-PLAN.md (video signaling integration)
+- [x] Execute 06-04-PLAN.md (video UI components)
 
 ### Blockers
 
@@ -197,34 +199,36 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 06-03-PLAN.md (video signaling integration)
+**Last session:** 2026-01-31 - Completed 06-04-PLAN.md (video UI components)
 
 **What we just completed:**
-- Executed plan 06-03 (video signaling integration)
-- Added video renegotiation message handler to NetworkService
-- Added video control methods to NetworkService (enable_video, disable_video, etc.)
-- Added video API methods to bridge (7 new methods)
-- Added TypeScript types for video functionality
-- Added frontend events for video state changes
-- Added handle_video_renegotiate_offer/answer methods to VoiceCallService
+- Executed plan 06-04 (video UI components)
+- Extended call store with video state (videoEnabled, videoSource, remoteVideo, selectedCamera, selectedMonitor)
+- Added video actions (enableVideo, disableVideo, setVideoEnabled, setRemoteVideo, etc.)
+- Added event listeners for discordopus:video_state and discordopus:remote_video_changed
+- Created VideoSection component for camera selection in settings
+- Created ScreenPicker dialog for monitor selection
+- Integrated VideoSection into SettingsPanel
+- Fixed pre-existing TypeScript errors in AudioSection.tsx
 
 **What's next:**
-- Execute 06-04-PLAN.md (video UI components)
+- Execute 06-05-PLAN.md (video display components)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- .planning/phases/06-video-screen-sharing/06-03-SUMMARY.md
+- frontend/src/components/settings/VideoSection.tsx
+- frontend/src/components/call/ScreenPicker.tsx
+- .planning/phases/06-video-screen-sharing/06-04-SUMMARY.md
 
 **Files modified this session:**
-- src/network/service.py
-- src/voice/call_service.py
-- src/api/bridge.py
-- frontend/src/lib/pywebview.ts
+- frontend/src/stores/call.ts
+- frontend/src/components/settings/SettingsPanel.tsx
+- frontend/src/components/settings/AudioSection.tsx
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 06-03-PLAN.md*
+*Last updated: 2026-01-31 after completing 06-04-PLAN.md*
