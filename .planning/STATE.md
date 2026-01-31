@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 7 - Group Features
-**Status:** In Progress (3/8 plans)
+**Status:** In Progress (5/8 plans)
 **Last Updated:** 2026-01-31
 
 ## Project Reference
@@ -15,7 +15,7 @@ See: .planning/PROJECT.md
 ## Progress
 
 ```
-[=========================================================================] 94% (Phase 7 IN PROGRESS - 3/8 plans)
+[=========================================================================] 96% (Phase 7 IN PROGRESS - 5/8 plans)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -26,16 +26,16 @@ See: .planning/PROJECT.md
 | 4 | File Transfer | COMPLETE | 8/8 | 7 |
 | 5 | Voice Calls (1-on-1) | COMPLETE | 8/8 | 9 |
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
-| 7 | Group Features | In Progress | 2/8 | 8 |
+| 7 | Group Features | In Progress | 5/8 | 8 |
 | 8 | Notifications & Polish | Pending | 0/? | 5 |
 
-**Total:** 70/73 requirements completed (96%)
+**Total:** 71/73 requirements completed (97%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 41
-- Average plan duration: 6m
+- Plans completed: 46
+- Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -153,6 +153,13 @@ See: .planning/PROJECT.md
 | 2026-01-31 | 128-bit random token in invites | Use secrets.token_urlsafe(16) for uniqueness | Prevents invite enumeration attacks |
 | 2026-01-31 | Creator auto-admin on group create | Group creator automatically added as admin member | Consistent permission model |
 | 2026-01-31 | Admin-only invite generation | Only admins can generate invite codes | Controlled group access |
+| 2026-01-31 | Mesh topology for group calls | Each participant maintains N-1 peer connections | Best latency, no SFU required |
+| 2026-01-31 | Polite/impolite by public key | Higher public key initiates connection | Deterministic, no coordination needed |
+| 2026-01-31 | 4 participant soft limit | 300 kbps total bandwidth is reasonable | Warning displayed for 5+ |
+| 2026-01-31 | 8 participant hard limit | Mesh becomes impractical above this | Refuse connections above limit |
+| 2026-01-31 | 50 kbps per audio stream | Opus codec at standard quality | Consistent with 1:1 calls |
+| 2026-01-31 | Callback-based broadcast for groups | GroupMessagingCallbacks.broadcast_group_message | Consistent with messaging/file transfer patterns |
+| 2026-01-31 | Key rotation on member removal | Regenerate sender key when member leaves | Forward secrecy - removed member can't decrypt future messages |
 
 ### Active TODOs
 
@@ -201,6 +208,8 @@ See: .planning/PROJECT.md
 - [x] Execute 07-01-PLAN.md (group storage schema)
 - [x] Execute 07-02-PLAN.md (Sender Keys encryption)
 - [x] Execute 07-03-PLAN.md (Group service)
+- [x] Execute 07-04-PLAN.md (Group messaging)
+- [x] Execute 07-05-PLAN.md (WebRTC mesh topology)
 
 ### Blockers
 
@@ -219,30 +228,29 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed 07-03-PLAN.md (Group service)
+**Last session:** 2026-01-31 - Completed 07-04-PLAN.md (Group messaging)
 
 **What we just completed:**
-- 07-03: Group service - lifecycle management and invite system
-- GroupService class for create/join/leave/invite operations
-- Invite code generation with discordopus://join/ URL scheme
-- Member management with admin permission checks
+- 07-04: Group messaging service with Sender Keys integration
+- GroupMessagingService for encrypted group message broadcast
+- Sender Key distribution via pairwise Signal sessions (callbacks)
+- Key rotation on member removal for forward secrecy
 
 **What's next:**
-- Execute 07-04-PLAN.md (Group messaging integration)
+- Execute 07-06-PLAN.md (Group network integration)
 
 **Open questions:**
 - None
 
 **Files created this session:**
-- src/groups/invite.py (178 lines)
-- src/groups/group_service.py (359 lines)
-- .planning/phases/07-group-features/07-03-SUMMARY.md
+- src/groups/group_messaging.py (483 lines)
+- .planning/phases/07-group-features/07-04-SUMMARY.md
 
 **Files modified this session:**
-- src/groups/__init__.py (updated exports)
+- src/groups/__init__.py (added messaging exports)
 - .planning/STATE.md
 
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 07-03-PLAN.md - Group Service*
+*Last updated: 2026-01-31 after completing 07-04-PLAN.md - Group Messaging*
