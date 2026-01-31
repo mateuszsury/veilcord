@@ -65,6 +65,15 @@ export interface PyWebViewAPI {
   is_muted(): Promise<boolean>;
   get_call_state(): Promise<CallState | null>;
 
+  // Video Calls
+  enable_video(source: 'camera' | 'screen'): Promise<VideoResult>;
+  disable_video(): Promise<ApiResult>;
+  set_camera(device_id: number): Promise<ApiResult>;
+  set_screen_monitor(monitor_index: number): Promise<ApiResult>;
+  get_video_state(): Promise<VideoState>;
+  get_cameras(): Promise<CamerasResult>;
+  get_monitors(): Promise<MonitorsResult>;
+
   // Voice Messages
   start_voice_recording(): Promise<VoiceRecordingResult>;
   stop_voice_recording(): Promise<VoiceRecordingResult>;
@@ -146,6 +155,46 @@ export interface AudioDevice {
 
 export interface CallResult {
   callId?: string;
+  error?: string;
+}
+
+// Video call types
+export type VideoSource = 'camera' | 'screen' | null;
+
+export interface VideoState {
+  videoEnabled: boolean;
+  videoSource: VideoSource;
+  remoteVideo: boolean;
+}
+
+export interface Camera {
+  index: number;
+  name: string;
+  backend: number;
+  path: string;
+}
+
+export interface Monitor {
+  index: number;
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+}
+
+export interface VideoResult {
+  success?: boolean;
+  source?: string;
+  error?: string;
+}
+
+export interface CamerasResult {
+  cameras: Camera[];
+  error?: string;
+}
+
+export interface MonitorsResult {
+  monitors: Monitor[];
   error?: string;
 }
 
@@ -302,6 +351,19 @@ export interface RemoteMuteEventPayload {
   muted: boolean;
 }
 
+// Video event payloads
+// discordopus:video_state - Fired when local video state changes
+export interface VideoStateEventPayload {
+  videoEnabled: boolean;
+  videoSource: VideoSource;
+  remoteVideo: boolean;
+}
+
+// discordopus:remote_video_changed - Fired when remote party enables/disables video
+export interface RemoteVideoEventPayload {
+  hasVideo: boolean;
+}
+
 // Custom events dispatched by Python backend
 declare global {
   interface Window {
@@ -325,6 +387,8 @@ declare global {
     'discordopus:call_rejected': CustomEvent<CallEndedEventPayload>;
     'discordopus:call_ended': CustomEvent<CallEndedEventPayload>;
     'discordopus:remote_mute': CustomEvent<RemoteMuteEventPayload>;
+    'discordopus:video_state': CustomEvent<VideoStateEventPayload>;
+    'discordopus:remote_video_changed': CustomEvent<RemoteVideoEventPayload>;
   }
 }
 
