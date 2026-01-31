@@ -256,6 +256,56 @@ def init_database() -> sqlcipher3.Connection:
         )
     """)
 
+    # groups table: group conversation metadata
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS groups (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            creator_public_key TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            invite_code TEXT,
+            is_active INTEGER DEFAULT 1
+        )
+    """)
+
+    # group_members table: members of each group
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS group_members (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_id TEXT NOT NULL,
+            public_key TEXT NOT NULL,
+            display_name TEXT NOT NULL,
+            joined_at INTEGER NOT NULL,
+            is_admin INTEGER DEFAULT 0,
+            FOREIGN KEY (group_id) REFERENCES groups(id),
+            UNIQUE(group_id, public_key)
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_group_members
+        ON group_members(group_id)
+    """)
+
+    # sender_keys table: Sender Keys received from group members
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS sender_keys (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_id TEXT NOT NULL,
+            sender_public_key TEXT NOT NULL,
+            chain_key BLOB NOT NULL,
+            signature_public BLOB NOT NULL,
+            message_index INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            FOREIGN KEY (group_id) REFERENCES groups(id),
+            UNIQUE(group_id, sender_public_key)
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_sender_keys
+        ON sender_keys(group_id, sender_public_key)
+    """)
+
     conn.commit()
 
     _db_connection = conn
