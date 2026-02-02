@@ -1,8 +1,8 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 10 - UI/UX Redesign
-**Status:** In progress (8/10 plans complete)
-**Last Updated:** 2026-02-02T09:15:00Z
+**Status:** In progress (9/10 plans complete)
+**Last Updated:** 2026-02-02T07:10:00Z
 
 ## Project Reference
 
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
 | 9 | Audio & Video Effects | COMPLETE | 12/12 | 8 |
-| 10 | UI/UX Redesign | IN PROGRESS | 8/10 | - |
+| 10 | UI/UX Redesign | IN PROGRESS | 9/10 | - |
 
 **Total:** 81/81 core requirements completed (100% - v1.0 complete)
-**Phase 10 Progress:** 8/10 plans completed (10-01 Design System, 10-02 UI Primitives, 10-03 IconBar, 10-04 ChannelList, 10-05 Layout Assembly, 10-06 Chat Area Styling, 10-07 Settings Panel, 10-08 Call UI COMPLETE)
+**Phase 10 Progress:** 9/10 plans completed (10-01 Design System, 10-02 UI Primitives, 10-03 IconBar, 10-04 ChannelList, 10-05 Layout Assembly, 10-06 Chat Area Styling, 10-07 Settings Panel, 10-08 Call UI, 10-09 Virtual Scrolling COMPLETE)
 
 ## Performance Metrics
 
@@ -229,6 +229,9 @@ See: .planning/PROJECT.md
 | 2026-02-02 | EffectsPanel bottom-20 positioning | Effects panel appears above call controls with 20 units offset | Avoids overlap with CallControls bar |
 | 2026-02-02 | Custom Switch with spring animation | Simple toggle using Framer Motion spring for smooth feel | Better UX than native checkbox for effect toggles |
 | 2026-02-02 | IncomingCallPopup pulse rings | Animated border rings around avatar for incoming call visual | Clear indication of incoming call state |
+| 2026-02-02 | useVirtualScroll hook pattern | Wrap TanStack Virtual in reusable hook with scroll helpers | Consistent virtual scrolling across all list components |
+| 2026-02-02 | 80px estimate size for messages | Default message height estimate for virtual scrolling | Typical Discord-style message with avatar and content |
+| 2026-02-02 | MessageList as wrapper vs re-export | Keep wrapper to enable future message preprocessing | Allows date grouping without breaking interface |
 
 ### Active TODOs
 
@@ -307,6 +310,7 @@ See: .planning/PROJECT.md
 - [x] Execute 10-06-PLAN.md (Chat area styling) - Discord-style messages with slide-fade animations
 - [x] Execute 10-07-PLAN.md (Settings panel) - Two-column Discord-style settings with left nav and right content
 - [x] Execute 10-08-PLAN.md (Call UI) - Discord/Zoom-style CallControls, EffectsPanel, overlay redesign
+- [x] Execute 10-09-PLAN.md (Virtual Scrolling) - TanStack Virtual for message lists with 1000+ message support
 
 ### Blockers
 
@@ -318,21 +322,20 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-02-02 - Completed 10-08-PLAN.md
+**Last session:** 2026-02-02 - Completed 10-09-PLAN.md
 
 **What we just completed:**
-- 10-08: Call UI Components
-  - CallControls: Discord/Zoom-style horizontal button bar with mute/video/screen/effects/end controls
-  - EffectsPanel: Expandable panel (w-80) with audio/video effect toggles and custom Switch component
-  - ActiveCallOverlay: Corner positioned (bottom-4 right-4) with CallControls integration and EffectsPanel toggle
-  - IncomingCallPopup: Centered modal with large avatar, animated pulse rings, and accept/reject buttons
-  - All components use Framer Motion for animations and Discord color palette
-  - 3 tasks completed in 8 minutes
-  - **Phase 10 Plan 08 COMPLETE**
+- 10-09: Virtual Scrolling
+  - useVirtualScroll hook wrapping TanStack Virtual with scrollToBottom/scrollToTop helpers
+  - VirtualMessageList with auto-scroll, loading skeletons (Discord colors), and empty state
+  - MessageList updated to use VirtualMessageList for backward compatibility
+  - Only ~20 visible messages rendered regardless of total count
+  - 3 tasks completed in 4 minutes
+  - **Phase 10 Plan 09 COMPLETE**
 
 **What's next:**
-- Execute 10-09-PLAN.md and 10-10-PLAN.md
-- Remaining plans: modals/dialogs, final polish
+- Execute 10-10-PLAN.md (final plan in Phase 10)
+- Final polish and any remaining modals/dialogs
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8, 9 deferred - should be run before production
