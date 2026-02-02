@@ -2,7 +2,7 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { forwardRef } from 'react';
 
 export interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   children: React.ReactNode;
@@ -12,6 +12,7 @@ const variantStyles = {
   primary: 'bg-accent-red text-white hover:bg-accent-red-hover',
   secondary: 'bg-discord-bg-tertiary text-discord-text-primary hover:bg-discord-bg-modifier-hover',
   ghost: 'bg-transparent text-discord-text-secondary hover:bg-discord-bg-modifier-hover hover:text-discord-text-primary',
+  danger: 'bg-status-busy text-white hover:bg-status-busy/80',
 };
 
 const sizeStyles = {
@@ -31,6 +32,10 @@ const variantHoverEffects = {
   },
   ghost: {
     scale: 1.02,
+  },
+  danger: {
+    scale: 1.02,
+    boxShadow: '0 0 20px rgba(237, 66, 69, 0.3)',
   },
 };
 
