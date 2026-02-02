@@ -1,16 +1,56 @@
+/**
+ * IconBar - Discord-style narrow icon sidebar (80px width)
+ *
+ * Provides primary navigation between sections:
+ * - Home: Welcome/branding panel
+ * - Contacts: Contact list
+ * - Groups: Group list
+ * - Settings: Settings panel
+ *
+ * Features:
+ * - Active indicator pill with smooth layoutId animation
+ * - Hover/tap animations using Framer Motion
+ * - Accessibility: aria-label, aria-current, focus-visible ring
+ * - UserPanel at bottom with avatar and audio controls
+ */
+
 import { motion } from 'framer-motion';
-import { Home, Users, MessageSquare, Settings } from 'lucide-react';
+import { Home, Users, MessageSquare, Settings, type LucideIcon } from 'lucide-react';
 import { useUIStore } from '@/stores/ui';
 import { UserPanel } from './UserPanel';
 
 type Section = 'home' | 'contacts' | 'groups' | 'settings';
 
-const sections: readonly { id: Section; icon: typeof Home; label: string }[] = [
+interface SectionConfig {
+  id: Section;
+  icon: LucideIcon;
+  label: string;
+}
+
+const sections: readonly SectionConfig[] = [
   { id: 'home', icon: Home, label: 'Home' },
   { id: 'contacts', icon: Users, label: 'Contacts' },
   { id: 'groups', icon: MessageSquare, label: 'Groups' },
   { id: 'settings', icon: Settings, label: 'Settings' },
 ];
+
+/**
+ * Spring animation config for the active indicator pill
+ * Uses high stiffness for snappy feel, moderate damping to prevent overshoot
+ */
+const indicatorSpring = {
+  type: 'spring' as const,
+  stiffness: 500,
+  damping: 30,
+};
+
+/**
+ * Scale animations for icon buttons
+ */
+const buttonAnimations = {
+  hover: { scale: 1.1 },
+  tap: { scale: 0.95 },
+};
 
 export function IconBar() {
   const activeSection = useUIStore((s) => s.activeSection);
@@ -24,14 +64,16 @@ export function IconBar() {
         return (
           <div key={id} className="relative flex items-center justify-center">
             {/* Active indicator pill on left */}
+            {/* Active indicator pill - animates between icons using layoutId */}
             {isActive && (
               <motion.div
                 layoutId="activeIndicator"
                 className="absolute left-0 w-1 h-8 bg-accent-red rounded-r-full"
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                transition={indicatorSpring}
               />
             )}
 
+            {/* Icon button with hover/tap animations */}
             <motion.button
               onClick={() => setActiveSection(id)}
               className={`
@@ -46,8 +88,8 @@ export function IconBar() {
                     : 'text-discord-text-secondary hover:bg-discord-bg-tertiary hover:text-discord-text-primary'
                 }
               `.trim().replace(/\s+/g, ' ')}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={buttonAnimations.hover}
+              whileTap={buttonAnimations.tap}
               aria-label={label}
               aria-current={isActive ? 'page' : undefined}
             >
