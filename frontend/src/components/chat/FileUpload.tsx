@@ -25,7 +25,7 @@ export function FileUpload({ contactId, disabled = false }: FileUploadProps) {
     <button
       onClick={handleClick}
       disabled={disabled}
-      className="p-3 rounded-xl text-cosmic-muted hover:text-cosmic-accent hover:bg-cosmic-surface
+      className="p-3 rounded-xl text-discord-text-muted hover:text-accent-red-text hover:bg-discord-bg-secondary
                  disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       title="Send file"
     >

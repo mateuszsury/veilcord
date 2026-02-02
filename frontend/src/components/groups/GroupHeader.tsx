@@ -69,14 +69,14 @@ export function GroupHeader({ groupId }: Props) {
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border-b border-cosmic-border bg-cosmic-surface/50">
+    <div className="flex items-center justify-between p-4 border-b border-discord-bg-tertiary bg-discord-bg-secondary/50">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-cosmic-accent flex items-center justify-center text-white font-medium">
+        <div className="w-10 h-10 rounded-full bg-accent-red flex items-center justify-center text-white font-medium">
           {group.name.charAt(0).toUpperCase()}
         </div>
         <div>
-          <h2 className="text-cosmic-text font-semibold">{group.name}</h2>
-          <p className="text-sm text-cosmic-muted">{members.length} members</p>
+          <h2 className="text-discord-text-primary font-semibold">{group.name}</h2>
+          <p className="text-sm text-discord-text-muted">{members.length} members</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export function GroupHeader({ groupId }: Props) {
           <button
             onClick={handleGenerateInvite}
             disabled={generating}
-            className="px-3 py-1.5 text-sm bg-cosmic-accent hover:bg-cosmic-accent/80 disabled:opacity-50 text-white rounded transition-colors"
+            className="px-3 py-1.5 text-sm bg-accent-red hover:bg-accent-red-hover disabled:opacity-50 text-white rounded transition-colors"
           >
             {generating ? 'Generating...' : 'Invite'}
           </button>
@@ -93,7 +93,7 @@ export function GroupHeader({ groupId }: Props) {
 
         <button
           onClick={handleLeave}
-          className="px-3 py-1.5 text-sm text-cosmic-muted hover:text-red-400 transition-colors"
+          className="px-3 py-1.5 text-sm text-discord-text-muted hover:text-red-400 transition-colors"
         >
           Leave
         </button>
@@ -102,9 +102,9 @@ export function GroupHeader({ groupId }: Props) {
       {/* Invite modal */}
       {showInvite && inviteCode && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-cosmic-surface rounded-lg p-6 w-[500px] max-w-[90vw] border border-cosmic-border">
-            <h3 className="text-lg font-semibold text-cosmic-text mb-4">Invite Link</h3>
-            <p className="text-sm text-cosmic-muted mb-3">
+          <div className="bg-discord-bg-secondary rounded-lg p-6 w-[500px] max-w-[90vw] border border-discord-bg-tertiary">
+            <h3 className="text-lg font-semibold text-discord-text-primary mb-4">Invite Link</h3>
+            <p className="text-sm text-discord-text-muted mb-3">
               Share this link to invite people to the group:
             </p>
             <div className="flex gap-2">
@@ -112,22 +112,22 @@ export function GroupHeader({ groupId }: Props) {
                 type="text"
                 value={inviteCode}
                 readOnly
-                className="flex-1 px-3 py-2 bg-cosmic-bg border border-cosmic-border rounded text-cosmic-text font-mono text-sm"
+                className="flex-1 px-3 py-2 bg-discord-bg-tertiary border border-discord-bg-modifier-active rounded text-discord-text-primary font-mono text-sm"
               />
               <button
                 onClick={handleCopyInvite}
-                className="px-4 py-2 bg-cosmic-accent hover:bg-cosmic-accent/80 text-white rounded transition-colors"
+                className="px-4 py-2 bg-accent-red hover:bg-accent-red-hover text-white rounded transition-colors"
               >
                 {copying ? 'Copied!' : 'Copy'}
               </button>
             </div>
-            <p className="text-xs text-cosmic-muted mt-2">
+            <p className="text-xs text-discord-text-muted mt-2">
               This invite link expires in 7 days.
             </p>
             <div className="flex justify-end mt-4">
               <button
                 onClick={() => setShowInvite(false)}
-                className="text-cosmic-muted hover:text-cosmic-text transition-colors"
+                className="text-discord-text-muted hover:text-discord-text-primary transition-colors"
               >
                 Close
               </button>

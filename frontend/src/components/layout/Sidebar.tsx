@@ -4,9 +4,11 @@ import { useContactsStore } from '@/stores/contacts';
 import { useUIStore } from '@/stores/ui';
 import { useNetworkStore } from '@/stores/network';
 import { useGroupStore } from '@/stores/groups';
+import { useDiscoveryStore } from '@/stores/discovery';
 import { StatusSelector } from './StatusSelector';
 import { ConnectionIndicator } from './ConnectionIndicator';
 import { CreateGroupDialog, JoinGroupDialog } from '@/components/groups';
+import { api } from '@/lib/pywebview';
 import type { UserStatus } from '@/lib/pywebview';
 
 function getStatusDotColor(status: UserStatus): string {
@@ -41,35 +43,57 @@ export function Sidebar() {
   const groups = useGroupStore((s) => s.groups);
   const loadGroups = useGroupStore((s) => s.loadGroups);
 
-  // Initialize network store and groups on mount
+  const discoveryEnabled = useDiscoveryStore((s) => s.enabled);
+  const discoveredUsers = useDiscoveryStore((s) => s.users);
+  const loadDiscoveryState = useDiscoveryStore((s) => s.loadState);
+
+  const setContacts = useContactsStore((s) => s.setContacts);
+
+  const [addingUser, setAddingUser] = useState<string | null>(null);
+
+  // Initialize network store, groups, and discovery on mount
   useEffect(() => {
     loadNetworkState();
     loadGroups();
-  }, [loadNetworkState, loadGroups]);
+    loadDiscoveryState();
+  }, [loadNetworkState, loadGroups, loadDiscoveryState]);
+
+  const handleAddDiscoveredUser = async (publicKey: string, displayName: string) => {
+    setAddingUser(publicKey);
+    try {
+      await api.call((a) => a.add_contact(publicKey, displayName));
+      const contacts = await api.call((a) => a.get_contacts());
+      setContacts(contacts);
+    } catch (e) {
+      console.error('Failed to add contact:', e);
+    } finally {
+      setAddingUser(null);
+    }
+  };
 
   return (
     <motion.aside
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="w-64 h-full bg-cosmic-surface border-r border-cosmic-border flex flex-col"
+      className="w-64 h-full bg-discord-bg-secondary border-r border-discord-bg-tertiary flex flex-col"
     >
       {/* Header */}
-      <div className="p-4 border-b border-cosmic-border">
+      <div className="p-4 border-b border-discord-bg-tertiary">
         <div className="flex items-center justify-between mb-1">
-          <h1 className="text-lg font-semibold text-cosmic-text">DiscordOpus</h1>
+          <h1 className="text-lg font-semibold text-discord-text-primary">DiscordOpus</h1>
         </div>
-        <p className="text-xs text-cosmic-muted mb-2">Secure P2P Messenger</p>
+        <p className="text-xs text-discord-text-muted mb-2">Secure P2P Messenger</p>
         <StatusSelector />
       </div>
 
       {/* Contacts and Groups list */}
       <div className="flex-1 overflow-y-auto p-2">
         {/* Contacts Section */}
-        <div className="text-xs uppercase text-cosmic-muted px-2 py-1 mb-1">
+        <div className="text-xs uppercase text-discord-text-muted px-2 py-1 mb-1">
           Contacts
         </div>
         {contacts.length === 0 ? (
-          <p className="text-sm text-cosmic-muted px-2 py-4 text-center">
+          <p className="text-sm text-discord-text-muted px-2 py-4 text-center">
             No contacts yet
           </p>
         ) : (
@@ -83,8 +107,8 @@ export function Sidebar() {
                   }}
                   className={`w-full text-left px-2 py-2 rounded-md transition-colors ${
                     selectedContactId === contact.id
-                      ? 'bg-cosmic-accent/20 text-cosmic-accent'
-                      : 'hover:bg-cosmic-border text-cosmic-text'
+                      ? 'bg-accent-red/20 text-accent-red-text'
+                      : 'hover:bg-discord-bg-modifier-hover text-discord-text-primary'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -94,7 +118,7 @@ export function Sidebar() {
                     />
                     <span className="font-medium truncate">{contact.displayName}</span>
                   </div>
-                  <div className="text-xs text-cosmic-muted truncate pl-4">
+                  <div className="text-xs text-discord-text-muted truncate pl-4">
                     {contact.fingerprint.slice(0, 16)}...
                   </div>
                 </button>
@@ -106,11 +130,11 @@ export function Sidebar() {
         {/* Groups Section */}
         <div className="mt-6">
           <div className="flex items-center justify-between px-2 mb-2">
-            <span className="text-xs uppercase text-cosmic-muted">Groups</span>
+            <span className="text-xs uppercase text-discord-text-muted">Groups</span>
             <div className="flex gap-1">
               <button
                 onClick={() => setShowJoinGroup(true)}
-                className="p-1 text-cosmic-muted hover:text-cosmic-text transition-colors"
+                className="p-1 text-discord-text-muted hover:text-discord-text-primary transition-colors"
                 title="Join group"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,7 +143,7 @@ export function Sidebar() {
               </button>
               <button
                 onClick={() => setShowCreateGroup(true)}
-                className="p-1 text-cosmic-muted hover:text-cosmic-text transition-colors"
+                className="p-1 text-discord-text-muted hover:text-discord-text-primary transition-colors"
                 title="Create group"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,11 +163,11 @@ export function Sidebar() {
                 }}
                 className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors ${
                   selectedGroupId === group.id
-                    ? 'bg-cosmic-accent/20 text-cosmic-accent'
-                    : 'text-cosmic-text hover:bg-cosmic-border'
+                    ? 'bg-accent-red/20 text-accent-red-text'
+                    : 'text-discord-text-primary hover:bg-discord-bg-modifier-hover'
                 }`}
               >
-                <div className="w-8 h-8 rounded-full bg-cosmic-accent/50 flex items-center justify-center text-sm font-medium">
+                <div className="w-8 h-8 rounded-full bg-accent-red/50 flex items-center justify-center text-sm font-medium">
                   {group.name.charAt(0).toUpperCase()}
                 </div>
                 <span className="truncate">{group.name}</span>
@@ -151,12 +175,66 @@ export function Sidebar() {
             ))}
 
             {groups.length === 0 && (
-              <p className="text-sm text-cosmic-muted px-2 py-4 text-center">
+              <p className="text-sm text-discord-text-muted px-2 py-4 text-center">
                 No groups yet. Create or join one!
               </p>
             )}
           </div>
         </div>
+
+        {/* Discovery Section - only show if enabled */}
+        {discoveryEnabled && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between px-2 mb-2">
+              <span className="text-xs uppercase text-discord-text-muted">Discovery</span>
+              <span className="text-xs text-green-400">
+                {discoveredUsers.length} online
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              {discoveredUsers.map((user) => {
+                const isAlreadyContact = contacts.some(
+                  (c) => c.publicKey === user.publicKey || user.publicKey.includes(c.publicKey) || c.publicKey.includes(user.publicKey)
+                );
+                const isAdding = addingUser === user.publicKey;
+
+                return (
+                  <div
+                    key={user.publicKey}
+                    className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-discord-bg-modifier-hover transition-colors"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusDotColor(user.status)}`}
+                      />
+                      <span className="text-sm text-discord-text-primary truncate">
+                        {user.displayName}
+                      </span>
+                    </div>
+                    {isAlreadyContact ? (
+                      <span className="text-xs text-discord-text-muted">Added</span>
+                    ) : (
+                      <button
+                        onClick={() => handleAddDiscoveredUser(user.publicKey, user.displayName)}
+                        disabled={isAdding}
+                        className="text-xs px-2 py-1 bg-accent-red/20 text-accent-red-text rounded hover:bg-accent-red/30 disabled:opacity-50 transition-colors"
+                      >
+                        {isAdding ? '...' : 'Add'}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+
+              {discoveredUsers.length === 0 && (
+                <p className="text-sm text-discord-text-muted px-2 py-4 text-center">
+                  No users discovered yet
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Group Dialogs */}
@@ -164,11 +242,11 @@ export function Sidebar() {
       <JoinGroupDialog isOpen={showJoinGroup} onClose={() => setShowJoinGroup(false)} />
 
       {/* Footer with connection status and settings */}
-      <div className="p-2 border-t border-cosmic-border">
+      <div className="p-2 border-t border-discord-bg-tertiary">
         <ConnectionIndicator />
         <button
           onClick={() => setActivePanel('settings')}
-          className="w-full px-3 py-2 text-left text-sm text-cosmic-muted hover:text-cosmic-text hover:bg-cosmic-border rounded-md transition-colors mt-1"
+          className="w-full px-3 py-2 text-left text-sm text-discord-text-muted hover:text-discord-text-primary hover:bg-discord-bg-modifier-hover rounded-md transition-colors mt-1"
         >
           Settings
         </button>

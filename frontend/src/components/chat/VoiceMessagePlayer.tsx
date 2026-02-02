@@ -172,7 +172,7 @@ export function VoiceMessagePlayer({ fileId, filename: _filename, duration: prop
         type="button"
         onClick={togglePlayPause}
         disabled={isLoading}
-        className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-cosmic-accent/20 hover:bg-cosmic-accent/30 text-cosmic-accent transition-colors disabled:opacity-50"
+        className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-accent-red/20 hover:bg-accent-red/30 text-accent-red-text transition-colors disabled:opacity-50"
         title={isPlaying ? 'Pause' : 'Play'}
       >
         {isLoading ? (
@@ -190,16 +190,16 @@ export function VoiceMessagePlayer({ fileId, filename: _filename, duration: prop
         <div
           ref={progressRef}
           onClick={handleProgressClick}
-          className="h-2 bg-cosmic-base rounded-full cursor-pointer relative overflow-hidden"
+          className="h-2 bg-discord-bg-tertiary rounded-full cursor-pointer relative overflow-hidden"
         >
           <div
-            className="absolute inset-y-0 left-0 bg-cosmic-accent rounded-full transition-all duration-100"
+            className="absolute inset-y-0 left-0 bg-accent-red rounded-full transition-all duration-100"
             style={{ width: `${progress}%` }}
           />
         </div>
 
         {/* Time display */}
-        <div className="flex justify-between text-xs text-cosmic-muted">
+        <div className="flex justify-between text-xs text-discord-text-muted">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>

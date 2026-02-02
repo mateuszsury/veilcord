@@ -68,20 +68,20 @@ export function FileMessageWrapper({ fileId, className = '' }: FileMessageWrappe
 
   if (loading) {
     return (
-      <div className={`inline-flex items-center gap-2 bg-cosmic-surface rounded px-3 py-2 ${className}`}>
-        <div className="w-4 h-4 border-2 border-cosmic-accent border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm text-cosmic-muted">Loading file...</span>
+      <div className={`inline-flex items-center gap-2 bg-discord-bg-secondary rounded px-3 py-2 ${className}`}>
+        <div className="w-4 h-4 border-2 border-accent-red border-t-transparent rounded-full animate-spin" />
+        <span className="text-sm text-discord-text-muted">Loading file...</span>
       </div>
     );
   }
 
   if (error || !metadata) {
     return (
-      <div className={`inline-flex items-center gap-2 bg-cosmic-surface rounded px-3 py-2 ${className}`}>
-        <svg className="w-5 h-5 text-cosmic-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className={`inline-flex items-center gap-2 bg-discord-bg-secondary rounded px-3 py-2 ${className}`}>
+        <svg className="w-5 h-5 text-status-busy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span className="text-sm text-cosmic-muted">{error || 'File not available'}</span>
+        <span className="text-sm text-discord-text-muted">{error || 'File not available'}</span>
       </div>
     );
   }

@@ -41,8 +41,8 @@ export function GroupMemberList({ groupId }: Props) {
   };
 
   return (
-    <div className="p-4 border-l border-cosmic-border w-64 bg-cosmic-surface/50">
-      <h3 className="text-sm font-semibold text-cosmic-muted uppercase mb-3">
+    <div className="p-4 border-l border-discord-bg-tertiary w-64 bg-discord-bg-secondary/50">
+      <h3 className="text-sm font-semibold text-discord-text-muted uppercase mb-3">
         Members ({members.length})
       </h3>
 
@@ -50,16 +50,16 @@ export function GroupMemberList({ groupId }: Props) {
         {members.map((member) => (
           <div
             key={member.public_key}
-            className="flex items-center justify-between p-2 rounded hover:bg-cosmic-border/50"
+            className="flex items-center justify-between p-2 rounded hover:bg-discord-bg-modifier-hover"
           >
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-cosmic-accent flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-accent-red flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
                 {member.display_name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-cosmic-text text-sm truncate">{member.display_name}</p>
+                <p className="text-discord-text-primary text-sm truncate">{member.display_name}</p>
                 {member.is_admin && (
-                  <span className="text-xs text-cosmic-accent">Admin</span>
+                  <span className="text-xs text-accent-red-text">Admin</span>
                 )}
               </div>
             </div>
@@ -67,7 +67,7 @@ export function GroupMemberList({ groupId }: Props) {
             {isAdmin && !member.is_admin && member.public_key !== identity?.publicKey && (
               <button
                 onClick={() => handleRemove(member.public_key)}
-                className="text-cosmic-muted hover:text-red-400 p-1 transition-colors"
+                className="text-discord-text-muted hover:text-red-400 p-1 transition-colors"
                 title="Remove member"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@ export function GroupMemberList({ groupId }: Props) {
         ))}
 
         {members.length === 0 && (
-          <p className="text-sm text-cosmic-muted text-center py-4">
+          <p className="text-sm text-discord-text-muted text-center py-4">
             No members yet
           </p>
         )}

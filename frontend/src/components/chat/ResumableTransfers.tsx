@@ -57,10 +57,10 @@ export function ResumableTransfers({ contactId }: Props) {
   }
 
   return (
-    <div className="border-b border-cosmic-border bg-cosmic-surface/50 px-4 py-2">
+    <div className="border-b border-discord-bg-tertiary bg-discord-bg-secondary/50 px-4 py-2">
       <div className="flex items-center gap-2 mb-2">
-        <Icon path={ICONS.upload} className="w-4 h-4 text-cosmic-muted" />
-        <span className="text-sm text-cosmic-muted">Resumable Transfers</span>
+        <Icon path={ICONS.upload} className="w-4 h-4 text-discord-text-muted" />
+        <span className="text-sm text-discord-text-muted">Resumable Transfers</span>
       </div>
 
       <div className="space-y-2">
@@ -70,28 +70,28 @@ export function ResumableTransfers({ contactId }: Props) {
           return (
             <div
               key={transfer.id}
-              className="flex items-center gap-3 p-2 rounded-lg bg-cosmic-bg/50"
+              className="flex items-center gap-3 p-2 rounded-lg bg-discord-bg-primary/50"
             >
               {/* File icon */}
-              <div className="p-2 rounded-lg bg-cosmic-accent/10 text-cosmic-accent">
+              <div className="p-2 rounded-lg bg-accent-red/10 text-accent-red-text">
                 <Icon path={ICONS.file} className="w-5 h-5" />
               </div>
 
               {/* File info */}
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-cosmic-text truncate">
+                <div className="text-sm font-medium text-discord-text-primary truncate">
                   {transfer.filename}
                 </div>
-                <div className="text-xs text-cosmic-muted">
+                <div className="text-xs text-discord-text-muted">
                   {formatSize(transfer.bytes_transferred)} / {formatSize(transfer.size)}
                   {' - '}
                   {progress.toFixed(0)}% complete
                 </div>
 
                 {/* Progress bar */}
-                <div className="mt-1 h-1 bg-cosmic-border rounded-full overflow-hidden">
+                <div className="mt-1 h-1 bg-discord-bg-modifier-active rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-cosmic-accent transition-all"
+                    className="h-full bg-accent-red transition-all"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -101,8 +101,8 @@ export function ResumableTransfers({ contactId }: Props) {
               <button
                 onClick={() => resumeTransfer(contactId, transfer.id)}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg
-                           bg-cosmic-accent text-white text-sm font-medium
-                           hover:bg-cosmic-accent/90 transition-colors"
+                           bg-accent-red text-white text-sm font-medium
+                           hover:bg-accent-red-hover transition-colors"
                 title="Resume transfer (select the same file)"
               >
                 <Icon path={ICONS.play} className="w-4 h-4" />
@@ -113,7 +113,7 @@ export function ResumableTransfers({ contactId }: Props) {
         })}
       </div>
 
-      <p className="mt-2 text-xs text-cosmic-muted">
+      <p className="mt-2 text-xs text-discord-text-muted">
         Click Resume and select the same file to continue the transfer.
       </p>
     </div>

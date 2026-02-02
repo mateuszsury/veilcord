@@ -63,14 +63,14 @@ export function GroupChatPanel({ groupId }: Props) {
 
   if (!group) {
     return (
-      <div className="flex-1 flex items-center justify-center text-cosmic-muted">
+      <div className="flex-1 flex items-center justify-center text-discord-text-muted">
         Group not found
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-cosmic-bg/50">
+    <div className="flex-1 flex flex-col min-h-0 bg-discord-bg-primary/50">
       <GroupHeader groupId={groupId} />
 
       <div className="flex-1 flex min-h-0 relative">
@@ -82,7 +82,7 @@ export function GroupChatPanel({ groupId }: Props) {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 ? (
-              <div className="text-center text-cosmic-muted py-8">
+              <div className="text-center text-discord-text-muted py-8">
                 No messages yet. Start the conversation!
               </div>
             ) : (
@@ -98,12 +98,12 @@ export function GroupChatPanel({ groupId }: Props) {
                     <div
                       className={`max-w-[70%] rounded-lg px-4 py-2 ${
                         isOwn
-                          ? 'bg-cosmic-accent text-white'
-                          : 'bg-cosmic-surface text-cosmic-text'
+                          ? 'bg-accent-red text-white'
+                          : 'bg-discord-bg-secondary text-discord-text-primary'
                       }`}
                     >
                       {!isOwn && (
-                        <div className="text-xs text-cosmic-accent mb-1">
+                        <div className="text-xs text-accent-red-text mb-1">
                           {getDisplayName(message.sender_public_key)}
                         </div>
                       )}
@@ -131,19 +131,19 @@ export function GroupChatPanel({ groupId }: Props) {
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSubmit} className="p-4 border-t border-cosmic-border">
+          <form onSubmit={handleSubmit} className="p-4 border-t border-discord-bg-tertiary">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type a message..."
-                className="flex-1 px-4 py-2 bg-cosmic-surface border border-cosmic-border rounded-lg text-cosmic-text placeholder-cosmic-muted focus:outline-none focus:border-cosmic-accent"
+                className="flex-1 px-4 py-2 bg-discord-bg-secondary border border-discord-bg-tertiary rounded-lg text-discord-text-primary placeholder-discord-text-muted focus:outline-none focus:border-accent-red"
               />
               <button
                 type="submit"
                 disabled={!input.trim()}
-                className="px-4 py-2 bg-cosmic-accent hover:bg-cosmic-accent/80 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                className="px-4 py-2 bg-accent-red hover:bg-accent-red-hover disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
               >
                 Send
               </button>
@@ -155,7 +155,7 @@ export function GroupChatPanel({ groupId }: Props) {
         {!showMembers && (
           <button
             onClick={() => setShowMembers(true)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 p-1 bg-cosmic-surface hover:bg-cosmic-border rounded-l text-cosmic-muted"
+            className="absolute right-0 top-1/2 -translate-y-1/2 p-1 bg-discord-bg-secondary hover:bg-discord-bg-modifier-hover rounded-l text-discord-text-muted"
             title="Show members"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +169,7 @@ export function GroupChatPanel({ groupId }: Props) {
           <div className="relative">
             <button
               onClick={() => setShowMembers(false)}
-              className="absolute left-2 top-2 p-1 hover:bg-cosmic-border rounded text-cosmic-muted z-10"
+              className="absolute left-2 top-2 p-1 hover:bg-discord-bg-modifier-hover rounded text-discord-text-muted z-10"
               title="Hide members"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

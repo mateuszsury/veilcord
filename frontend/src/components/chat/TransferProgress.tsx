@@ -28,7 +28,7 @@ export function TransferProgress({ contactId }: TransferProgressProps) {
   }
 
   return (
-    <div className="border-t border-cosmic-border p-4 space-y-3">
+    <div className="border-t border-discord-bg-tertiary p-4 space-y-3">
       {contactTransfers.map((transfer) => (
         <TransferItem
           key={transfer.transferId}
@@ -54,13 +54,13 @@ function TransferItem({ transfer, onCancel }: TransferItemProps) {
   const isActive = transfer.state === 'active' || transfer.state === 'pending';
 
   return (
-    <div className="bg-cosmic-surface rounded-lg p-3">
+    <div className="bg-discord-bg-secondary rounded-lg p-3">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             {/* File icon */}
             <svg
-              className="w-4 h-4 text-cosmic-accent flex-shrink-0"
+              className="w-4 h-4 text-accent-red-text flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -74,10 +74,10 @@ function TransferItem({ transfer, onCancel }: TransferItemProps) {
             </svg>
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-cosmic-text truncate">
+              <p className="text-sm font-medium text-discord-text-primary truncate">
                 {transfer.filename}
               </p>
-              <p className="text-xs text-cosmic-muted">
+              <p className="text-xs text-discord-text-muted">
                 {formatTransferInfo(transfer)}
               </p>
             </div>
@@ -88,7 +88,7 @@ function TransferItem({ transfer, onCancel }: TransferItemProps) {
         {isActive && (
           <button
             onClick={onCancel}
-            className="text-cosmic-muted hover:text-cosmic-danger transition-colors"
+            className="text-discord-text-muted hover:text-status-busy transition-colors"
             title="Cancel transfer"
           >
             <svg
@@ -109,22 +109,22 @@ function TransferItem({ transfer, onCancel }: TransferItemProps) {
       </div>
 
       {/* Progress bar */}
-      <div className="w-full bg-cosmic-bg rounded-full h-1.5">
+      <div className="w-full bg-discord-bg-primary rounded-full h-1.5">
         <div
-          className="bg-cosmic-accent h-1.5 rounded-full transition-all duration-300"
+          className="bg-accent-red h-1.5 rounded-full transition-all duration-300"
           style={{ width: `${Math.min(progress, 100)}%` }}
         />
       </div>
 
       {/* Status */}
       {transfer.state === 'failed' && (
-        <p className="text-xs text-cosmic-danger mt-1">Transfer failed</p>
+        <p className="text-xs text-status-busy mt-1">Transfer failed</p>
       )}
       {transfer.state === 'cancelled' && (
-        <p className="text-xs text-cosmic-muted mt-1">Cancelled</p>
+        <p className="text-xs text-discord-text-muted mt-1">Cancelled</p>
       )}
       {transfer.state === 'complete' && (
-        <p className="text-xs text-cosmic-success mt-1">Complete</p>
+        <p className="text-xs text-status-online mt-1">Complete</p>
       )}
     </div>
   );

@@ -47,12 +47,12 @@ export function StatusSelector() {
     <div ref={dropdownRef} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-cosmic-border transition-colors"
+        className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-discord-bg-modifier-hover transition-colors"
       >
         <span className={`w-2.5 h-2.5 rounded-full ${getStatusColor(userStatus)}`} />
-        <span className="text-sm text-cosmic-text">{getStatusLabel(userStatus)}</span>
+        <span className="text-sm text-discord-text-primary">{getStatusLabel(userStatus)}</span>
         <svg
-          className={`w-4 h-4 text-cosmic-muted transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-discord-text-muted transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -68,14 +68,14 @@ export function StatusSelector() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 mt-1 w-36 bg-cosmic-surface border border-cosmic-border rounded-md shadow-lg z-50"
+            className="absolute top-full left-0 mt-1 w-36 bg-discord-bg-secondary border border-discord-bg-tertiary rounded-md shadow-lg z-50"
           >
             {STATUS_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 onClick={() => handleStatusChange(option.value)}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm hover:bg-cosmic-border transition-colors first:rounded-t-md last:rounded-b-md ${
-                  userStatus === option.value ? 'text-cosmic-accent' : 'text-cosmic-text'
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm hover:bg-discord-bg-modifier-hover transition-colors first:rounded-t-md last:rounded-b-md ${
+                  userStatus === option.value ? 'text-accent-red-text' : 'text-discord-text-primary'
                 }`}
               >
                 <span className={`w-2.5 h-2.5 rounded-full ${option.color}`} />

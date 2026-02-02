@@ -112,7 +112,7 @@ export function VoiceRecorder({ contactId, onSent, onCancel }: VoiceRecorderProp
   }
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-cosmic-surface rounded-lg border border-cosmic-border">
+    <div className="flex items-center gap-3 p-3 bg-discord-bg-secondary rounded-lg border border-discord-bg-tertiary">
       {/* Recording indicator */}
       <div className="flex items-center gap-2">
         <div className="relative">
@@ -128,7 +128,7 @@ export function VoiceRecorder({ contactId, onSent, onCancel }: VoiceRecorderProp
       </div>
 
       {/* Duration display */}
-      <div className={`font-mono text-sm ${isNearMax ? 'text-red-400' : 'text-cosmic-text'}`}>
+      <div className={`font-mono text-sm ${isNearMax ? 'text-red-400' : 'text-discord-text-primary'}`}>
         {formatDuration(duration)}
         {isNearMax && !isAtMax && (
           <span className="text-xs text-red-400 ml-1">max 5:00</span>
@@ -144,7 +144,7 @@ export function VoiceRecorder({ contactId, onSent, onCancel }: VoiceRecorderProp
       <button
         type="button"
         onClick={handleCancel}
-        className="p-2 text-cosmic-muted hover:text-cosmic-text hover:bg-cosmic-border rounded-full transition-colors"
+        className="p-2 text-discord-text-muted hover:text-discord-text-primary hover:bg-discord-bg-modifier-hover rounded-full transition-colors"
         title="Cancel recording"
       >
         <Icon path={ICONS.x} />
@@ -155,7 +155,7 @@ export function VoiceRecorder({ contactId, onSent, onCancel }: VoiceRecorderProp
         type="button"
         onClick={handleSend}
         disabled={duration < 0.5}
-        className="p-2 bg-cosmic-accent text-white rounded-full hover:bg-cosmic-accent/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="p-2 bg-accent-red text-white rounded-full hover:bg-accent-red-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         title="Send voice message"
       >
         <Icon path={ICONS.send} />

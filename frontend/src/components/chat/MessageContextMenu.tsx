@@ -133,7 +133,7 @@ export function MessageContextMenu({
 
       {/* Context menu */}
       <div
-        className="fixed z-50 min-w-[160px] py-1 bg-cosmic-elevated rounded-lg shadow-xl border border-cosmic-border"
+        className="fixed z-50 min-w-[160px] py-1 bg-discord-bg-secondary rounded-lg shadow-xl border border-discord-bg-tertiary"
         style={{ left: adjustedX, top: adjustedY }}
       >
         {showReactionPicker && (
@@ -152,7 +152,7 @@ export function MessageContextMenu({
               className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
                 item.danger
                   ? 'text-red-400 hover:bg-red-500/10'
-                  : 'text-cosmic-text hover:bg-cosmic-hover'
+                  : 'text-discord-text-primary hover:bg-discord-bg-modifier-hover'
               }`}
             >
               <span className="opacity-70">{item.icon}</span>

@@ -70,8 +70,8 @@ export function GroupCallControls({ groupId }: Props) {
   };
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-cosmic-surface/50 border-b border-cosmic-border">
-      <div className="text-sm text-cosmic-muted">
+    <div className="flex items-center justify-between px-4 py-2 bg-discord-bg-secondary/50 border-b border-discord-bg-tertiary">
+      <div className="text-sm text-discord-text-muted">
         {isInCall ? (
           <span className="text-green-400">In group call</span>
         ) : (
@@ -87,7 +87,7 @@ export function GroupCallControls({ groupId }: Props) {
               className={`p-2 rounded-full transition-colors ${
                 muted
                   ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-cosmic-surface hover:bg-cosmic-border text-cosmic-text'
+                  : 'bg-discord-bg-secondary hover:bg-discord-bg-modifier-hover text-discord-text-primary'
               }`}
               title={muted ? 'Unmute' : 'Mute'}
             >

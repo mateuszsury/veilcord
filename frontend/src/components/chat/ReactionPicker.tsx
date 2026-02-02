@@ -28,7 +28,7 @@ export function ReactionPicker({ onSelect, onClose }: ReactionPickerProps) {
 
   return (
     <div
-      className="flex items-center gap-1 p-2 bg-cosmic-elevated rounded-lg shadow-lg border border-cosmic-border"
+      className="flex items-center gap-1 p-2 bg-discord-bg-secondary rounded-lg shadow-lg border border-discord-bg-tertiary"
       onClick={(e) => e.stopPropagation()}
     >
       {QUICK_REACTIONS.map(({ emoji, label }) => (
@@ -36,7 +36,7 @@ export function ReactionPicker({ onSelect, onClose }: ReactionPickerProps) {
           key={label}
           type="button"
           onClick={() => handleSelect(emoji)}
-          className="w-8 h-8 flex items-center justify-center rounded hover:bg-cosmic-hover transition-colors text-lg"
+          className="w-8 h-8 flex items-center justify-center rounded hover:bg-discord-bg-modifier-hover transition-colors text-lg"
           title={label}
         >
           {emoji}

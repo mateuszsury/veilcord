@@ -41,10 +41,10 @@ function AppContent() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-cosmic-bg text-red-400">
+      <div className="flex items-center justify-center h-screen bg-discord-bg-primary text-status-busy">
         <div className="text-center p-8">
           <h1 className="text-xl font-semibold mb-2">Initialization Error</h1>
-          <p className="text-cosmic-muted">{error}</p>
+          <p className="text-discord-text-muted">{error}</p>
         </div>
       </div>
     );
@@ -52,10 +52,10 @@ function AppContent() {
 
   if (!isReady) {
     return (
-      <div className="flex items-center justify-center h-screen bg-cosmic-bg">
+      <div className="flex items-center justify-center h-screen bg-discord-bg-primary">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-cosmic-accent border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-cosmic-muted">Loading DiscordOpus...</p>
+          <div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-discord-text-muted">Loading DiscordOpus...</p>
         </div>
       </div>
     );

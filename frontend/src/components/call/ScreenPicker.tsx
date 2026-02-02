@@ -80,10 +80,10 @@ export function ScreenPicker({ isOpen, onClose, onSelect }: ScreenPickerProps) {
       className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
       onClick={handleBackdropClick}
     >
-      <div className="bg-cosmic-surface rounded-xl border border-cosmic-border p-6 max-w-xl w-full mx-4 shadow-2xl">
+      <div className="bg-discord-bg-secondary rounded-xl border border-discord-bg-tertiary p-6 max-w-xl w-full mx-4 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-cosmic-text flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-discord-text-primary flex items-center gap-2">
             {/* Monitor icon */}
             <svg
               className="w-6 h-6"
@@ -104,7 +104,7 @@ export function ScreenPicker({ isOpen, onClose, onSelect }: ScreenPickerProps) {
           {/* Close button */}
           <button
             onClick={onClose}
-            className="text-cosmic-muted hover:text-cosmic-text transition-colors p-1"
+            className="text-discord-text-muted hover:text-discord-text-primary transition-colors p-1"
           >
             <svg
               className="w-6 h-6"
@@ -125,11 +125,11 @@ export function ScreenPicker({ isOpen, onClose, onSelect }: ScreenPickerProps) {
         {/* Content */}
         {loading ? (
           <div className="text-center py-8">
-            <p className="text-cosmic-muted">Loading monitors...</p>
+            <p className="text-discord-text-muted">Loading monitors...</p>
           </div>
         ) : monitors.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-cosmic-muted">No monitors detected</p>
+            <p className="text-discord-text-muted">No monitors detected</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
@@ -139,14 +139,14 @@ export function ScreenPicker({ isOpen, onClose, onSelect }: ScreenPickerProps) {
                 onClick={() => handleSelect(monitor.index)}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   selectedMonitor === monitor.index
-                    ? 'border-cosmic-accent bg-cosmic-accent/10'
-                    : 'border-cosmic-border hover:border-cosmic-accent/50 bg-cosmic-bg'
+                    ? 'border-accent-red bg-accent-red/10'
+                    : 'border-discord-bg-tertiary hover:border-accent-red/50 bg-discord-bg-primary'
                 }`}
               >
                 {/* Monitor visual representation */}
-                <div className="aspect-video bg-cosmic-surface rounded border border-cosmic-border mb-3 flex items-center justify-center">
+                <div className="aspect-video bg-discord-bg-secondary rounded border border-discord-bg-tertiary mb-3 flex items-center justify-center">
                   <svg
-                    className="w-8 h-8 text-cosmic-muted"
+                    className="w-8 h-8 text-discord-text-muted"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -162,19 +162,19 @@ export function ScreenPicker({ isOpen, onClose, onSelect }: ScreenPickerProps) {
 
                 {/* Monitor info */}
                 <div className="text-left">
-                  <p className="font-medium text-cosmic-text">
+                  <p className="font-medium text-discord-text-primary">
                     Monitor {monitor.index}
                     {monitor.index === 1 && (
-                      <span className="text-xs text-cosmic-accent ml-2">
+                      <span className="text-xs text-accent-red-text ml-2">
                         Primary
                       </span>
                     )}
                   </p>
-                  <p className="text-sm text-cosmic-muted">
+                  <p className="text-sm text-discord-text-muted">
                     {monitor.width} x {monitor.height}
                   </p>
                   {monitors.length > 1 && (
-                    <p className="text-xs text-cosmic-muted mt-1">
+                    <p className="text-xs text-discord-text-muted mt-1">
                       Position: ({monitor.left}, {monitor.top})
                     </p>
                   )}
@@ -182,7 +182,7 @@ export function ScreenPicker({ isOpen, onClose, onSelect }: ScreenPickerProps) {
 
                 {/* Selected indicator */}
                 {selectedMonitor === monitor.index && (
-                  <div className="mt-2 flex items-center gap-1 text-cosmic-accent text-sm">
+                  <div className="mt-2 flex items-center gap-1 text-accent-red-text text-sm">
                     <svg
                       className="w-4 h-4"
                       fill="currentColor"
@@ -206,7 +206,7 @@ export function ScreenPicker({ isOpen, onClose, onSelect }: ScreenPickerProps) {
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-cosmic-muted hover:text-cosmic-text transition-colors"
+            className="px-4 py-2 text-discord-text-muted hover:text-discord-text-primary transition-colors"
           >
             Cancel
           </button>
