@@ -19,6 +19,8 @@ from src.voice.models import CallState, CallEndReason, VoiceCall, CallEvent
 from src.voice.audio_track import MicrophoneAudioTrack, AudioPlaybackTrack
 from src.voice.video_track import CameraVideoTrack, ScreenShareTrack
 from src.network.stun import get_ice_servers
+from src.effects.tracks import AudioEffectsTrack, VideoEffectsTrack, VideoEffectsPipeline
+from src.effects.audio import AudioEffectChain
 
 
 logger = logging.getLogger(__name__)
@@ -123,6 +125,14 @@ class VoiceCallService:
 
         # Callback for remote video state changes
         self.on_remote_video: Optional[Callable[[bool, Any], None]] = None
+
+        # Effects track management
+        self._audio_effects_track: Optional[AudioEffectsTrack] = None
+        self._video_effects_track: Optional[VideoEffectsTrack] = None
+        self._audio_effect_chain: Optional[AudioEffectChain] = None
+        self._video_effects_pipeline: Optional[VideoEffectsPipeline] = None
+        self.audio_effects_enabled: bool = False
+        self.video_effects_enabled: bool = False
 
         # Timeouts
         self._ring_timeout = 30.0  # seconds
@@ -275,9 +285,18 @@ class VoiceCallService:
                 )
                 await self._mic_track.start()
 
-                # Add mic track to peer connection
-                self._pc.addTrack(self._mic_track)
-                logger.debug("Added microphone track to peer connection")
+                # Wrap with effects track if effects enabled
+                if self.audio_effects_enabled and self._audio_effect_chain:
+                    self._audio_effects_track = AudioEffectsTrack(
+                        source_track=self._mic_track,
+                        effect_chain=self._audio_effect_chain
+                    )
+                    self._pc.addTrack(self._audio_effects_track)
+                    logger.debug("Added audio effects track to peer connection")
+                else:
+                    # Add raw mic track
+                    self._pc.addTrack(self._mic_track)
+                    logger.debug("Added microphone track to peer connection")
 
                 # Create offer
                 offer = await self._pc.createOffer()
@@ -419,9 +438,18 @@ class VoiceCallService:
             )
             await self._mic_track.start()
 
-            # Add mic track to peer connection
-            self._pc.addTrack(self._mic_track)
-            logger.debug("Added microphone track")
+            # Wrap with effects track if effects enabled
+            if self.audio_effects_enabled and self._audio_effect_chain:
+                self._audio_effects_track = AudioEffectsTrack(
+                    source_track=self._mic_track,
+                    effect_chain=self._audio_effect_chain
+                )
+                self._pc.addTrack(self._audio_effects_track)
+                logger.debug("Added audio effects track to peer connection")
+            else:
+                # Add raw mic track
+                self._pc.addTrack(self._mic_track)
+                logger.debug("Added microphone track")
 
             # Create answer
             answer = await self._pc.createAnswer()
@@ -626,6 +654,14 @@ class VoiceCallService:
 
     async def _cleanup(self) -> None:
         """Clean up call resources."""
+        # Clean up audio effects track
+        if self._audio_effects_track:
+            try:
+                await self._audio_effects_track.stop()
+            except Exception as e:
+                logger.debug(f"Error stopping audio effects track: {e}")
+            self._audio_effects_track = None
+
         if self._mic_track:
             try:
                 await self._mic_track.stop()
@@ -639,6 +675,14 @@ class VoiceCallService:
             except Exception as e:
                 logger.debug(f"Error stopping playback: {e}")
             self._playback = None
+
+        # Clean up video effects track
+        if self._video_effects_track:
+            try:
+                await self._video_effects_track.stop()
+            except Exception as e:
+                logger.debug(f"Error stopping video effects track: {e}")
+            self._video_effects_track = None
 
         # Clean up video track
         if self._video_track:
@@ -749,6 +793,56 @@ class VoiceCallService:
         self._input_device_id = input_id
         self._output_device_id = output_id
         logger.debug(f"Audio devices set: input={input_id}, output={output_id}")
+
+    def set_audio_effects(self, enabled: bool, chain: Optional[AudioEffectChain] = None) -> None:
+        """
+        Enable or disable audio effects and optionally set effect chain.
+
+        Can be called before or during an active call.
+        During a call, effects track will update immediately.
+
+        Args:
+            enabled: True to enable effects, False to disable
+            chain: Effect chain to use (if None, keeps existing chain)
+        """
+        self.audio_effects_enabled = enabled
+
+        if chain is not None:
+            self._audio_effect_chain = chain
+
+        # Update effects track if in active call
+        if self._audio_effects_track:
+            self._audio_effects_track.effects_enabled = enabled
+            if chain is not None:
+                self._audio_effects_track.set_effect_chain(chain)
+            logger.info(f"Updated audio effects mid-call: enabled={enabled}")
+
+        logger.debug(f"Audio effects set: enabled={enabled}")
+
+    def set_video_effects(self, enabled: bool, pipeline: Optional[VideoEffectsPipeline] = None) -> None:
+        """
+        Enable or disable video effects and optionally set effect pipeline.
+
+        Can be called before or during an active call.
+        During a call, effects track will update immediately.
+
+        Args:
+            enabled: True to enable effects, False to disable
+            pipeline: Effect pipeline to use (if None, keeps existing pipeline)
+        """
+        self.video_effects_enabled = enabled
+
+        if pipeline is not None:
+            self._video_effects_pipeline = pipeline
+
+        # Update effects track if in active call
+        if self._video_effects_track:
+            self._video_effects_track.effects_enabled = enabled
+            if pipeline is not None:
+                self._video_effects_track.set_pipeline(pipeline)
+            logger.info(f"Updated video effects mid-call: enabled={enabled}")
+
+        logger.debug(f"Video effects set: enabled={enabled}")
 
     async def _start_ring_timeout(self) -> None:
         """Start timeout for unanswered call."""
@@ -932,9 +1026,18 @@ class VoiceCallService:
                 logger.error(f"Unknown video source: {video_source}")
                 return False
 
-            # Add track to peer connection
-            self._pc.addTrack(self._video_track)
-            logger.debug("Added video track to peer connection")
+            # Wrap with effects track if effects enabled
+            if self.video_effects_enabled and self._video_effects_pipeline:
+                self._video_effects_track = VideoEffectsTrack(
+                    source_track=self._video_track,
+                    pipeline=self._video_effects_pipeline
+                )
+                self._pc.addTrack(self._video_effects_track)
+                logger.debug("Added video effects track to peer connection")
+            else:
+                # Add raw video track
+                self._pc.addTrack(self._video_track)
+                logger.debug("Added video track to peer connection")
 
             # Trigger renegotiation
             offer = await self._pc.createOffer()
