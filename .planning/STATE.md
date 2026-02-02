@@ -28,15 +28,15 @@ See: .planning/PROJECT.md
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
-| 9 | Audio & Video Effects | IN PROGRESS | 4/12 | TBD |
+| 9 | Audio & Video Effects | IN PROGRESS | 5/12 | TBD |
 
 **Total:** 73/73 requirements completed (100% - v1.0 milestone)
-**Phase 9 Progress:** 4/12 plans completed
+**Phase 9 Progress:** 5/12 plans completed
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 54
+- Plans completed: 55
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -182,6 +182,9 @@ See: .planning/PROJECT.md
 | 2026-02-02 | Singleton pattern for HardwareDetector | Hardware capabilities don't change during app runtime, cache results | Efficient re-detection avoidance, single source of truth |
 | 2026-02-02 | QualityPreset CUDA→ULTRA, OpenCL→HIGH, CPU→MEDIUM | Auto-select best quality based on hardware capabilities | Optimal quality with graceful CPU fallback |
 | 2026-02-02 | GPUtil as optional dependency | Only works with NVIDIA GPUs, not all users have NVIDIA | Graceful degradation for non-NVIDIA or integrated graphics |
+| 2026-02-02 | Blur strength mapping for virtual backgrounds | Map 1-100 to Gaussian kernel 15-95 (15 + strength * 0.8) | Intuitive user control with technical precision |
+| 2026-02-02 | AnimatedBackground preloads all frames | GIF/video frames loaded to memory for smooth playback | Prevents I/O latency during real-time processing |
+| 2026-02-02 | Background image caching by frame size | Cache resized backgrounds to avoid repeated cv2.resize | Performance optimization for real-time video |
 
 ### Active TODOs
 
@@ -244,6 +247,7 @@ See: .planning/PROJECT.md
 - [x] Execute 09-02-PLAN.md (noise cancellation with DeepFilterNet3 and RNNoise)
 - [x] Execute 09-03-PLAN.md (audio effects chain with Pedalboard)
 - [x] Execute 09-04-PLAN.md (video processing core with MediaPipe)
+- [x] Execute 09-05-PLAN.md (virtual background effects)
 
 ### Blockers
 
@@ -255,21 +259,22 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-02-02 - Completed 09-02-PLAN.md
+**Last session:** 2026-02-02 - Completed 09-05-PLAN.md
 
 **What we just completed:**
-- 09-02: Core audio processing infrastructure with AI-based noise cancellation
-  - NoiseReducer with DeepFilterNet3 (GPU) and RNNoise (CPU) fallback
-  - Hardware-adaptive method selection based on CUDA/OpenCL availability
-  - AudioEffectChain framework for composing multiple effects in correct order
-  - AudioEffect abstract base class for standardized effect interface
-  - Latency tracking with 150ms threshold warnings
-  - 3 tasks completed in 6 minutes
+- 09-05: Virtual background effects with MediaPipe segmentation
+  - VirtualBackground class with 5 modes (NONE, BLUR, COLOR, IMAGE, ANIMATED)
+  - Background blur with configurable strength (1-100)
+  - Solid color and custom image replacement
+  - AnimatedBackground helper for GIF/video loop playback
+  - Edge smoothing for natural person/background blending
+  - 9 built-in presets (blur levels, solid colors, themed images)
+  - 2 tasks completed in 3 minutes
 
 **What's next:**
-- Continue Phase 9 execution (5/12 plans remaining)
-- Plans 09-01, 09-03, 09-04 already completed by previous session
-- Execute remaining plans: 09-05 through 09-12
+- Continue Phase 9 execution (7/12 plans remaining)
+- Plans 09-01, 09-02, 09-03, 09-04, 09-05 complete
+- Execute remaining plans: 09-06 through 09-12
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8 deferred - should be run before production
@@ -281,6 +286,8 @@ See: .planning/PROJECT.md
 - .planning/phases/09-audio-video-effects/09-02-SUMMARY.md
 - .planning/phases/09-audio-video-effects/09-03-SUMMARY.md
 - .planning/phases/09-audio-video-effects/09-04-SUMMARY.md
+- .planning/phases/09-audio-video-effects/09-05-SUMMARY.md
+- src/effects/video/virtual_background.py
 - src/effects/hardware/__init__.py
 - src/effects/hardware/gpu_detector.py
 - src/effects/hardware/quality_adapter.py
