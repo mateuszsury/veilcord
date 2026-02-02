@@ -1,8 +1,8 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 10 - UI/UX Redesign
-**Status:** In progress (4/10 plans complete)
-**Last Updated:** 2026-02-02T08:05:00Z
+**Status:** In progress (5/10 plans complete)
+**Last Updated:** 2026-02-02T07:02:00Z
 
 ## Project Reference
 
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
 | 9 | Audio & Video Effects | COMPLETE | 12/12 | 8 |
-| 10 | UI/UX Redesign | IN PROGRESS | 4/10 | - |
+| 10 | UI/UX Redesign | IN PROGRESS | 5/10 | - |
 
 **Total:** 81/81 core requirements completed (100% - v1.0 complete)
-**Phase 10 Progress:** 4/10 plans completed (10-01 Design System, 10-02 UI Primitives, 10-03 IconBar, 10-04 ChannelList COMPLETE)
+**Phase 10 Progress:** 5/10 plans completed (10-01 Design System, 10-02 UI Primitives, 10-03 IconBar, 10-04 ChannelList, 10-05 Layout Assembly COMPLETE)
 
 ## Performance Metrics
 
@@ -220,6 +220,8 @@ See: .planning/PROJECT.md
 | 2026-02-02 | AnimatePresence for channel list transitions | Slide animations x: -20 to 0 to 20 when switching sections | Smooth visual feedback for section changes |
 | 2026-02-02 | UserStatus to StatusType mapping | Backend has 6 statuses, UI Badge only supports 4 | invisible/unknown/offline all map to 'offline' |
 | 2026-02-02 | as const for framer-motion ease arrays | TypeScript requires const assertion for tuple types | Proper typing for transition objects |
+| 2026-02-02 | CSS Grid with CSS variables for layout | grid-template-columns: var(--sidebar-icon-width) var(--sidebar-channel-width) 1fr | Responsive columns using design system tokens |
+| 2026-02-02 | Custom grid-cols-discord CSS class | Define once in index.css, use everywhere | Cleaner JSX than inline styles |
 
 ### Active TODOs
 
@@ -294,6 +296,7 @@ See: .planning/PROJECT.md
 - [x] Execute 10-02-PLAN.md (UI primitives) - Button, Avatar, Badge, Tooltip components
 - [x] Execute 10-03-PLAN.md (IconBar component) - Section navigation with icons
 - [x] Execute 10-04-PLAN.md (ChannelList panel) - ContactList, GroupList, HomePanel with slide transitions
+- [x] Execute 10-05-PLAN.md (Layout assembly) - CSS Grid three-column layout with IconBar, ChannelList, MainPanel
 
 ### Blockers
 
@@ -305,22 +308,22 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-02-02 - Completed 10-04-PLAN.md
+**Last session:** 2026-02-02 - Completed 10-05-PLAN.md
 
 **What we just completed:**
-- 10-04: Channel List Panel
-  - ChannelList container with 240px width and AnimatePresence transitions
-  - ContactList with Avatar, status indicators, and selection
-  - GroupList with member counts and create/join buttons
-  - HomePanel with app branding and welcome message
-  - Slide animations (x: -20 to 0 to 20) for section changes
-  - 3 tasks completed in 8 minutes
-  - **Phase 10 Plan 04 COMPLETE**
+- 10-05: Layout Assembly
+  - CSS Grid three-column layout (80px + 240px + 1fr)
+  - AppLayout uses IconBar, ChannelList, MainPanel instead of old Sidebar
+  - Custom grid-cols-discord class using CSS variables
+  - MainPanel simplified with Discord colors
+  - Barrel export file for all layout components
+  - 3 tasks completed in 5 minutes
+  - **Phase 10 Plan 05 COMPLETE**
 
 **What's next:**
-- Execute 10-05-PLAN.md (AppLayout assembly)
-- Continue Phase 10 UI/UX Redesign plans 05-10
-- ChannelList ready for integration with IconBar in AppLayout
+- Execute 10-06-PLAN.md (ChatPanel redesign)
+- Continue Phase 10 UI/UX Redesign plans 06-10
+- Three-column layout ready for content component updates
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8, 9 deferred - should be run before production
