@@ -2,7 +2,7 @@
 
 **Current Phase:** Phase 9 - Audio & Video Effects
 **Status:** v1.1 in progress (v1.0 complete)
-**Last Updated:** 2026-02-02T06:12:00Z
+**Last Updated:** 2026-02-02T05:13:44Z
 
 ## Project Reference
 
@@ -28,16 +28,16 @@ See: .planning/PROJECT.md
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
-| 9 | Audio & Video Effects | IN PROGRESS | 5/12 | TBD |
+| 9 | Audio & Video Effects | IN PROGRESS | 7/12 | TBD |
 
 **Total:** 73/73 requirements completed (100% - v1.0 milestone)
-**Phase 9 Progress:** 5/12 plans completed (09-01, 09-02, 09-03, 09-04, 09-05 complete)
+**Phase 9 Progress:** 7/12 plans completed (09-01, 09-02, 09-03, 09-04, 09-05, 09-06, 09-07 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 56
-- Average plan duration: 12m
+- Plans completed: 58
+- Average plan duration: 11m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -253,6 +253,8 @@ See: .planning/PROJECT.md
 - [x] Execute 09-03-PLAN.md (audio effects chain with Pedalboard)
 - [x] Execute 09-04-PLAN.md (video processing core with MediaPipe)
 - [x] Execute 09-05-PLAN.md (virtual background effects)
+- [x] Execute 09-06-PLAN.md (creative video filters)
+- [x] Execute 09-07-PLAN.md (AR face overlays)
 
 ### Blockers
 
@@ -264,22 +266,24 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-02-02 - Completed 09-05-PLAN.md
+**Last session:** 2026-02-02 - Completed 09-07-PLAN.md
 
 **What we just completed:**
-- 09-05: Virtual background effects with MediaPipe segmentation
-  - VirtualBackground class with 5 modes (NONE, BLUR, COLOR, IMAGE, ANIMATED)
-  - Background blur with configurable strength (1-100)
-  - Solid color and custom image replacement
-  - AnimatedBackground helper for GIF/video loop playback
-  - Edge smoothing for natural person/background blending
-  - 9 built-in presets (blur levels, solid colors, themed images)
-  - 2 tasks completed in 3 minutes
+- 09-07: AR face overlays with MediaPipe landmarks
+  - AROverlay system with 8 overlay types (glasses, sunglasses, hat, mask, face_filter, mustache, ears, custom)
+  - MediaPipe landmark anchors for precise positioning (eyes 33/263, forehead 10, etc.)
+  - Alpha blending with rotation and scaling based on face angle
+  - AROverlayManager for multi-overlay composition
+  - 8 built-in overlay presets ready for PNG assets
+  - Placeholder generation for testing without actual assets
+  - Graceful degradation when face not detected
+  - 3 tasks completed in 5 minutes
+  - Bug fix: FaceTracker attribute initialization when MediaPipe unavailable
 
 **What's next:**
-- Continue Phase 9 execution (7/12 plans remaining)
-- Plans 09-01, 09-02, 09-03, 09-04, 09-05 complete
-- Execute remaining plans: 09-06 through 09-12
+- Continue Phase 9 execution (5/12 plans remaining)
+- Plans 09-01, 09-02, 09-03, 09-04, 09-05, 09-06, 09-07 complete
+- Execute remaining plans: 09-08 through 09-12
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8 deferred - should be run before production
@@ -292,7 +296,8 @@ See: .planning/PROJECT.md
 - .planning/phases/09-audio-video-effects/09-03-SUMMARY.md
 - .planning/phases/09-audio-video-effects/09-04-SUMMARY.md
 - .planning/phases/09-audio-video-effects/09-05-SUMMARY.md
-- src/effects/video/virtual_background.py
+- .planning/phases/09-audio-video-effects/09-06-SUMMARY.md
+- .planning/phases/09-audio-video-effects/09-07-SUMMARY.md
 - src/effects/hardware/__init__.py
 - src/effects/hardware/gpu_detector.py
 - src/effects/hardware/quality_adapter.py
@@ -305,6 +310,12 @@ See: .planning/PROJECT.md
 - src/effects/video/__init__.py
 - src/effects/video/face_tracker.py
 - src/effects/video/segmentation.py
+- src/effects/video/virtual_background.py
+- src/effects/video/beauty_filters.py
+- src/effects/video/creative_filters.py
+- src/effects/video/ar_overlays.py
+- assets/overlays/.gitkeep
+- assets/overlays/README.md
 
 **Files modified this session:**
 - requirements.txt (Phase 9 dependencies: deepfilternet, pyrnnoise, pedalboard, mediapipe, psutil)
@@ -319,4 +330,4 @@ See: .planning/PROJECT.md
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-02-02 after completing 09-03*
+*Last updated: 2026-02-02 after completing 09-07*
