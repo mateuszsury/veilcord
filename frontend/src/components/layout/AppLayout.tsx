@@ -7,15 +7,14 @@ import { ActiveCallOverlay } from '@/components/call/ActiveCallOverlay';
 /**
  * Main application layout with sidebar and main panel.
  *
- * The starry-bg class applies the cosmic starfield background
- * defined in index.css.
+ * Uses Discord dark theme background (bg-discord-bg-primary).
  *
  * Global components (UpdatePrompt, IncomingCallPopup, ActiveCallOverlay)
  * are rendered here so they appear regardless of which panel is active.
  */
 export function AppLayout() {
   return (
-    <div className="flex h-screen w-screen overflow-hidden starry-bg">
+    <div className="flex h-screen w-screen overflow-hidden bg-discord-bg-primary">
       <UpdatePrompt />
       <Sidebar />
       <MainPanel />
