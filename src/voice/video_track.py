@@ -8,7 +8,7 @@ and screen content via aiortc's VideoStreamTrack.
 import asyncio
 import fractions
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
 import cv2
 import numpy as np
@@ -17,6 +17,17 @@ from av import VideoFrame
 from mss import mss
 
 logger = logging.getLogger(__name__)
+
+# Import screen overlays (lazy import to avoid circular dependencies)
+_ScreenOverlayManager = None
+
+def _get_overlay_manager_class():
+    """Lazy import of ScreenOverlayManager."""
+    global _ScreenOverlayManager
+    if _ScreenOverlayManager is None:
+        from src.effects.video.screen_overlays import ScreenOverlayManager
+        _ScreenOverlayManager = ScreenOverlayManager
+    return _ScreenOverlayManager
 
 
 class CameraVideoTrack(VideoStreamTrack):
@@ -196,6 +207,10 @@ class ScreenShareTrack(VideoStreamTrack):
         self._frame_duration = fractions.Fraction(1, fps)
         self._monitor: Optional[dict] = None
 
+        # Screen overlay support
+        self._overlay_manager = None
+        self.overlays_enabled: bool = False
+
         # Initialize mss
         self._open_screen()
 
@@ -269,6 +284,13 @@ class ScreenShareTrack(VideoStreamTrack):
                 logger.error(f"Error capturing screen: {e}")
                 frame_rgb = self._create_black_frame()
 
+        # Apply overlays if enabled
+        if self.overlays_enabled and self._overlay_manager is not None:
+            try:
+                frame_rgb = self._overlay_manager.process(frame_rgb)
+            except Exception as e:
+                logger.error(f"Error applying screen overlays: {e}")
+
         # Store the frame for API access
         self._last_frame = frame_rgb
 
@@ -278,6 +300,138 @@ class ScreenShareTrack(VideoStreamTrack):
         frame.time_base = time_base
 
         return frame
+
+    def set_overlay_manager(self, manager):
+        """
+        Set overlay manager for screen capture.
+
+        Args:
+            manager: ScreenOverlayManager instance
+
+        Note:
+            Import ScreenOverlayManager from src.effects.video.screen_overlays
+        """
+        self._overlay_manager = manager
+        self.overlays_enabled = True
+        logger.info("Screen overlay manager set")
+
+    def set_watermark(
+        self,
+        text: Optional[str] = None,
+        image_path: Optional[str] = None,
+        position: str = "bottom_right"
+    ):
+        """
+        Convenience method to add watermark overlay.
+
+        Args:
+            text: Watermark text (mutually exclusive with image_path)
+            image_path: Path to watermark image (mutually exclusive with text)
+            position: Watermark position ("top_left", "top_right", "bottom_left",
+                     "bottom_right", "center")
+
+        Examples:
+            >>> track.set_watermark(text="My Stream", position="bottom_right")
+            >>> track.set_watermark(image_path="logo.png", position="top_left")
+        """
+        from src.effects.video.screen_overlays import (
+            ScreenOverlayManager, WatermarkOverlay
+        )
+
+        # Create manager if doesn't exist
+        if self._overlay_manager is None:
+            self._overlay_manager = ScreenOverlayManager()
+
+        # Remove existing watermark
+        self._overlay_manager.remove_overlay(WatermarkOverlay)
+
+        # Add new watermark
+        watermark = WatermarkOverlay(text=text, image_path=image_path, position=position)
+        self._overlay_manager.add_overlay(watermark)
+        self.overlays_enabled = True
+
+        logger.info(f"Watermark overlay added: text={text}, image={image_path}")
+
+    def set_border(
+        self,
+        enabled: bool,
+        color: Tuple[int, int, int] = (0, 120, 255),
+        thickness: int = 3
+    ):
+        """
+        Toggle border overlay.
+
+        Args:
+            enabled: Enable/disable border
+            color: RGB border color (default: blue)
+            thickness: Border thickness in pixels
+
+        Examples:
+            >>> track.set_border(True, color=(255, 0, 0), thickness=5)
+            >>> track.set_border(False)  # Disable border
+        """
+        from src.effects.video.screen_overlays import (
+            ScreenOverlayManager, BorderOverlay
+        )
+
+        # Create manager if doesn't exist
+        if self._overlay_manager is None:
+            self._overlay_manager = ScreenOverlayManager()
+
+        # Remove existing border
+        self._overlay_manager.remove_overlay(BorderOverlay)
+
+        if enabled:
+            # Add new border
+            border = BorderOverlay(color=color, thickness=thickness)
+            self._overlay_manager.add_overlay(border)
+            self.overlays_enabled = True
+            logger.info(f"Border overlay enabled: color={color}, thickness={thickness}")
+        else:
+            logger.info("Border overlay disabled")
+
+    def set_cursor_highlight(self, enabled: bool):
+        """
+        Toggle cursor highlight overlay.
+
+        Args:
+            enabled: Enable/disable cursor highlight
+
+        Note:
+            Cursor position must be set externally using track._overlay_manager
+            to access the CursorHighlight instance, as mss doesn't provide cursor
+            position automatically. Use pyautogui.position() or similar to track
+            cursor and update via:
+
+            >>> import pyautogui
+            >>> cursor_overlay = [o for o in track._overlay_manager.overlays
+            ...                   if isinstance(o, CursorHighlight)][0]
+            >>> x, y = pyautogui.position()
+            >>> cursor_overlay.set_cursor_position(x, y)
+
+        Examples:
+            >>> track.set_cursor_highlight(True)
+            >>> track.set_cursor_highlight(False)  # Disable highlight
+        """
+        from src.effects.video.screen_overlays import (
+            ScreenOverlayManager, CursorHighlight
+        )
+
+        # Create manager if doesn't exist
+        if self._overlay_manager is None:
+            self._overlay_manager = ScreenOverlayManager()
+
+        # Remove existing cursor highlight
+        self._overlay_manager.remove_overlay(CursorHighlight)
+
+        if enabled:
+            # Add new cursor highlight
+            cursor = CursorHighlight(color=(255, 255, 0), radius=30, style="circle")
+            self._overlay_manager.add_overlay(cursor)
+            self.overlays_enabled = True
+            logger.info("Cursor highlight overlay enabled")
+        else:
+            logger.info("Cursor highlight overlay disabled")
 
     async def stop(self):
         """Stop screen capture and release resources."""
@@ -291,3 +445,5 @@ class ScreenShareTrack(VideoStreamTrack):
         self._pts = 0
         self._last_frame = None
         self._monitor = None
+        self._overlay_manager = None
+        self.overlays_enabled = False

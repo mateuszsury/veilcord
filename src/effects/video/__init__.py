@@ -2,7 +2,8 @@
 Video effects module for real-time video processing.
 
 Provides face tracking, background segmentation, beauty filters, creative
-effects, and AR overlays using MediaPipe and OpenCV for DiscordOpus video calls.
+effects, AR overlays, and screen sharing overlays using MediaPipe and OpenCV
+for DiscordOpus video calls.
 
 Available effects:
 - Face tracking with 478 facial landmarks (MediaPipe Face Mesh)
@@ -10,6 +11,7 @@ Available effects:
 - Beauty filters (skin smoothing, lighting correction)
 - Creative filters (vintage, cartoon, color grading, vignette)
 - AR overlays (glasses, hats, masks, face filters)
+- Screen overlays (watermarks, borders, cursor highlight)
 - Video effect base class for custom effects
 
 Classes:
@@ -28,6 +30,11 @@ Classes:
     AROverlay: Base class for AR face overlays
     AROverlayManager: Manager for multiple AR overlays
     GlassesOverlay, SunglassesOverlay, HatOverlay, etc.: Specialized overlays
+    ScreenOverlay: Base class for screen overlays
+    WatermarkOverlay: Text or image watermarks for screen sharing
+    BorderOverlay: Border/frame overlay for screen sharing
+    CursorHighlight: Cursor position highlighting for screen sharing
+    ScreenOverlayManager: Manager for multiple screen overlays
 
 Constants:
     VIDEO_FILTER_PRESETS: Dictionary of all available filter presets
@@ -110,6 +117,15 @@ from .creative_filters import (
     CREATIVE_PRESETS,
 )
 
+# Import screen overlays (always available with OpenCV)
+from .screen_overlays import (
+    ScreenOverlay,
+    WatermarkOverlay,
+    BorderOverlay,
+    CursorHighlight,
+    ScreenOverlayManager,
+)
+
 # Import AR overlays (requires MediaPipe)
 try:
     from .ar_overlays import (
@@ -146,6 +162,11 @@ __all__.extend([
     "CREATIVE_PRESETS",
     "VIDEO_FILTER_PRESETS",
     "create_filter_preset",
+    "ScreenOverlay",
+    "WatermarkOverlay",
+    "BorderOverlay",
+    "CursorHighlight",
+    "ScreenOverlayManager",
 ])
 
 if AR_OVERLAYS_AVAILABLE:
