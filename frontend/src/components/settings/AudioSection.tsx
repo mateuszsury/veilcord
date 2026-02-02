@@ -9,6 +9,8 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/pywebview';
+import { Button } from '@/components/ui/Button';
+import { Mic, Volume2, RefreshCw } from 'lucide-react';
 
 interface AudioDevice {
   id: number;
@@ -116,79 +118,122 @@ export function AudioSection() {
 
   if (loading) {
     return (
-      <div className="space-y-4 p-4 bg-cosmic-surface/50 rounded-xl border border-cosmic-border">
-        <h3 className="text-lg font-semibold text-cosmic-text">Audio</h3>
-        <p className="text-cosmic-muted">Loading devices...</p>
-      </div>
+      <section className="space-y-6">
+        <h3 className="text-lg font-semibold text-discord-text-primary">
+          Voice & Audio
+        </h3>
+        <div className="h-px bg-discord-bg-tertiary" />
+        <p className="text-sm text-discord-text-muted">Loading devices...</p>
+      </section>
     );
   }
 
   return (
-    <div className="space-y-6 p-4 bg-cosmic-surface/50 rounded-xl border border-cosmic-border">
-      <h3 className="text-lg font-semibold text-cosmic-text">Audio</h3>
+    <section className="space-y-6">
+      <h3 className="text-lg font-semibold text-discord-text-primary">
+        Voice & Audio
+      </h3>
 
-      {/* Microphone selection */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-cosmic-muted">
-          Microphone
-        </label>
-        <select
-          value={selectedInput ?? ''}
-          onChange={(e) => handleInputChange(Number(e.target.value))}
-          className="w-full bg-cosmic-bg text-cosmic-text rounded-lg px-3 py-2 border border-cosmic-border focus:border-cosmic-accent focus:outline-none"
-        >
-          {inputDevices.length === 0 ? (
-            <option value="">No microphones found</option>
-          ) : (
-            inputDevices.map((device) => (
-              <option key={device.id} value={device.id}>
-                {device.name}
-              </option>
-            ))
-          )}
-        </select>
+      <div className="h-px bg-discord-bg-tertiary" />
+
+      <div className="space-y-4">
+        {/* Microphone selection */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary flex items-center gap-2">
+              <Mic size={16} />
+              Microphone
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
+              Select your input device for voice calls
+            </p>
+          </div>
+          <select
+            value={selectedInput ?? ''}
+            onChange={(e) => handleInputChange(Number(e.target.value))}
+            className="
+              w-64 bg-discord-bg-tertiary border border-discord-bg-modifier-active
+              rounded-md px-3 py-2 text-discord-text-primary
+              focus:ring-2 focus:ring-accent-red focus:border-transparent
+              focus:outline-none
+            "
+          >
+            {inputDevices.length === 0 ? (
+              <option value="">No microphones found</option>
+            ) : (
+              inputDevices.map((device) => (
+                <option key={device.id} value={device.id}>
+                  {device.name}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
+        {/* Speaker selection */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary flex items-center gap-2">
+              <Volume2 size={16} />
+              Speaker
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
+              Select your output device for audio playback
+            </p>
+          </div>
+          <select
+            value={selectedOutput ?? ''}
+            onChange={(e) => handleOutputChange(Number(e.target.value))}
+            className="
+              w-64 bg-discord-bg-tertiary border border-discord-bg-modifier-active
+              rounded-md px-3 py-2 text-discord-text-primary
+              focus:ring-2 focus:ring-accent-red focus:border-transparent
+              focus:outline-none
+            "
+          >
+            {outputDevices.length === 0 ? (
+              <option value="">No speakers found</option>
+            ) : (
+              outputDevices.map((device) => (
+                <option key={device.id} value={device.id}>
+                  {device.name}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
+        {/* Test microphone */}
+        <div className="flex items-start justify-between gap-4 pt-2">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary">
+              Microphone Test
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
+              Records for 2 seconds and plays back so you can hear yourself
+            </p>
+            {testStatus && (
+              <p className="text-sm text-accent-red-text mt-2 animate-pulse">
+                {testStatus}
+              </p>
+            )}
+          </div>
+          <Button
+            onClick={testMicrophone}
+            disabled={testing || selectedInput === null || inputDevices.length === 0}
+            variant="secondary"
+          >
+            {testing ? (
+              <>
+                <RefreshCw size={14} className="animate-spin" />
+                <span className="ml-1">Testing...</span>
+              </>
+            ) : (
+              'Test Microphone'
+            )}
+          </Button>
+        </div>
       </div>
-
-      {/* Speaker selection */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-cosmic-muted">
-          Speaker
-        </label>
-        <select
-          value={selectedOutput ?? ''}
-          onChange={(e) => handleOutputChange(Number(e.target.value))}
-          className="w-full bg-cosmic-bg text-cosmic-text rounded-lg px-3 py-2 border border-cosmic-border focus:border-cosmic-accent focus:outline-none"
-        >
-          {outputDevices.length === 0 ? (
-            <option value="">No speakers found</option>
-          ) : (
-            outputDevices.map((device) => (
-              <option key={device.id} value={device.id}>
-                {device.name}
-              </option>
-            ))
-          )}
-        </select>
-      </div>
-
-      {/* Test microphone button */}
-      <div className="space-y-2">
-        <button
-          onClick={testMicrophone}
-          disabled={testing || selectedInput === null || inputDevices.length === 0}
-          className="px-4 py-2 bg-cosmic-accent hover:bg-cosmic-accent/80 disabled:bg-cosmic-surface disabled:text-cosmic-muted disabled:cursor-not-allowed text-white rounded-lg transition-colors"
-        >
-          {testing ? 'Testing...' : 'Test Microphone'}
-        </button>
-
-        {testStatus && (
-          <p className="text-sm text-cosmic-accent animate-pulse">{testStatus}</p>
-        )}
-
-        <p className="text-xs text-cosmic-muted">
-          Records for 2 seconds and plays back so you can hear yourself.
-        </p>
-      </div>
-    </div>
+    </section>
   );
 }

@@ -1,7 +1,17 @@
+/**
+ * Identity settings section.
+ *
+ * Displays and manages user's cryptographic identity:
+ * - Display name (editable)
+ * - Public key (copyable)
+ * - Fingerprint (for verification)
+ */
+
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { useIdentityStore } from '@/stores/identity';
 import { api } from '@/lib/pywebview';
+import { Button } from '@/components/ui/Button';
+import { Copy, Check, Edit2 } from 'lucide-react';
 
 export function IdentitySection() {
   const identity = useIdentityStore((s) => s.identity);
@@ -32,99 +42,142 @@ export function IdentitySection() {
     setIdentity(newIdentity);
   };
 
+  // No identity yet - show generation prompt
   if (!identity) {
     return (
-      <div className="bg-cosmic-surface rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Identity</h3>
-        <p className="text-cosmic-muted mb-4">
-          Generate your cryptographic identity to start using DiscordOpus.
-        </p>
-        <button
-          onClick={handleGenerateIdentity}
-          className="px-4 py-2 bg-cosmic-accent hover:bg-cosmic-accent-hover text-white rounded-md transition-colors"
-        >
-          Generate Identity
-        </button>
-      </div>
+      <section className="space-y-6">
+        <h3 className="text-lg font-semibold text-discord-text-primary">
+          My Account
+        </h3>
+
+        <div className="h-px bg-discord-bg-tertiary" />
+
+        <div className="space-y-4">
+          <p className="text-sm text-discord-text-muted">
+            Generate your cryptographic identity to start using DiscordOpus.
+            Your identity is stored locally and never shared with any server.
+          </p>
+          <Button onClick={handleGenerateIdentity}>
+            Generate Identity
+          </Button>
+        </div>
+      </section>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-cosmic-surface rounded-lg p-6"
-    >
-      <h3 className="text-lg font-semibold mb-4">Your Identity</h3>
+    <section className="space-y-6">
+      <h3 className="text-lg font-semibold text-discord-text-primary">
+        My Account
+      </h3>
 
-      {/* Display Name */}
-      <div className="mb-4">
-        <label className="block text-sm text-cosmic-muted mb-1">Display Name</label>
-        {isEditingName ? (
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="flex-1 bg-cosmic-bg border border-cosmic-border rounded-md px-3 py-2 text-cosmic-text focus:outline-none focus:border-cosmic-accent"
-              placeholder="Enter display name"
-              autoFocus
-            />
-            <button
-              onClick={handleSaveName}
-              className="px-3 py-2 bg-cosmic-accent hover:bg-cosmic-accent-hover text-white rounded-md"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setIsEditingName(false)}
-              className="px-3 py-2 bg-cosmic-border hover:bg-cosmic-muted/20 rounded-md"
-            >
-              Cancel
-            </button>
+      <div className="h-px bg-discord-bg-tertiary" />
+
+      <div className="space-y-4">
+        {/* Display Name */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary">
+              Display Name
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
+              This is how you appear to your contacts
+            </p>
           </div>
-        ) : (
           <div className="flex items-center gap-2">
-            <span className="text-cosmic-text">{identity.displayName}</span>
-            <button
-              onClick={() => {
-                setNewName(identity.displayName);
-                setIsEditingName(true);
-              }}
-              className="text-xs text-cosmic-muted hover:text-cosmic-accent"
-            >
-              Edit
-            </button>
+            {isEditingName ? (
+              <>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="
+                    bg-discord-bg-tertiary border border-discord-bg-modifier-active
+                    rounded-md px-3 py-2 text-discord-text-primary
+                    placeholder:text-discord-text-muted
+                    focus:ring-2 focus:ring-accent-red focus:border-transparent
+                    focus:outline-none
+                  "
+                  placeholder="Enter display name"
+                  autoFocus
+                />
+                <Button size="sm" onClick={handleSaveName}>
+                  Save
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setIsEditingName(false)}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <>
+                <span className="text-sm text-discord-text-primary">
+                  {identity.displayName}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setNewName(identity.displayName);
+                    setIsEditingName(true);
+                  }}
+                >
+                  <Edit2 size={14} />
+                </Button>
+              </>
+            )}
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Public Key */}
-      <div className="mb-4">
-        <label className="block text-sm text-cosmic-muted mb-1">Public Key (Share this)</label>
-        <div className="flex items-center gap-2">
-          <code className="flex-1 bg-cosmic-bg border border-cosmic-border rounded-md px-3 py-2 text-xs font-mono text-cosmic-text overflow-x-auto">
-            {identity.publicKey}
-          </code>
-          <button
+        {/* Public Key */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <label className="text-sm font-medium text-discord-text-primary">
+              Public Key
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
+              Share this with others to let them add you as a contact
+            </p>
+            <code className="
+              block mt-2 bg-discord-bg-tertiary border border-discord-bg-modifier-active
+              rounded-md px-3 py-2 text-xs font-mono text-discord-text-primary
+              overflow-x-auto whitespace-nowrap
+            ">
+              {identity.publicKey}
+            </code>
+          </div>
+          <Button
+            size="sm"
+            variant="secondary"
             onClick={handleCopyPublicKey}
-            className="px-3 py-2 bg-cosmic-border hover:bg-cosmic-muted/20 rounded-md text-sm"
+            className="mt-6"
           >
-            {copied ? 'Copied!' : 'Copy'}
-          </button>
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            <span className="ml-1">{copied ? 'Copied!' : 'Copy'}</span>
+          </Button>
+        </div>
+
+        {/* Fingerprint */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <label className="text-sm font-medium text-discord-text-primary">
+              Fingerprint
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
+              Compare this with your contact in person to verify identity
+            </p>
+            <code className="
+              block mt-2 bg-discord-bg-tertiary border border-discord-bg-modifier-active
+              rounded-md px-3 py-2 text-sm font-mono text-discord-text-primary
+            ">
+              {identity.fingerprintFormatted || identity.fingerprint}
+            </code>
+          </div>
         </div>
       </div>
-
-      {/* Fingerprint */}
-      <div>
-        <label className="block text-sm text-cosmic-muted mb-1">Fingerprint (For verification)</label>
-        <code className="block bg-cosmic-bg border border-cosmic-border rounded-md px-3 py-2 text-sm font-mono text-cosmic-text">
-          {identity.fingerprintFormatted || identity.fingerprint}
-        </code>
-        <p className="text-xs text-cosmic-muted mt-1">
-          Compare this with your contact in person to verify identity
-        </p>
-      </div>
-    </motion.div>
+    </section>
   );
 }
