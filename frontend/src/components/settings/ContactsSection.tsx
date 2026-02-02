@@ -1,7 +1,15 @@
+/**
+ * Contacts settings section.
+ *
+ * Manage contacts: add, remove, and verify contacts.
+ */
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useContactsStore } from '@/stores/contacts';
 import { api } from '@/lib/pywebview';
+import { Button } from '@/components/ui/Button';
+import { Users, Trash2, Shield, ShieldCheck } from 'lucide-react';
 
 export function ContactsSection() {
   const contacts = useContactsStore((s) => s.contacts);
@@ -49,18 +57,23 @@ export function ContactsSection() {
   };
 
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-cosmic-surface rounded-lg p-6"
+      className="space-y-6"
     >
-      <h3 className="text-lg font-semibold mb-4">Contacts</h3>
+      <h3 className="text-lg font-semibold text-discord-text-primary flex items-center gap-2">
+        <Users size={20} />
+        Contacts
+      </h3>
+
+      <div className="h-px bg-discord-bg-tertiary" />
 
       {/* Add Contact Form */}
-      <div className="mb-6 p-4 bg-cosmic-bg rounded-lg">
-        <h4 className="text-sm font-medium mb-3">Add Contact</h4>
+      <div className="p-4 bg-discord-bg-tertiary rounded-lg border border-discord-bg-modifier-active">
+        <h4 className="text-sm font-medium text-discord-text-primary mb-3">Add Contact</h4>
         {error && (
-          <div className="mb-3 p-2 bg-red-900/30 text-red-400 rounded text-sm">
+          <div className="mb-3 p-2 bg-status-busy/10 text-status-busy border border-status-busy/30 rounded text-sm">
             {error}
           </div>
         )}
@@ -70,69 +83,83 @@ export function ContactsSection() {
             value={publicKey}
             onChange={(e) => setPublicKey(e.target.value)}
             placeholder="Paste contact's public key"
-            className="w-full bg-cosmic-surface border border-cosmic-border rounded-md px-3 py-2 text-cosmic-text text-sm focus:outline-none focus:border-cosmic-accent"
+            className="
+              w-full bg-discord-bg-secondary border border-discord-bg-modifier-active
+              rounded-md px-3 py-2 text-discord-text-primary text-sm
+              placeholder:text-discord-text-muted
+              focus:ring-2 focus:ring-accent-red focus:border-transparent
+              focus:outline-none
+            "
           />
           <input
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Display name"
-            className="w-full bg-cosmic-surface border border-cosmic-border rounded-md px-3 py-2 text-cosmic-text text-sm focus:outline-none focus:border-cosmic-accent"
+            className="
+              w-full bg-discord-bg-secondary border border-discord-bg-modifier-active
+              rounded-md px-3 py-2 text-discord-text-primary text-sm
+              placeholder:text-discord-text-muted
+              focus:ring-2 focus:ring-accent-red focus:border-transparent
+              focus:outline-none
+            "
           />
-          <button
-            onClick={handleAddContact}
-            className="w-full px-4 py-2 bg-cosmic-accent hover:bg-cosmic-accent-hover text-white rounded-md text-sm"
-          >
+          <Button onClick={handleAddContact} className="w-full">
             Add Contact
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Contacts List */}
-      <div>
-        <h4 className="text-sm font-medium mb-3">
+      <div className="space-y-3">
+        <h4 className="text-sm font-medium text-discord-text-primary">
           Your Contacts ({contacts.length})
         </h4>
         {contacts.length === 0 ? (
-          <p className="text-cosmic-muted text-sm">No contacts yet</p>
+          <p className="text-discord-text-muted text-sm">No contacts yet</p>
         ) : (
           <ul className="space-y-2">
             {contacts.map((contact) => (
               <li
                 key={contact.id}
-                className="p-3 bg-cosmic-bg rounded-lg"
+                className="p-3 bg-discord-bg-tertiary rounded-lg border border-discord-bg-modifier-active"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium flex items-center gap-2">
+                    <div className="font-medium text-discord-text-primary flex items-center gap-2">
                       {contact.displayName}
                       {contact.verified && (
-                        <span className="text-xs bg-green-900/30 text-green-400 px-1.5 py-0.5 rounded">
+                        <span className="text-xs bg-status-online/20 text-status-online px-1.5 py-0.5 rounded flex items-center gap-1">
+                          <ShieldCheck size={10} />
                           Verified
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-cosmic-muted mt-1">
+                    <div className="text-xs text-discord-text-muted mt-1 font-mono">
                       {contact.fingerprint.slice(0, 16)}...
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button
+                    <Button
+                      size="sm"
+                      variant="ghost"
                       onClick={() =>
                         setShowFingerprint(
                           showFingerprint === contact.id ? null : contact.id
                         )
                       }
-                      className="text-xs text-cosmic-muted hover:text-cosmic-text"
                     >
-                      Verify
-                    </button>
-                    <button
+                      <Shield size={14} />
+                      <span className="ml-1">Verify</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
                       onClick={() => handleRemoveContact(contact.id)}
-                      className="text-xs text-red-400 hover:text-red-300"
+                      className="text-status-busy hover:text-status-busy"
                     >
-                      Remove
-                    </button>
+                      <Trash2 size={14} />
+                    </Button>
                   </div>
                 </div>
 
@@ -141,24 +168,22 @@ export function ContactsSection() {
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
-                    className="mt-3 pt-3 border-t border-cosmic-border"
+                    className="mt-3 pt-3 border-t border-discord-bg-modifier-active"
                   >
-                    <p className="text-xs text-cosmic-muted mb-2">
+                    <p className="text-xs text-discord-text-muted mb-2">
                       Compare this fingerprint with your contact in person:
                     </p>
-                    <code className="block bg-cosmic-surface p-2 rounded text-xs font-mono break-all">
+                    <code className="block bg-discord-bg-secondary p-2 rounded text-xs font-mono text-discord-text-primary break-all border border-discord-bg-modifier-active">
                       {contact.fingerprintFormatted || contact.fingerprint}
                     </code>
-                    <button
+                    <Button
+                      size="sm"
+                      variant={contact.verified ? 'danger' : 'secondary'}
                       onClick={() => handleToggleVerified(contact.id, contact.verified)}
-                      className={`mt-2 text-xs px-2 py-1 rounded ${
-                        contact.verified
-                          ? 'bg-red-900/30 text-red-400'
-                          : 'bg-green-900/30 text-green-400'
-                      }`}
+                      className="mt-2"
                     >
                       {contact.verified ? 'Mark as Unverified' : 'Mark as Verified'}
-                    </button>
+                    </Button>
                   </motion.div>
                 )}
               </li>
@@ -166,6 +191,6 @@ export function ContactsSection() {
           </ul>
         )}
       </div>
-    </motion.div>
+    </motion.section>
   );
 }

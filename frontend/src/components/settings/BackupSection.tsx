@@ -1,7 +1,15 @@
+/**
+ * Key backup settings section.
+ *
+ * Allows users to export and import encrypted identity backups.
+ */
+
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/pywebview';
 import { useIdentityStore } from '@/stores/identity';
+import { Button } from '@/components/ui/Button';
+import { Download, Upload, Key } from 'lucide-react';
 
 export function BackupSection() {
   const identity = useIdentityStore((s) => s.identity);
@@ -65,83 +73,109 @@ export function BackupSection() {
 
   if (!identity) {
     return (
-      <div className="bg-cosmic-surface rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Key Backup</h3>
-        <p className="text-cosmic-muted">Generate an identity first to enable backup.</p>
-      </div>
+      <section className="space-y-6">
+        <h3 className="text-lg font-semibold text-discord-text-primary flex items-center gap-2">
+          <Key size={20} />
+          Key Backup
+        </h3>
+        <div className="h-px bg-discord-bg-tertiary" />
+        <p className="text-sm text-discord-text-muted">
+          Generate an identity first to enable backup.
+        </p>
+      </section>
     );
   }
 
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-cosmic-surface rounded-lg p-6"
+      className="space-y-6"
     >
-      <h3 className="text-lg font-semibold mb-4">Key Backup</h3>
-      <p className="text-sm text-cosmic-muted mb-4">
+      <h3 className="text-lg font-semibold text-discord-text-primary flex items-center gap-2">
+        <Key size={20} />
+        Key Backup
+      </h3>
+
+      <div className="h-px bg-discord-bg-tertiary" />
+
+      <p className="text-sm text-discord-text-muted">
         Create a password-protected backup of your identity keys. Store it safely -
         you'll need it to recover your identity if you reinstall Windows.
       </p>
 
       {status && (
         <div
-          className={`mb-4 p-3 rounded-md text-sm ${
+          className={`p-3 rounded-md text-sm ${
             status.type === 'success'
-              ? 'bg-green-900/30 text-green-400'
-              : 'bg-red-900/30 text-red-400'
+              ? 'bg-status-online/10 text-status-online border border-status-online/30'
+              : 'bg-status-busy/10 text-status-busy border border-status-busy/30'
           }`}
         >
           {status.message}
         </div>
       )}
 
-      {/* Export */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Export Backup</label>
-        <div className="flex gap-2">
-          <input
-            type="password"
-            value={exportPassword}
-            onChange={(e) => setExportPassword(e.target.value)}
-            placeholder="Create backup password"
-            className="flex-1 bg-cosmic-bg border border-cosmic-border rounded-md px-3 py-2 text-cosmic-text focus:outline-none focus:border-cosmic-accent"
-          />
-          <button
-            onClick={handleExport}
-            className="px-4 py-2 bg-cosmic-accent hover:bg-cosmic-accent-hover text-white rounded-md"
-          >
-            Export
-          </button>
+      <div className="space-y-4">
+        {/* Export */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-discord-text-primary flex items-center gap-2">
+            <Download size={14} />
+            Export Backup
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              value={exportPassword}
+              onChange={(e) => setExportPassword(e.target.value)}
+              placeholder="Create backup password"
+              className="
+                flex-1 bg-discord-bg-tertiary border border-discord-bg-modifier-active
+                rounded-md px-3 py-2 text-discord-text-primary
+                placeholder:text-discord-text-muted
+                focus:ring-2 focus:ring-accent-red focus:border-transparent
+                focus:outline-none
+              "
+            />
+            <Button onClick={handleExport}>
+              Export
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Import */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Import Backup</label>
-        <div className="flex gap-2">
-          <input
-            type="password"
-            value={importPassword}
-            onChange={(e) => setImportPassword(e.target.value)}
-            placeholder="Enter backup password"
-            className="flex-1 bg-cosmic-bg border border-cosmic-border rounded-md px-3 py-2 text-cosmic-text focus:outline-none focus:border-cosmic-accent"
-          />
-          <button
-            onClick={handleImportClick}
-            className="px-4 py-2 bg-cosmic-border hover:bg-cosmic-muted/20 rounded-md"
-          >
-            Import
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleFileChange}
-            className="hidden"
-          />
+        {/* Import */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-discord-text-primary flex items-center gap-2">
+            <Upload size={14} />
+            Import Backup
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              value={importPassword}
+              onChange={(e) => setImportPassword(e.target.value)}
+              placeholder="Enter backup password"
+              className="
+                flex-1 bg-discord-bg-tertiary border border-discord-bg-modifier-active
+                rounded-md px-3 py-2 text-discord-text-primary
+                placeholder:text-discord-text-muted
+                focus:ring-2 focus:ring-accent-red focus:border-transparent
+                focus:outline-none
+              "
+            />
+            <Button onClick={handleImportClick} variant="secondary">
+              Import
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
         </div>
       </div>
-    </motion.div>
+    </motion.section>
   );
 }

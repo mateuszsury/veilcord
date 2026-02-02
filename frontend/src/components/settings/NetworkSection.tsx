@@ -1,15 +1,25 @@
+/**
+ * Network settings section.
+ *
+ * Displays connection status and signaling server configuration.
+ */
+
 import { useState, useEffect } from 'react';
 import { useNetworkStore } from '@/stores/network';
+import { Button } from '@/components/ui/Button';
+import { Wifi, RefreshCw } from 'lucide-react';
 
 export function NetworkSection() {
   const signalingServer = useNetworkStore((s) => s.signalingServer);
   const connectionState = useNetworkStore((s) => s.connectionState);
   const updateSignalingServer = useNetworkStore((s) => s.updateSignalingServer);
+  const reconnect = useNetworkStore((s) => s.reconnect);
   const error = useNetworkStore((s) => s.error);
 
   const [serverUrl, setServerUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
 
   // Sync local state with store
   useEffect(() => {
@@ -30,16 +40,25 @@ export function NetworkSection() {
     }
   };
 
+  const handleReconnect = async () => {
+    setIsReconnecting(true);
+    try {
+      await reconnect();
+    } finally {
+      setIsReconnecting(false);
+    }
+  };
+
   const getConnectionStatusColor = () => {
     switch (connectionState) {
       case 'connected':
-        return 'text-green-500';
+        return 'text-status-online';
       case 'connecting':
       case 'authenticating':
-        return 'text-yellow-500';
+        return 'text-status-away';
       case 'disconnected':
       default:
-        return 'text-red-500';
+        return 'text-status-busy';
     }
   };
 
@@ -58,56 +77,92 @@ export function NetworkSection() {
   };
 
   return (
-    <section className="bg-cosmic-surface border border-cosmic-border rounded-lg p-4">
-      <h3 className="text-lg font-medium mb-4">Network</h3>
+    <section className="space-y-6">
+      <h3 className="text-lg font-semibold text-discord-text-primary flex items-center gap-2">
+        <Wifi size={20} />
+        Network
+      </h3>
 
-      {/* Connection Status */}
-      <div className="mb-4">
-        <label className="block text-sm text-cosmic-muted mb-1">Connection Status</label>
-        <div className="flex items-center gap-2">
-          <span className={`font-medium ${getConnectionStatusColor()}`}>
-            {getConnectionStatusLabel()}
-          </span>
+      <div className="h-px bg-discord-bg-tertiary" />
+
+      <div className="space-y-4">
+        {/* Connection Status */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary">
+              Connection Status
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
+              Current connection to signaling server
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`text-sm font-medium ${getConnectionStatusColor()}`}>
+              {getConnectionStatusLabel()}
+            </span>
+            <Button
+              onClick={handleReconnect}
+              disabled={isReconnecting || connectionState === 'connecting' || connectionState === 'authenticating'}
+              variant="secondary"
+              size="sm"
+            >
+              {isReconnecting ? (
+                <>
+                  <RefreshCw size={14} className="animate-spin" />
+                  <span className="ml-1">Reconnecting...</span>
+                </>
+              ) : (
+                'Reconnect'
+              )}
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Signaling Server URL */}
-      <div className="mb-4">
-        <label className="block text-sm text-cosmic-muted mb-1">
-          Signaling Server URL
-        </label>
-        <input
-          type="text"
-          value={serverUrl}
-          onChange={(e) => setServerUrl(e.target.value)}
-          placeholder="wss://signaling.example.com"
-          className="w-full px-3 py-2 bg-cosmic-bg border border-cosmic-border rounded-md text-cosmic-text placeholder:text-cosmic-muted focus:outline-none focus:ring-2 focus:ring-cosmic-accent"
-        />
-        <p className="text-xs text-cosmic-muted mt-1">
-          WebSocket URL of the signaling server for P2P connection establishment
-        </p>
-      </div>
+        {/* Signaling Server URL */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary">
+              Signaling Server URL
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
+              WebSocket URL for P2P connection establishment
+            </p>
+          </div>
+        </div>
 
-      {/* Save Button */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handleSave}
-          disabled={isSaving || serverUrl === signalingServer}
-          className="px-4 py-2 bg-cosmic-accent text-white rounded-md hover:bg-cosmic-accent/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {isSaving ? 'Saving...' : 'Save'}
-        </button>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={serverUrl}
+            onChange={(e) => setServerUrl(e.target.value)}
+            placeholder="wss://signaling.example.com"
+            className="
+              flex-1 bg-discord-bg-tertiary border border-discord-bg-modifier-active
+              rounded-md px-3 py-2 text-discord-text-primary
+              placeholder:text-discord-text-muted
+              focus:ring-2 focus:ring-accent-red focus:border-transparent
+              focus:outline-none
+            "
+          />
+          <Button
+            onClick={handleSave}
+            disabled={isSaving || serverUrl === signalingServer}
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
+
         {saveSuccess && (
-          <span className="text-sm text-green-500">Saved successfully!</span>
+          <p className="text-sm text-status-online">Saved successfully!</p>
+        )}
+
+        {/* Error Display */}
+        {error && (
+          <div className="p-3 bg-status-busy/10 border border-status-busy/30 rounded-md">
+            <p className="text-sm text-status-busy">{error}</p>
+          </div>
         )}
       </div>
-
-      {/* Error Display */}
-      {error && (
-        <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-md">
-          <p className="text-sm text-red-500">{error}</p>
-        </div>
-      )}
     </section>
   );
 }

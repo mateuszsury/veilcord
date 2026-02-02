@@ -9,6 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/pywebview';
+import { Bell, MessageSquare, Phone, Info } from 'lucide-react';
 import type { NotificationSettings } from '@/lib/pywebview';
 
 export function NotificationSection() {
@@ -65,23 +66,34 @@ export function NotificationSection() {
 
   if (loading) {
     return (
-      <div className="bg-gray-800/50 rounded-lg p-4">
-        <h3 className="text-lg font-medium text-white mb-4">Notifications</h3>
-        <p className="text-gray-400">Loading settings...</p>
-      </div>
+      <section className="space-y-6">
+        <h3 className="text-lg font-semibold text-discord-text-primary flex items-center gap-2">
+          <Bell size={20} />
+          Notifications
+        </h3>
+        <div className="h-px bg-discord-bg-tertiary" />
+        <p className="text-sm text-discord-text-muted">Loading settings...</p>
+      </section>
     );
   }
 
   return (
-    <div className="bg-gray-800/50 rounded-lg p-4">
-      <h3 className="text-lg font-medium text-white mb-4">Notifications</h3>
+    <section className="space-y-6">
+      <h3 className="text-lg font-semibold text-discord-text-primary flex items-center gap-2">
+        <Bell size={20} />
+        Notifications
+      </h3>
+
+      <div className="h-px bg-discord-bg-tertiary" />
 
       <div className="space-y-4">
         {/* Global enable/disable */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-white">Enable Notifications</p>
-            <p className="text-sm text-gray-400">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary">
+              Enable Notifications
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
               Show Windows notifications when app is in background
             </p>
           </div>
@@ -92,15 +104,25 @@ export function NotificationSection() {
               checked={settings.enabled}
               onChange={(e) => handleEnabledChange(e.target.checked)}
             />
-            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+            <div className="
+              w-11 h-6 bg-discord-bg-modifier-active rounded-full peer
+              peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent-red
+              peer-checked:after:translate-x-full peer-checked:after:border-white
+              after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+              after:bg-white after:border-gray-300 after:border after:rounded-full
+              after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-red
+            "></div>
           </label>
         </div>
 
         {/* Message notifications */}
-        <div className={`flex items-center justify-between ${!settings.enabled ? 'opacity-50' : ''}`}>
-          <div>
-            <p className="text-white">Message Notifications</p>
-            <p className="text-sm text-gray-400">
+        <div className={`flex items-start justify-between gap-4 ${!settings.enabled ? 'opacity-50' : ''}`}>
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary flex items-center gap-2">
+              <MessageSquare size={14} />
+              Message Notifications
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
               Notify when new messages arrive
             </p>
           </div>
@@ -112,15 +134,26 @@ export function NotificationSection() {
               disabled={!settings.enabled}
               onChange={(e) => handleMessagesChange(e.target.checked)}
             />
-            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 peer-disabled:cursor-not-allowed"></div>
+            <div className="
+              w-11 h-6 bg-discord-bg-modifier-active rounded-full peer
+              peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent-red
+              peer-checked:after:translate-x-full peer-checked:after:border-white
+              after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+              after:bg-white after:border-gray-300 after:border after:rounded-full
+              after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-red
+              peer-disabled:cursor-not-allowed
+            "></div>
           </label>
         </div>
 
         {/* Call notifications */}
-        <div className={`flex items-center justify-between ${!settings.enabled ? 'opacity-50' : ''}`}>
-          <div>
-            <p className="text-white">Call Notifications</p>
-            <p className="text-sm text-gray-400">
+        <div className={`flex items-start justify-between gap-4 ${!settings.enabled ? 'opacity-50' : ''}`}>
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary flex items-center gap-2">
+              <Phone size={14} />
+              Call Notifications
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
               Notify for incoming calls with accept/reject buttons
             </p>
           </div>
@@ -132,17 +165,26 @@ export function NotificationSection() {
               disabled={!settings.enabled}
               onChange={(e) => handleCallsChange(e.target.checked)}
             />
-            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 peer-disabled:cursor-not-allowed"></div>
+            <div className="
+              w-11 h-6 bg-discord-bg-modifier-active rounded-full peer
+              peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent-red
+              peer-checked:after:translate-x-full peer-checked:after:border-white
+              after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+              after:bg-white after:border-gray-300 after:border after:rounded-full
+              after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-red
+              peer-disabled:cursor-not-allowed
+            "></div>
           </label>
         </div>
 
         {/* Info note */}
-        <div className="mt-6 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-          <p className="text-sm text-gray-400">
-            <span className="text-purple-400">Note:</span> Notifications respect Windows Do Not Disturb mode automatically.
+        <div className="mt-4 p-3 bg-discord-bg-tertiary rounded-lg border border-discord-bg-modifier-active">
+          <p className="text-sm text-discord-text-muted flex items-center gap-2">
+            <Info size={14} className="text-accent-red-text" />
+            Notifications respect Windows Do Not Disturb mode automatically.
           </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

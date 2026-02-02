@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/pywebview';
 import { useCall } from '@/stores/call';
+import { Video } from 'lucide-react';
 import type { Camera } from '@/lib/pywebview';
 
 export function VideoSection() {
@@ -52,77 +53,67 @@ export function VideoSection() {
 
   if (loading) {
     return (
-      <div className="space-y-4 p-4 bg-cosmic-surface/50 rounded-xl border border-cosmic-border">
-        <h3 className="text-lg font-semibold text-cosmic-text flex items-center gap-2">
-          {/* Camera icon */}
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-            />
-          </svg>
+      <section className="space-y-6">
+        <h3 className="text-lg font-semibold text-discord-text-primary flex items-center gap-2">
+          <Video size={20} />
           Video
         </h3>
-        <p className="text-cosmic-muted">Loading cameras...</p>
-      </div>
+        <div className="h-px bg-discord-bg-tertiary" />
+        <p className="text-sm text-discord-text-muted">Loading cameras...</p>
+      </section>
     );
   }
 
   return (
-    <div className="space-y-6 p-4 bg-cosmic-surface/50 rounded-xl border border-cosmic-border">
-      <h3 className="text-lg font-semibold text-cosmic-text flex items-center gap-2">
-        {/* Camera icon */}
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-          />
-        </svg>
+    <section className="space-y-6">
+      <h3 className="text-lg font-semibold text-discord-text-primary flex items-center gap-2">
+        <Video size={20} />
         Video
       </h3>
 
-      {/* Camera selection */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-cosmic-muted">
-          Camera
-        </label>
-        <select
-          value={selectedCamera ?? ''}
-          onChange={(e) => handleCameraChange(Number(e.target.value))}
-          className="w-full bg-cosmic-bg text-cosmic-text rounded-lg px-3 py-2 border border-cosmic-border focus:border-cosmic-accent focus:outline-none"
-          disabled={cameras.length === 0}
-        >
-          {cameras.length === 0 ? (
-            <option value="">No cameras detected</option>
-          ) : (
-            cameras.map((camera) => (
-              <option key={camera.index} value={camera.index}>
-                {camera.name}
-              </option>
-            ))
-          )}
-        </select>
+      <div className="h-px bg-discord-bg-tertiary" />
+
+      <div className="space-y-4">
+        {/* Camera selection */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-discord-text-primary">
+              Camera
+            </label>
+            <p className="text-sm text-discord-text-muted mt-0.5">
+              Select your camera for video calls
+            </p>
+          </div>
+          <select
+            value={selectedCamera ?? ''}
+            onChange={(e) => handleCameraChange(Number(e.target.value))}
+            className="
+              w-64 bg-discord-bg-tertiary border border-discord-bg-modifier-active
+              rounded-md px-3 py-2 text-discord-text-primary
+              focus:ring-2 focus:ring-accent-red focus:border-transparent
+              focus:outline-none
+              disabled:opacity-50 disabled:cursor-not-allowed
+            "
+            disabled={cameras.length === 0}
+          >
+            {cameras.length === 0 ? (
+              <option value="">No cameras detected</option>
+            ) : (
+              cameras.map((camera) => (
+                <option key={camera.index} value={camera.index}>
+                  {camera.name}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
 
         {cameras.length === 0 && (
-          <p className="text-xs text-cosmic-muted">
+          <p className="text-xs text-discord-text-muted">
             Connect a camera to use video calling features.
           </p>
         )}
       </div>
-    </div>
+    </section>
   );
 }
