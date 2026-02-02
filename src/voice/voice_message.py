@@ -37,6 +37,8 @@ from pyogg import OpusFile
 
 from src.voice.models import VoiceMessageMetadata
 from src.storage.paths import get_voice_messages_dir
+from src.effects.audio.voice_message_effects import VoiceMessageEffects, VoiceMessageEffectMetadata
+from src.effects.audio import AudioEffectChain
 
 logger = logging.getLogger(__name__)
 
@@ -322,13 +324,144 @@ class VoiceMessagePlayer:
 
         # Audio data buffer (decoded PCM)
         self._audio_data: Optional[np.ndarray] = None
+        self._raw_audio_data: Optional[np.ndarray] = None  # Original unprocessed audio
         self._sample_index = 0
         self._playback_complete = False
         self._lock = threading.Lock()
 
+        # Audio effects
+        self._effects: Optional[VoiceMessageEffects] = None
+        self._effect_metadata: Optional[VoiceMessageEffectMetadata] = None
+        self.effects_enabled: bool = False
+
         # Callbacks for UI updates
         self.on_position_update: Optional[Callable[[float], None]] = None
         self.on_playback_complete: Optional[Callable[[], None]] = None
+
+    def set_effects(self, effects: VoiceMessageEffects) -> None:
+        """
+        Set effect processor for playback.
+
+        Effects will be applied during playback if effects_enabled is True.
+        Can be called before or during playback.
+
+        Args:
+            effects: VoiceMessageEffects instance with configured effect chain
+        """
+        self._effects = effects
+        logger.info("Set voice message effects")
+
+        # If audio is loaded and effects are enabled, reprocess it
+        if self._raw_audio_data is not None and self.effects_enabled:
+            self._apply_effects_to_loaded_audio()
+
+    def set_effect_chain(self, chain: AudioEffectChain) -> None:
+        """
+        Convenience method to set effect chain directly.
+
+        Creates VoiceMessageEffects instance internally.
+
+        Args:
+            chain: AudioEffectChain to apply
+        """
+        self._effects = VoiceMessageEffects(chain)
+        logger.info("Set voice message effect chain")
+
+        # If audio is loaded and effects are enabled, reprocess it
+        if self._raw_audio_data is not None and self.effects_enabled:
+            self._apply_effects_to_loaded_audio()
+
+    def get_effect_metadata(self) -> Optional[VoiceMessageEffectMetadata]:
+        """
+        Get current effect settings as metadata.
+
+        Returns:
+            VoiceMessageEffectMetadata if effects are set, None otherwise
+        """
+        if self._effect_metadata:
+            return self._effect_metadata
+
+        if self._effects:
+            # Create metadata from current effect chain
+            return VoiceMessageEffectMetadata(
+                effect_preset="custom",
+                effect_chain=self._effects.effect_chain.to_dict()["effects"],
+                applied_during="playback"
+            )
+
+        return None
+
+    def _apply_effects_to_loaded_audio(self) -> None:
+        """
+        Apply current effects to loaded audio data.
+
+        Internal method called when effects change or are enabled.
+        """
+        if self._raw_audio_data is None or self._effects is None:
+            return
+
+        try:
+            # Process raw audio through effects
+            self._audio_data = self._effects.process_audio(
+                self._raw_audio_data,
+                self._sample_rate
+            )
+            logger.debug("Applied effects to loaded audio")
+        except Exception as e:
+            logger.error(f"Error applying effects to audio: {e}")
+            # Fall back to raw audio on error
+            self._audio_data = self._raw_audio_data.copy()
+
+    async def preview_with_effects(self, duration: float = 3.0) -> None:
+        """
+        Play first N seconds with current effects as preview.
+
+        Allows user to hear how message will sound with effects
+        before committing to full playback.
+
+        Args:
+            duration: Preview duration in seconds (default: 3.0)
+
+        Raises:
+            RuntimeError: If no file is loaded or no effects set
+        """
+        if self._raw_audio_data is None:
+            raise RuntimeError("No file loaded")
+
+        if self._effects is None:
+            raise RuntimeError("No effects set")
+
+        # Create preview
+        preview_audio = self._effects.create_preview(
+            self._raw_audio_data,
+            self._sample_rate,
+            duration
+        )
+
+        # Temporarily swap audio data for preview
+        original_audio = self._audio_data
+        original_index = self._sample_index
+        original_enabled = self.effects_enabled
+
+        try:
+            self._audio_data = preview_audio
+            self._sample_index = 0
+            self.effects_enabled = True
+
+            # Play preview
+            await self.play()
+
+            # Wait for preview to complete (or duration)
+            preview_samples = len(preview_audio)
+            preview_duration = preview_samples / self._sample_rate
+            await asyncio.sleep(preview_duration + 0.1)  # Small buffer
+
+        finally:
+            # Restore original state
+            await self.stop()
+            self._audio_data = original_audio
+            self._sample_index = original_index
+            self.effects_enabled = original_enabled
 
     def _playback_callback(self, outdata: np.ndarray, frames: int,
                            time_info: dict, status: sd.CallbackFlags) -> None:
@@ -388,13 +521,27 @@ class VoiceMessagePlayer:
             audio_int16 = np.ctypeslib.as_array(opus_file.buffer, shape=(samples,))
 
             # Convert to float32 normalized [-1.0, 1.0]
-            self._audio_data = audio_int16.astype(np.float32) / 32768.0
+            audio_float = audio_int16.astype(np.float32) / 32768.0
 
             # If stereo, convert to mono for consistency
             if self._channels > 1:
                 # Reshape and average channels
-                self._audio_data = self._audio_data.reshape(-1, self._channels).mean(axis=1)
+                audio_float = audio_float.reshape(-1, self._channels).mean(axis=1)
                 samples = samples // self._channels
+
+            # Store raw audio (unprocessed)
+            self._raw_audio_data = audio_float.copy()
+
+            # Apply effects if enabled
+            if self.effects_enabled and self._effects is not None:
+                self._audio_data = self._effects.process_audio(
+                    self._raw_audio_data,
+                    self._sample_rate
+                )
+                logger.debug("Applied effects during load")
+            else:
+                # Use raw audio for playback
+                self._audio_data = self._raw_audio_data.copy()
 
             self._duration = samples / self._sample_rate
             self._current_file = file_path
