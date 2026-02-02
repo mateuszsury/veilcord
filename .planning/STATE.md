@@ -1,8 +1,8 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 10 - UI/UX Redesign
-**Status:** In progress (7/10 plans complete)
-**Last Updated:** 2026-02-02T08:42:00Z
+**Status:** In progress (8/10 plans complete)
+**Last Updated:** 2026-02-02T09:15:00Z
 
 ## Project Reference
 
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
 | 9 | Audio & Video Effects | COMPLETE | 12/12 | 8 |
-| 10 | UI/UX Redesign | IN PROGRESS | 7/10 | - |
+| 10 | UI/UX Redesign | IN PROGRESS | 8/10 | - |
 
 **Total:** 81/81 core requirements completed (100% - v1.0 complete)
-**Phase 10 Progress:** 7/10 plans completed (10-01 Design System, 10-02 UI Primitives, 10-03 IconBar, 10-04 ChannelList, 10-05 Layout Assembly, 10-06 Chat Area Styling, 10-07 Settings Panel COMPLETE)
+**Phase 10 Progress:** 8/10 plans completed (10-01 Design System, 10-02 UI Primitives, 10-03 IconBar, 10-04 ChannelList, 10-05 Layout Assembly, 10-06 Chat Area Styling, 10-07 Settings Panel, 10-08 Call UI COMPLETE)
 
 ## Performance Metrics
 
@@ -225,6 +225,10 @@ See: .planning/PROJECT.md
 | 2026-02-02 | Use framer-motion for message entrance animations | Slide up + fade (y: 20 to 0, opacity) with 0.2s duration | Consistent with Phase 10 animation patterns |
 | 2026-02-02 | Discord-style messages (no bubbles, flat layout) | Avatar + name + timestamp + content layout | Clean modern messaging UX |
 | 2026-02-02 | Integrated input container pattern | File upload and voice buttons inside input container with divider | Discord-inspired unified input area |
+| 2026-02-02 | CallControls button sizing w-11 h-11 | 44px rounded-full buttons for touch-friendly call controls | Consistent with Discord/Zoom call control UX |
+| 2026-02-02 | EffectsPanel bottom-20 positioning | Effects panel appears above call controls with 20 units offset | Avoids overlap with CallControls bar |
+| 2026-02-02 | Custom Switch with spring animation | Simple toggle using Framer Motion spring for smooth feel | Better UX than native checkbox for effect toggles |
+| 2026-02-02 | IncomingCallPopup pulse rings | Animated border rings around avatar for incoming call visual | Clear indication of incoming call state |
 
 ### Active TODOs
 
@@ -302,6 +306,7 @@ See: .planning/PROJECT.md
 - [x] Execute 10-05-PLAN.md (Layout assembly) - CSS Grid three-column layout with IconBar, ChannelList, MainPanel
 - [x] Execute 10-06-PLAN.md (Chat area styling) - Discord-style messages with slide-fade animations
 - [x] Execute 10-07-PLAN.md (Settings panel) - Two-column Discord-style settings with left nav and right content
+- [x] Execute 10-08-PLAN.md (Call UI) - Discord/Zoom-style CallControls, EffectsPanel, overlay redesign
 
 ### Blockers
 
@@ -313,21 +318,21 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-02-02 - Completed 10-06-PLAN.md
+**Last session:** 2026-02-02 - Completed 10-08-PLAN.md
 
 **What we just completed:**
-- 10-06: Chat Area Styling
-  - Discord-style ChatPanel with header (h-14) + messages (flex-1) + input (p-4)
-  - Framer-motion slide up + fade animations for new messages
-  - MessageBubble redesigned to flat layout (no bubbles) with avatar + name + timestamp + content
-  - MessageInput with integrated file upload and voice buttons inside rounded container
-  - All cosmic-* classes replaced with discord-* classes
-  - 3 tasks completed in 4 minutes
-  - **Phase 10 Plan 06 COMPLETE**
+- 10-08: Call UI Components
+  - CallControls: Discord/Zoom-style horizontal button bar with mute/video/screen/effects/end controls
+  - EffectsPanel: Expandable panel (w-80) with audio/video effect toggles and custom Switch component
+  - ActiveCallOverlay: Corner positioned (bottom-4 right-4) with CallControls integration and EffectsPanel toggle
+  - IncomingCallPopup: Centered modal with large avatar, animated pulse rings, and accept/reject buttons
+  - All components use Framer Motion for animations and Discord color palette
+  - 3 tasks completed in 8 minutes
+  - **Phase 10 Plan 08 COMPLETE**
 
 **What's next:**
-- Execute 10-08-PLAN.md through 10-10
-- Remaining plans: modals/dialogs, call UI, final polish
+- Execute 10-09-PLAN.md and 10-10-PLAN.md
+- Remaining plans: modals/dialogs, final polish
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8, 9 deferred - should be run before production
