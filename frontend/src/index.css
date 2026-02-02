@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* ============================================
+ * Discord Three-Column Layout
+ * ============================================ */
+
+/* CSS Grid template for Discord-style layout:
+ * - Column 1: IconBar (80px)
+ * - Column 2: ChannelList (240px)
+ * - Column 3: MainPanel (flexible)
+ */
+.grid-cols-discord {
+  grid-template-columns: var(--sidebar-icon-width) var(--sidebar-channel-width) 1fr;
+}
+
 @theme {
   /* ============================================
    * Discord Dark Theme - Design System
