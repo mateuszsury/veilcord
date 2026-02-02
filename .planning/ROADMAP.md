@@ -1,7 +1,7 @@
 # Roadmap: DiscordOpus
 
 **Created:** 2026-01-30
-**Phases:** 9
+**Phases:** 10
 **Requirements:** 73 v1 + 6 v1.1
 
 ## Overview
@@ -17,6 +17,7 @@
 | 7 | Group Features | Users can create groups and participate in group calls | 8 |
 | 8 | Notifications & Polish | Users receive system notifications and auto-updates | 5 |
 | 9 | Audio & Video Effects | Users have professional audio/video processing with local AI | 6 |
+| 10 | UI/UX Redesign | Users experience production-grade Discord-inspired interface with black-red theme | TBD |
 
 ## Phase 1: Cryptographic Foundation & Packaging
 
@@ -398,6 +399,43 @@ Plans:
 
 ---
 
+## Phase 10: UI/UX Redesign
+
+**Goal:** Completely rebuild the user interface with production-grade quality, Discord-inspired layout in black-red color scheme, with smooth animations, logical grouping, and exceptional UX.
+
+**Requirements:**
+- UI-REDESIGN-01: Discord-inspired layout with logical component grouping
+- UI-REDESIGN-02: Black-red color scheme with consistent design system
+- UI-REDESIGN-03: Smooth transitions and animations throughout
+- UI-REDESIGN-04: Production-grade aesthetic quality
+- UI-REDESIGN-05: Improved navigation and information architecture
+- UI-REDESIGN-06: Responsive and accessible design
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 10 to break down)
+
+**Status:** Not planned yet
+
+**Success Criteria:**
+1. Interface follows Discord-style layout (servers/channels sidebar, chat area, user panel)
+2. Consistent black-red color scheme applied across all components
+3. Smooth micro-animations on interactions (hover, click, transitions)
+4. Logical grouping of related features (settings, contacts, chat, calls)
+5. Clean, minimal aesthetic with professional polish
+6. Responsive to different window sizes
+7. Consistent typography and spacing system
+8. Visual feedback for all user actions
+9. Easy navigation between features
+10. Effects controls integrated naturally into call UI
+
+**Dependencies:** Phase 9 (all features complete, ready for UI polish)
+
+**Research Notes:** Use frontend-design skill during planning and execution for production-grade component design.
+
+---
+
 ## Coverage Validation
 
 | Category | Total | Mapped | Coverage |
@@ -449,6 +487,9 @@ Phase 8: Notifications & Polish
    |
    v
 Phase 9: Audio & Video Effects
+   |
+   v
+Phase 10: UI/UX Redesign
 ```
 
 ---
