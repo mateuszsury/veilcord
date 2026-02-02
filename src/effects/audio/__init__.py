@@ -64,6 +64,16 @@ try:
 except ImportError as e:
     logger.warning(f"Could not import enhancement: {e}")
 
+# Attempt to import voice message effects
+try:
+    from .voice_message_effects import VoiceMessageEffects, VoiceMessageEffectMetadata
+    __all__.extend([
+        "VoiceMessageEffects",
+        "VoiceMessageEffectMetadata"
+    ])
+except ImportError as e:
+    logger.warning(f"Could not import voice_message_effects: {e}")
+
 
 # Built-in audio effect presets
 AUDIO_PRESETS: Dict[str, Callable[[], AudioEffectChain]] = {}

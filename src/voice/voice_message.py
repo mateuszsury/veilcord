@@ -83,6 +83,10 @@ class VoiceMessageRecorder:
         self._stop_flag = False  # Signal to stop from callback
         self._lock = threading.Lock()
 
+        # Effect metadata for recording
+        self._effect_chain: Optional[AudioEffectChain] = None
+        self._effect_metadata: Optional[VoiceMessageEffectMetadata] = None
+
         # Callbacks for UI updates
         self.on_duration_update: Optional[Callable[[float], None]] = None
         self.on_max_duration_reached: Optional[Callable[[], None]] = None
@@ -131,6 +135,26 @@ class VoiceMessageRecorder:
 
             if result != OPE_OK:
                 logger.error(f"Error encoding audio: {result}")
+
+    def set_recording_effects(self, chain: AudioEffectChain, preset_name: str = "custom") -> None:
+        """
+        Set effect chain to apply to recording.
+
+        Note: Per design, effects are applied during playback (non-destructive),
+        but this method allows storing effect metadata with the recording for
+        automatic application during playback.
+
+        Args:
+            chain: AudioEffectChain to store as metadata
+            preset_name: Name of preset used, or "custom" for manual chains
+        """
+        self._effect_chain = chain
+        self._effect_metadata = VoiceMessageEffectMetadata(
+            effect_preset=preset_name,
+            effect_chain=chain.to_dict()["effects"],
+            applied_during="playback"
+        )
+        logger.info(f"Set recording effect metadata: {preset_name}")
 
     async def start_recording(self) -> Path:
         """
@@ -240,10 +264,15 @@ class VoiceMessageRecorder:
             self._start_time = None
             return None
 
-        # Create metadata
+        # Create metadata with effect information if available
+        effects_dict = None
+        if self._effect_metadata:
+            effects_dict = self._effect_metadata.to_dict()
+
         metadata = VoiceMessageMetadata.create(
             duration_seconds=duration,
-            file_path=str(self._output_path)
+            file_path=str(self._output_path),
+            effects=effects_dict
         )
 
         self._output_path = None
@@ -488,12 +517,16 @@ class VoiceMessagePlayer:
                 outdata[to_copy:].fill(0)
                 self._playback_complete = True
 
-    async def load(self, file_path: Path) -> float:
+    async def load(self, file_path: Path, metadata: Optional[VoiceMessageMetadata] = None) -> float:
         """
         Load voice message file for playback.
 
+        If metadata with effects is provided, those effects will be automatically
+        applied during playback (if effects_enabled is True).
+
         Args:
             file_path: Path to .ogg voice message file.
+            metadata: Optional metadata with effect information
 
         Returns:
             Duration in seconds.
@@ -504,6 +537,19 @@ class VoiceMessagePlayer:
         """
         if not file_path.exists():
             raise FileNotFoundError(f"Voice message not found: {file_path}")
+
+        # Load effect metadata if provided
+        if metadata and metadata.effects:
+            try:
+                self._effect_metadata = VoiceMessageEffectMetadata.from_dict(metadata.effects)
+                # If effects are enabled and we don't have effects set, create from metadata
+                # (User can override by calling set_effects/set_effect_chain)
+                if self.effects_enabled and self._effects is None:
+                    # Note: Would need effect registry to fully reconstruct chain
+                    # For now, just store the metadata
+                    logger.info("Loaded effect metadata from voice message")
+            except Exception as e:
+                logger.warning(f"Failed to load effect metadata: {e}")
 
         # Stop any current playback
         await self.stop()

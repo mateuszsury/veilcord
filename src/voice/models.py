@@ -130,20 +130,34 @@ class VoiceMessageMetadata:
     Metadata for a recorded voice message.
 
     Voice messages are stored as Opus-encoded .ogg files.
+    Effect metadata can be stored to enable consistent playback across devices.
     """
     id: str
     duration_seconds: float
     sample_rate: int = 48000  # Opus standard
     file_path: Optional[str] = None  # Path to .ogg file
     created_at: float = field(default_factory=time.time)
+    effects: Optional[dict] = None  # Serialized VoiceMessageEffectMetadata
 
     @classmethod
-    def create(cls, duration_seconds: float, file_path: Optional[str] = None) -> 'VoiceMessageMetadata':
-        """Create a new voice message metadata entry."""
+    def create(cls, duration_seconds: float, file_path: Optional[str] = None,
+               effects: Optional[dict] = None) -> 'VoiceMessageMetadata':
+        """
+        Create a new voice message metadata entry.
+
+        Args:
+            duration_seconds: Duration of the voice message in seconds
+            file_path: Path to the .ogg file
+            effects: Effect metadata dictionary (from VoiceMessageEffectMetadata.to_dict())
+
+        Returns:
+            VoiceMessageMetadata instance
+        """
         return cls(
             id=str(uuid.uuid4()),
             duration_seconds=duration_seconds,
-            file_path=file_path
+            file_path=file_path,
+            effects=effects
         )
 
 
