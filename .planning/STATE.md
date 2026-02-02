@@ -2,7 +2,7 @@
 
 **Current Phase:** Phase 9 - Audio & Video Effects
 **Status:** v1.1 in progress (v1.0 complete)
-**Last Updated:** 2026-02-02T05:27:52Z
+**Last Updated:** 2026-02-02T06:35:00Z
 
 ## Project Reference
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
-| 9 | Audio & Video Effects | IN PROGRESS | 11/12 | TBD |
+| 9 | Audio & Video Effects | IN PROGRESS | 12/12 | TBD |
 
 **Total:** 73/73 requirements completed (100% - v1.0 milestone)
-**Phase 9 Progress:** 11/12 plans completed (09-01 through 09-11 complete)
+**Phase 9 Progress:** 12/12 plans completed (09-01 through 09-12 complete)
 
 ## Performance Metrics
 
@@ -205,6 +205,7 @@ See: .planning/PROJECT.md
 | 2026-02-02 | Lazy import in video_track.py | Import ScreenOverlayManager lazily to avoid circular dependencies | video_track imported early in call_service |
 | 2026-02-02 | Convenience methods on ScreenShareTrack | set_watermark(), set_border(), set_cursor_highlight() methods | Simple API for common cases without manager |
 | 2026-02-02 | ScreenOverlayManager preset system | create_preset() for common configurations (presentation, branded, minimal) | Quick setup for typical screen sharing scenarios |
+| 2026-02-02 | Non-destructive voice message effects | Effects applied during playback, not baked into recordings | Preserves original audio, allows changing effects post-recording |
 
 ### Active TODOs
 
@@ -273,6 +274,7 @@ See: .planning/PROJECT.md
 - [x] Execute 09-08-PLAN.md (effects track integration)
 - [x] Execute 09-09-PLAN.md (effect preset management)
 - [x] Execute 09-11-PLAN.md (screen sharing overlays)
+- [x] Execute 09-10-PLAN.md (voice message effects integration)
 
 ### Blockers
 
