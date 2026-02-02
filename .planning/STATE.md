@@ -1,8 +1,8 @@
 # Project State: DiscordOpus
 
-**Current Phase:** MILESTONE COMPLETE
-**Status:** v1.0 - All 8 phases complete
-**Last Updated:** 2026-01-31
+**Current Phase:** Phase 9 - Audio & Video Effects
+**Status:** v1.1 in progress (v1.0 complete)
+**Last Updated:** 2026-02-02
 
 ## Project Reference
 
@@ -28,13 +28,15 @@ See: .planning/PROJECT.md
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
+| 9 | Audio & Video Effects | IN PROGRESS | 4/12 | TBD |
 
-**Total:** 73/73 requirements completed (100%)
+**Total:** 73/73 requirements completed (100% - v1.0 milestone)
+**Phase 9 Progress:** 4/12 plans completed
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 53
+- Plans completed: 54
 - Average plan duration: 5m
 - Estimated completion: TBD (more data needed)
 
@@ -176,6 +178,10 @@ See: .planning/PROJECT.md
 | 2026-01-31 | 3-second delay before update check | Wait for app to fully initialize before checking updates | Avoids race conditions with frontend loading |
 | 2026-01-31 | UpdatePrompt in AppLayout as global component | Banner appears regardless of active panel | Consistent UX across all views |
 | 2026-01-31 | Session-based dismiss for update banner | User can dismiss, banner returns on restart if update still available | Balance between persistence and user control |
+| 2026-02-02 | Lazy torch import in HardwareDetector | torch is large and slow to import; lazy loading avoids delaying app startup | Prevents Phase 9 effects from slowing application startup |
+| 2026-02-02 | Singleton pattern for HardwareDetector | Hardware capabilities don't change during app runtime, cache results | Efficient re-detection avoidance, single source of truth |
+| 2026-02-02 | QualityPreset CUDA→ULTRA, OpenCL→HIGH, CPU→MEDIUM | Auto-select best quality based on hardware capabilities | Optimal quality with graceful CPU fallback |
+| 2026-02-02 | GPUtil as optional dependency | Only works with NVIDIA GPUs, not all users have NVIDIA | Graceful degradation for non-NVIDIA or integrated graphics |
 
 ### Active TODOs
 
@@ -234,6 +240,7 @@ See: .planning/PROJECT.md
 - [x] Execute 08-03-PLAN.md (Notification API integration)
 - [x] Execute 08-04-PLAN.md (Update prompt UI)
 - [x] Execute 08-05-PLAN.md (Verification checkpoint - deferred) - PHASE 8 COMPLETE - MILESTONE v1.0 COMPLETE
+- [x] Execute 09-01-PLAN.md (hardware detection and quality adaptation)
 
 ### Blockers
 
@@ -245,20 +252,18 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-01-31 - Completed Phase 8, MILESTONE v1.0
+**Last session:** 2026-02-02 - Started Phase 9, completed 09-01
 
 **What we just completed:**
-- 08-01: NotificationService with InteractableWindowsToaster
-- 08-02: UpdateService with tufup TUF verification
-- 08-03: Notification API integration with NetworkService
-- 08-04: Update prompt UI with background check on startup
-- 08-05: Verification checkpoint (deferred by user)
-- PHASE 8 COMPLETE
-- MILESTONE v1.0 COMPLETE - All 8 phases, 54 plans, 73 requirements
+- 09-01: Hardware detection and quality adaptation infrastructure
+  - HardwareDetector with CUDA/OpenCL/CPU detection
+  - QualityAdapter with auto-preset selection (ULTRA/HIGH/MEDIUM/LOW)
+  - ResourceMonitor for CPU/GPU/memory usage tracking
+  - Phase 9 dependencies added (deepfilternet, pyrnnoise, pedalboard, mediapipe, psutil)
 
 **What's next:**
-- Run /gsd:audit-milestone for final verification
-- Or /gsd:complete-milestone to archive and start v2.0
+- Execute 09-02-PLAN.md (noise cancellation with DeepFilterNet3 and RNNoise)
+- Execute remaining Phase 9 plans (voice effects, video filters, virtual backgrounds, etc.)
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8 deferred - should be run before production
@@ -266,34 +271,23 @@ See: .planning/PROJECT.md
 - AUMID may need Windows registration for notification callbacks in production
 
 **Files created this session:**
-- .planning/phases/08-notifications-polish/08-01-SUMMARY.md
-- .planning/phases/08-notifications-polish/08-02-SUMMARY.md
-- .planning/phases/08-notifications-polish/08-03-SUMMARY.md
-- .planning/phases/08-notifications-polish/08-04-SUMMARY.md
-- .planning/phases/08-notifications-polish/08-05-SUMMARY.md
-- .planning/phases/08-notifications-polish/08-VERIFICATION.md
-- src/notifications/__init__.py
-- src/notifications/service.py
-- src/updates/__init__.py
-- src/updates/service.py
-- src/updates/settings.py
-- frontend/src/components/settings/NotificationSection.tsx
-- frontend/src/components/layout/UpdatePrompt.tsx
+- .planning/phases/09-audio-video-effects/09-01-SUMMARY.md
+- src/effects/hardware/__init__.py
+- src/effects/hardware/gpu_detector.py
+- src/effects/hardware/quality_adapter.py
+- src/effects/hardware/resource_monitor.py
 
 **Files modified this session:**
-- requirements.txt (windows-toasts, tufup)
-- src/storage/settings.py (notification settings)
-- src/network/service.py (notification integration)
-- src/api/bridge.py (notification + update API)
-- src/main.py (update check on startup)
-- frontend/src/components/settings/SettingsPanel.tsx (NotificationSection)
-- frontend/src/components/layout/AppLayout.tsx (UpdatePrompt)
-- frontend/src/lib/pywebview.ts (types)
-- frontend/src/stores/contacts.ts (open_chat event)
-- frontend/src/components/settings/NotificationSection.tsx (api.call() pattern fix)
+- requirements.txt (Phase 9 dependencies: deepfilternet, pyrnnoise, pedalboard, mediapipe, psutil)
 - .planning/STATE.md
 
 ---
 
+### Roadmap Evolution
+
+- Phase 9 added: Audio & Video Effects (noise cancellation, voice effects, video filters, background blur, local AI processing)
+
+---
+
 *State initialized: 2026-01-30*
-*Last updated: 2026-01-31 after completing 08-04-PLAN.md*
+*Last updated: 2026-02-02 after completing 09-01*
