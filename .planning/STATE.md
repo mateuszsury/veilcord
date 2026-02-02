@@ -190,6 +190,11 @@ See: .planning/PROJECT.md
 | 2026-02-02 | Professional signal chain order | Gate → De-esser → EQ(corrective) → Compressor → EQ(creative) → Effects | Standard vocal processing chain used in studios and broadcasts |
 | 2026-02-02 | EQ presets over raw frequency controls | Provide clarity/warmth/presence presets instead of raw frequency band adjustments | Better UX for non-technical users, custom mode for advanced users |
 | 2026-02-02 | Graceful Pedalboard degradation | Effects check availability, log warnings, bypass processing if unavailable | Robust development without requiring Pedalboard installation |
+| 2026-02-02 | MediaPipe landmark anchors for AR overlays | GLASSES use eyes 33/263, HAT uses forehead 10, MASK uses nose 1 | MediaPipe Face Mesh provides 478 landmarks with stable indices |
+| 2026-02-02 | BGRA PNG format for overlays | PNG with alpha channel (4 channels) for transparency | Standard AR overlay format, widely supported |
+| 2026-02-02 | Placeholder generation for missing overlay assets | Creates colored shapes when PNG files not found | Allows testing without actual asset files |
+| 2026-02-02 | Helper functions avoid circular imports | _get_eye_distance() and _get_face_angle() at module level | AROverlay needs face calculations without FaceTracker dependency |
+| 2026-02-02 | AROverlayManager with shared FaceTracker | Single face detection pass for multiple overlays | Efficient - one detection per frame regardless of overlay count |
 
 ### Active TODOs
 
