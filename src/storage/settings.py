@@ -5,7 +5,8 @@ Provides persistent storage for user preferences and app configuration.
 All values are stored as strings - callers must handle type conversion.
 """
 
-from typing import Optional
+import json
+from typing import Optional, Tuple, List
 
 from src.storage.db import get_database
 
@@ -28,6 +29,28 @@ class Settings:
     NOTIFICATIONS_CALLS = "notifications_calls"
     """Whether to show notifications for incoming calls."""
 
+    DISCOVERY_ENABLED = "discovery_enabled"
+    """Whether this user is discoverable by others."""
+
+    # Effect settings
+    EFFECTS_ACTIVE_PRESET = "effects_active_preset"
+    """Name of currently active effect preset."""
+
+    EFFECTS_FAVORITE_PRESETS = "effects_favorite_presets"
+    """JSON list of favorite preset names for quick access."""
+
+    EFFECTS_AUDIO_ENABLED = "effects_audio_enabled"
+    """Whether audio effects are currently enabled."""
+
+    EFFECTS_VIDEO_ENABLED = "effects_video_enabled"
+    """Whether video effects are currently enabled."""
+
+    EFFECTS_SHOW_RESOURCE_MONITOR = "effects_show_resource_monitor"
+    """Whether to show resource usage monitor."""
+
+    EFFECTS_QUALITY_OVERRIDE = "effects_quality_override"
+    """Quality override setting (low, medium, high, ultra, or null for auto)."""
+
     # Default values
     _defaults = {
         USER_STATUS: "online",
@@ -35,6 +58,14 @@ class Settings:
         NOTIFICATIONS_ENABLED: "true",
         NOTIFICATIONS_MESSAGES: "true",
         NOTIFICATIONS_CALLS: "true",
+        DISCOVERY_ENABLED: "false",  # Off by default for privacy
+        # Effect defaults
+        EFFECTS_ACTIVE_PRESET: "work",
+        EFFECTS_FAVORITE_PRESETS: json.dumps(["work", "gaming", "streaming"]),
+        EFFECTS_AUDIO_ENABLED: "false",  # Off by default until user enables
+        EFFECTS_VIDEO_ENABLED: "false",  # Off by default until user enables
+        EFFECTS_SHOW_RESOURCE_MONITOR: "false",
+        EFFECTS_QUALITY_OVERRIDE: "null",  # Auto-detect by default
     }
 
     @classmethod
@@ -114,3 +145,119 @@ def delete_setting(key: str) -> None:
     db = get_database()
     db.execute("DELETE FROM settings WHERE key = ?", (key,))
     db.commit()
+
+
+# Effect-specific setting helpers
+
+
+def get_active_preset() -> str:
+    """
+    Get the name of the currently active effect preset.
+
+    Returns:
+        Active preset name (defaults to "work")
+    """
+    return get_setting(Settings.EFFECTS_ACTIVE_PRESET, "work")
+
+
+def set_active_preset(name: str) -> None:
+    """
+    Set the currently active effect preset.
+
+    Args:
+        name: Preset name to activate
+    """
+    set_setting(Settings.EFFECTS_ACTIVE_PRESET, name)
+
+
+def get_favorite_presets() -> List[str]:
+    """
+    Get list of favorite presets for quick access bar.
+
+    Returns:
+        List of preset names
+    """
+    json_str = get_setting(
+        Settings.EFFECTS_FAVORITE_PRESETS,
+        json.dumps(["work", "gaming", "streaming"])
+    )
+    try:
+        return json.loads(json_str)
+    except (json.JSONDecodeError, TypeError):
+        return ["work", "gaming", "streaming"]
+
+
+def set_favorite_presets(presets: List[str]) -> None:
+    """
+    Set favorite presets for quick access.
+
+    Args:
+        presets: List of preset names
+    """
+    set_setting(Settings.EFFECTS_FAVORITE_PRESETS, json.dumps(presets))
+
+
+def get_effects_enabled() -> Tuple[bool, bool]:
+    """
+    Get whether audio and video effects are enabled.
+
+    Returns:
+        Tuple of (audio_enabled, video_enabled)
+    """
+    audio_enabled = get_setting(Settings.EFFECTS_AUDIO_ENABLED, "false") == "true"
+    video_enabled = get_setting(Settings.EFFECTS_VIDEO_ENABLED, "false") == "true"
+    return audio_enabled, video_enabled
+
+
+def set_effects_enabled(audio: bool, video: bool) -> None:
+    """
+    Set whether audio and video effects are enabled.
+
+    Args:
+        audio: Whether audio effects are enabled
+        video: Whether video effects are enabled
+    """
+    set_setting(Settings.EFFECTS_AUDIO_ENABLED, "true" if audio else "false")
+    set_setting(Settings.EFFECTS_VIDEO_ENABLED, "true" if video else "false")
+
+
+def get_quality_override() -> Optional[str]:
+    """
+    Get quality override setting.
+
+    Returns:
+        Quality level ("low", "medium", "high", "ultra") or None for auto
+    """
+    value = get_setting(Settings.EFFECTS_QUALITY_OVERRIDE, "null")
+    return None if value == "null" else value
+
+
+def set_quality_override(quality: Optional[str]) -> None:
+    """
+    Set quality override.
+
+    Args:
+        quality: Quality level ("low", "medium", "high", "ultra") or None for auto
+    """
+    value = "null" if quality is None else quality
+    set_setting(Settings.EFFECTS_QUALITY_OVERRIDE, value)
+
+
+def get_show_resource_monitor() -> bool:
+    """
+    Get whether to show resource usage monitor.
+
+    Returns:
+        True if resource monitor should be shown
+    """
+    return get_setting(Settings.EFFECTS_SHOW_RESOURCE_MONITOR, "false") == "true"
+
+
+def set_show_resource_monitor(show: bool) -> None:
+    """
+    Set whether to show resource usage monitor.
+
+    Args:
+        show: Whether to show resource monitor
+    """
+    set_setting(Settings.EFFECTS_SHOW_RESOURCE_MONITOR, "true" if show else "false")
