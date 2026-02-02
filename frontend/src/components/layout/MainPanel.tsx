@@ -1,11 +1,19 @@
 import { useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { useUIStore } from '@/stores/ui';
 import { useChat } from '@/stores/chat';
 import { useGroupStore } from '@/stores/groups';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
 import { ChatPanel } from '@/components/chat/ChatPanel';
 
+/**
+ * MainPanel - Primary content area in the CSS Grid layout.
+ *
+ * Fills the third column (1fr) of the grid layout.
+ * Displays ChatPanel or SettingsPanel based on activePanel state.
+ *
+ * Uses Discord dark theme background (bg-discord-bg-primary).
+ * Content components handle their own scrolling.
+ */
 export function MainPanel() {
   const activePanel = useUIStore((s) => s.activePanel);
   const selectedContactId = useUIStore((s) => s.selectedContactId);
@@ -24,18 +32,8 @@ export function MainPanel() {
   }, [selectedGroupId, selectGroup]);
 
   return (
-    <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex-1 h-full bg-cosmic-bg flex flex-col overflow-hidden"
-    >
-      {activePanel === 'settings' ? (
-        <div className="flex-1 overflow-y-auto">
-          <SettingsPanel />
-        </div>
-      ) : (
-        <ChatPanel />
-      )}
-    </motion.main>
+    <main className="h-full bg-discord-bg-primary overflow-hidden">
+      {activePanel === 'settings' ? <SettingsPanel /> : <ChatPanel />}
+    </main>
   );
 }
