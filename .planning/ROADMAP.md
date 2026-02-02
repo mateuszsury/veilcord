@@ -1,8 +1,8 @@
 # Roadmap: DiscordOpus
 
 **Created:** 2026-01-30
-**Phases:** 8
-**Requirements:** 73 v1
+**Phases:** 9
+**Requirements:** 73 v1 + 6 v1.1
 
 ## Overview
 
@@ -16,6 +16,7 @@
 | 6 | Video & Screen Sharing | Users can make video calls and share screens | 8 |
 | 7 | Group Features | Users can create groups and participate in group calls | 8 |
 | 8 | Notifications & Polish | Users receive system notifications and auto-updates | 5 |
+| 9 | Audio & Video Effects | Users have professional audio/video processing with local AI | 6 |
 
 ## Phase 1: Cryptographic Foundation & Packaging
 
@@ -349,6 +350,54 @@ Plans:
 
 ---
 
+## Phase 9: Audio & Video Effects
+
+**Goal:** Users have access to professional audio processing (noise cancellation, voice effects) and video effects during calls, powered by local AI and DSP algorithms.
+
+**Requirements:**
+- AUDIO-FX-01: Real-time noise cancellation
+- AUDIO-FX-02: Voice enhancement and effects
+- AUDIO-FX-03: Background noise suppression
+- VIDEO-FX-01: Real-time video filters and effects
+- VIDEO-FX-02: Background blur/replacement
+- VIDEO-FX-03: Face tracking and AR overlays
+
+**Plans:** 12 plans
+
+Plans:
+- [x] 09-01-PLAN.md - Hardware detection and quality adaptation (Wave 1)
+- [x] 09-02-PLAN.md - Audio effects core (noise cancellation, effect chain) (Wave 1)
+- [x] 09-03-PLAN.md - Voice effects and enhancement (Pedalboard) (Wave 2)
+- [x] 09-04-PLAN.md - Video processing core (face tracker, segmentation) (Wave 1)
+- [x] 09-05-PLAN.md - Virtual backgrounds (blur, replace) (Wave 2)
+- [x] 09-06-PLAN.md - Beauty and creative filters (Wave 2)
+- [x] 09-07-PLAN.md - AR face overlays (glasses, masks) (Wave 2)
+- [x] 09-08-PLAN.md - Effects track integration (aiortc wrappers) (Wave 3)
+- [x] 09-09-PLAN.md - Preset management and settings (Wave 3)
+- [x] 09-10-PLAN.md - Voice message effects (Wave 4)
+- [x] 09-11-PLAN.md - Screen sharing overlays (Wave 3)
+- [x] 09-12-PLAN.md - Final integration and verification (Wave 4)
+
+**Status:** Complete (2026-02-02)
+
+**Verification Notes:** 09-VERIFICATION.md automated checks passed with 21/21 artifacts verified. Human verification checkpoint deferred by user.
+
+**Success Criteria:**
+1. User enables noise cancellation and background noise is significantly reduced
+2. User applies voice effects (pitch shift, reverb, etc.) during calls
+3. User enables background blur for privacy during video calls
+4. User applies video filters in real-time without noticeable latency
+5. Effects processing runs locally (no cloud dependency)
+6. Effects can be toggled on/off mid-call
+7. Audio effects work with voice messages
+8. Settings persist across app restarts
+
+**Dependencies:** Phase 5 (voice calls), Phase 6 (video calls)
+
+**Research Notes:** Research completed (09-RESEARCH.md). Using DeepFilterNet3 for AI noise suppression with RNNoise CPU fallback, Spotify's Pedalboard for audio effects, MediaPipe for face tracking and segmentation, OpenCV for video filters. All processing local with GPU acceleration when available.
+
+---
+
 ## Coverage Validation
 
 | Category | Total | Mapped | Coverage |
@@ -397,6 +446,9 @@ Phase 7: Group Features
    |
    v
 Phase 8: Notifications & Polish
+   |
+   v
+Phase 9: Audio & Video Effects
 ```
 
 ---
@@ -420,4 +472,4 @@ Phase 8: Notifications & Polish
 ---
 
 *Roadmap created: 2026-01-30*
-*Last updated: 2026-01-31*
+*Last updated: 2026-02-02*
