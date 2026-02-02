@@ -214,6 +214,9 @@ See: .planning/PROJECT.md
 | 2026-02-02 | Discord dark palette with softer grays | #1e1f22 primary instead of pure black | Less eye strain, Discord-inspired |
 | 2026-02-02 | Blood red accent (#991b1b) | Darker, serious, elegant red for accents | Blue links (#00a8fc) like Discord, red for accents only |
 | 2026-02-02 | Tailwind v4 @theme directive for design tokens | 33 CSS custom properties for entire design system | Enables bg-discord-*, text-discord-*, border-accent-* utility classes |
+| 2026-02-02 | HTMLMotionProps for Button | Extends motion props instead of ButtonHTMLAttributes | Full Framer Motion support while maintaining native button props |
+| 2026-02-02 | StatusBadge border matches parent bg | Uses border-discord-bg-secondary for visual separation | Clear status dots on avatars without floating appearance |
+| 2026-02-02 | Variant/size pattern for Tailwind classes | variantStyles and sizeStyles objects for class composition | Scalable pattern for styled components with multiple variants |
 
 ### Active TODOs
 
@@ -297,24 +300,23 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-02-02 - Completed 10-01-PLAN.md
+**Last session:** 2026-02-02 - Completed 10-02-PLAN.md
 
 **What we just completed:**
-- 10-01: Design System Foundation
-  - Installed @tanstack/react-virtual, lucide-react, react-loading-skeleton
-  - Created complete Discord design system with 33 CSS custom properties
-  - Discord dark palette (5 bg colors, 4 text colors)
-  - Blood red accent system (5 variations)
-  - Status colors, z-index scale, animation easings/durations
-  - Accessibility: focus ring, prefers-reduced-motion
-  - Replaced cosmic theme in index.css and AppLayout
+- 10-02: UI Primitives
+  - Button with primary/secondary/ghost variants and sm/md/lg sizes
+  - Red glow hover effect using Framer Motion boxShadow
+  - Avatar with image loading and initials fallback
+  - StatusBadge with online/away/busy/offline colors
+  - Tooltip with configurable delay and 4 positions
+  - Barrel export from @/components/ui
   - 3 tasks completed in 5 minutes
-  - **Phase 10 Plan 01 COMPLETE**
+  - **Phase 10 Plan 02 COMPLETE**
 
 **What's next:**
-- Execute 10-02-PLAN.md (navigation components)
-- Continue Phase 10 UI/UX Redesign plans 02-10
-- All subsequent plans can use new design tokens
+- Execute 10-03-PLAN.md (layout components)
+- Continue Phase 10 UI/UX Redesign plans 03-10
+- All plans can now import Button, Avatar, Badge, Tooltip from @/components/ui
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8, 9 deferred - should be run before production
