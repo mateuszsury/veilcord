@@ -2,7 +2,7 @@
 
 **Current Phase:** Phase 9 - Audio & Video Effects
 **Status:** v1.1 in progress (v1.0 complete)
-**Last Updated:** 2026-02-02T19:50:31Z
+**Last Updated:** 2026-02-02T05:27:52Z
 
 ## Project Reference
 
@@ -28,16 +28,16 @@ See: .planning/PROJECT.md
 | 6 | Video & Screen Sharing | COMPLETE | 6/6 | 8 |
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
-| 9 | Audio & Video Effects | IN PROGRESS | 8/12 | TBD |
+| 9 | Audio & Video Effects | IN PROGRESS | 11/12 | TBD |
 
 **Total:** 73/73 requirements completed (100% - v1.0 milestone)
-**Phase 9 Progress:** 8/12 plans completed (09-01 through 09-08 complete)
+**Phase 9 Progress:** 11/12 plans completed (09-01 through 09-11 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 59
-- Average plan duration: 11m
+- Plans completed: 62
+- Average plan duration: 10m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -198,6 +198,13 @@ See: .planning/PROJECT.md
 | 2026-02-02 | MediaStreamTrack wrapper pattern for effects | AudioEffectsTrack/VideoEffectsTrack wrap source tracks with effect processing | Clean separation of concerns, effects toggleable mid-call |
 | 2026-02-02 | Frame skipping for slow video processing | Return previous processed frame instead of blocking pipeline | Maintains smooth video even with heavy effects |
 | 2026-02-02 | Performance monitoring for effects tracks | Warn at 15ms for audio, 33ms for video frame time | Clear feedback when effects are too computationally expensive |
+| 2026-02-02 | Simple overlay system for screen sharing | Focus on watermark, border, cursor highlight only (per Phase 9 context) | Screen sharing doesn't need complex effects, performance matters |
+| 2026-02-02 | Text and image watermark support | WatermarkOverlay can use text OR image with alpha channel | Flexibility for branding and attribution |
+| 2026-02-02 | Position calculation with presets | Five position presets (top_left, top_right, bottom_left, bottom_right, center) | Common use cases covered, easy to extend |
+| 2026-02-02 | Cursor position external to overlay | CursorHighlight requires set_cursor_position(x, y) to be called externally | mss library doesn't provide cursor position |
+| 2026-02-02 | Lazy import in video_track.py | Import ScreenOverlayManager lazily to avoid circular dependencies | video_track imported early in call_service |
+| 2026-02-02 | Convenience methods on ScreenShareTrack | set_watermark(), set_border(), set_cursor_highlight() methods | Simple API for common cases without manager |
+| 2026-02-02 | ScreenOverlayManager preset system | create_preset() for common configurations (presentation, branded, minimal) | Quick setup for typical screen sharing scenarios |
 
 ### Active TODOs
 
@@ -264,6 +271,8 @@ See: .planning/PROJECT.md
 - [x] Execute 09-06-PLAN.md (creative video filters)
 - [x] Execute 09-07-PLAN.md (AR face overlays)
 - [x] Execute 09-08-PLAN.md (effects track integration)
+- [x] Execute 09-09-PLAN.md (effect preset management)
+- [x] Execute 09-11-PLAN.md (screen sharing overlays)
 
 ### Blockers
 
@@ -275,24 +284,25 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-02-02 - Completed 09-08-PLAN.md
+**Last session:** 2026-02-02 - Completed 09-11-PLAN.md
 
 **What we just completed:**
-- 09-08: Effects track integration with VoiceCallService
-  - AudioEffectsTrack wraps audio tracks with AudioEffectChain processing
-  - VideoEffectsTrack wraps video tracks with VideoEffectsPipeline processing
-  - VideoEffectsPipeline orchestrates multiple video effects in order
-  - VoiceCallService uses effects tracks when effects are enabled
-  - Mid-call effect toggling via set_audio_effects() and set_video_effects()
-  - Frame skipping strategy for slow video processing
-  - Performance monitoring with latency warnings (15ms audio, 33ms video)
-  - 3 tasks completed in 5 minutes
+- 09-11: Screen sharing overlays
+  - ScreenOverlay base class for consistent processing
+  - WatermarkOverlay with text and image support, position presets, opacity control
+  - BorderOverlay with solid and rounded corner styles
+  - CursorHighlight with circle, ring, and spotlight effects
+  - ScreenOverlayManager for multi-overlay composition
+  - Integration with ScreenShareTrack for real-time overlay application
+  - Convenience methods: set_watermark(), set_border(), set_cursor_highlight()
+  - Preset configurations: presentation, branded, minimal
+  - 3 tasks completed in 8 minutes (Task 2 included in Task 1 commit)
   - No deviations or issues
 
 **What's next:**
-- Continue Phase 9 execution (4/12 plans remaining)
-- Plans 09-01 through 09-08 complete
-- Execute remaining plans: 09-09 through 09-12
+- Continue Phase 9 execution (1/12 plans remaining)
+- Plans 09-01 through 09-11 complete (09-10 skipped or TBD)
+- Execute remaining plan: 09-12
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8 deferred - should be run before production
@@ -308,6 +318,8 @@ See: .planning/PROJECT.md
 - .planning/phases/09-audio-video-effects/09-06-SUMMARY.md
 - .planning/phases/09-audio-video-effects/09-07-SUMMARY.md
 - .planning/phases/09-audio-video-effects/09-08-SUMMARY.md
+- .planning/phases/09-audio-video-effects/09-09-SUMMARY.md
+- .planning/phases/09-audio-video-effects/09-11-SUMMARY.md
 - src/effects/hardware/__init__.py
 - src/effects/hardware/gpu_detector.py
 - src/effects/hardware/quality_adapter.py
@@ -324,15 +336,22 @@ See: .planning/PROJECT.md
 - src/effects/video/beauty_filters.py
 - src/effects/video/creative_filters.py
 - src/effects/video/ar_overlays.py
+- src/effects/video/screen_overlays.py
 - src/effects/tracks/__init__.py
 - src/effects/tracks/audio_effects_track.py
 - src/effects/tracks/video_effects_track.py
+- src/effects/presets/__init__.py
+- src/effects/presets/built_in_presets.py
+- src/effects/presets/preset_manager.py
 - assets/overlays/.gitkeep
 - assets/overlays/README.md
 
 **Files modified this session:**
 - requirements.txt (Phase 9 dependencies: deepfilternet, pyrnnoise, pedalboard, mediapipe, psutil)
-- src/voice/call_service.py (effects track integration)
+- src/voice/call_service.py (effects track integration, preset management)
+- src/voice/video_track.py (screen overlay integration)
+- src/effects/video/__init__.py (screen overlay exports)
+- src/storage/settings.py (preset persistence)
 - .planning/STATE.md
 
 ---
@@ -344,4 +363,4 @@ See: .planning/PROJECT.md
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-02-02 after completing 09-08*
+*Last updated: 2026-02-02 after completing 09-11*
