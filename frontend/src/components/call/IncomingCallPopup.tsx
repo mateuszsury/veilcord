@@ -2,9 +2,11 @@
  * Incoming call notification popup.
  *
  * Shows when state is 'ringing_incoming' with caller info
- * and accept/reject buttons.
+ * and accept/reject buttons in Discord style.
  */
 
+import { motion, AnimatePresence } from 'framer-motion';
+import { Phone, PhoneOff } from 'lucide-react';
 import { useCall } from '@/stores/call';
 import { useContactsStore } from '@/stores/contacts';
 
@@ -22,78 +24,76 @@ export function IncomingCallPopup() {
   const callerName = callInfo.contactName || contact?.displayName || 'Unknown';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700 max-w-sm w-full mx-4">
-        {/* Phone icon with pulse animation */}
-        <div className="flex justify-center mb-6">
-          <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center animate-pulse">
-            <svg
-              className="w-10 h-10 text-green-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-              />
-            </svg>
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="w-80 bg-discord-bg-secondary rounded-lg shadow-xl border border-discord-bg-tertiary overflow-hidden"
+        >
+          {/* Content */}
+          <div className="p-8 flex flex-col items-center">
+            {/* Caller avatar with pulse ring */}
+            <div className="relative mb-6">
+              {/* Pulse rings */}
+              <div className="absolute inset-0 -m-3">
+                <div className="w-[calc(100%+24px)] h-[calc(100%+24px)] rounded-full border-2 border-status-online/30 animate-ping" />
+              </div>
+              <div className="absolute inset-0 -m-1.5">
+                <div
+                  className="w-[calc(100%+12px)] h-[calc(100%+12px)] rounded-full border-2 border-status-online/50 animate-ping"
+                  style={{ animationDelay: '150ms' }}
+                />
+              </div>
+              {/* Avatar */}
+              <div className="relative w-20 h-20 rounded-full bg-accent-red/50 flex items-center justify-center text-3xl font-medium text-white">
+                {callerName.charAt(0).toUpperCase()}
+              </div>
+            </div>
+
+            {/* Caller info */}
+            <div className="text-center mb-8">
+              <p className="text-lg font-medium text-discord-text-primary mb-1">{callerName}</p>
+              <p className="text-discord-text-muted flex items-center justify-center gap-2">
+                <span className="inline-block w-2 h-2 bg-status-online rounded-full animate-pulse" />
+                Incoming call...
+              </p>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex justify-center gap-8">
+              {/* Reject button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => rejectCall()}
+                className="w-14 h-14 rounded-full bg-status-busy hover:brightness-110 flex items-center justify-center transition-colors shadow-lg"
+                title="Reject call"
+              >
+                <PhoneOff size={24} className="text-white" />
+              </motion.button>
+
+              {/* Accept button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => acceptCall()}
+                className="w-14 h-14 rounded-full bg-status-online hover:brightness-110 flex items-center justify-center transition-colors shadow-lg"
+                title="Accept call"
+              >
+                <Phone size={24} className="text-white" />
+              </motion.button>
+            </div>
           </div>
-        </div>
-
-        {/* Caller info */}
-        <div className="text-center mb-8">
-          <h2 className="text-xl font-semibold text-white mb-1">Incoming Call</h2>
-          <p className="text-slate-300 text-lg">{callerName}</p>
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex justify-center gap-6">
-          {/* Reject button */}
-          <button
-            onClick={() => rejectCall()}
-            className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors shadow-lg"
-            title="Reject call"
-          >
-            <svg
-              className="w-8 h-8 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-
-          {/* Accept button */}
-          <button
-            onClick={() => acceptCall()}
-            className="w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center transition-colors shadow-lg"
-            title="Accept call"
-          >
-            <svg
-              className="w-8 h-8 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
