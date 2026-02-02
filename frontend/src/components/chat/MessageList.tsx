@@ -1,11 +1,12 @@
 /**
- * Scrollable message list with auto-scroll to bottom.
+ * Discord-style scrollable message list.
  *
  * Features:
  * - Auto-scroll when new messages arrive
  * - Scroll-to-bottom on initial load
  * - Loading indicator for older messages
  * - Empty state when no messages
+ * - Discord-style message display (no bubbles)
  */
 
 import { useEffect, useRef } from 'react';
@@ -42,7 +43,7 @@ export function MessageList({
 
   if (messages.length === 0 && !loading) {
     return (
-      <div className="flex-1 flex items-center justify-center text-cosmic-muted">
+      <div className="flex-1 flex items-center justify-center text-discord-text-muted h-full">
         <div className="text-center">
           <p className="text-lg">No messages yet</p>
           <p className="text-sm mt-1">Send a message to start the conversation</p>
@@ -52,16 +53,16 @@ export function MessageList({
   }
 
   return (
-    <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+    <div ref={containerRef} className="flex-1 overflow-y-auto p-4 h-full">
       {/* Load more button */}
       {hasMore && (
         <div className="flex justify-center py-2">
           <button
             onClick={onLoadMore}
             disabled={loading}
-            className="text-sm text-cosmic-accent hover:text-cosmic-accent/80 disabled:opacity-50"
+            className="text-sm text-discord-text-link hover:underline disabled:opacity-50"
           >
-            {loading ? 'Loading...' : 'Load older messages'}
+            {loading ? 'Loading...' : 'Load earlier messages'}
           </button>
         </div>
       )}
@@ -69,7 +70,7 @@ export function MessageList({
       {/* Loading indicator */}
       {loading && messages.length === 0 && (
         <div className="flex justify-center py-8">
-          <div className="animate-pulse text-cosmic-muted">Loading messages...</div>
+          <div className="animate-pulse text-discord-text-muted">Loading messages...</div>
         </div>
       )}
 

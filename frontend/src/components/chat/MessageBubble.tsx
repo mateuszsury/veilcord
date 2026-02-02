@@ -1,16 +1,20 @@
 /**
- * Message bubble component for displaying a single message.
+ * Discord-style message display component.
  *
- * Displays different styles for sent (self) vs received messages.
- * Shows timestamp, edited indicator, reactions, and handles dark cosmic theme.
- * Supports context menu for actions (edit, delete, react, copy).
- * Supports inline editing mode.
+ * Displays messages with:
+ * - Avatar + name + timestamp + content layout (no bubbles)
+ * - Slide up + fade entrance animation
+ * - Hover state with action buttons
+ * - Context menu for actions (edit, delete, react, copy)
+ * - Inline editing mode
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import type { Message } from '@/stores/messages';
 import { MessageContextMenu } from './MessageContextMenu';
 import { FileMessageWrapper } from './FileMessageWrapper';
+import { Avatar } from '@/components/ui';
 import { api } from '@/lib/pywebview';
 
 interface Reaction {
@@ -36,6 +40,9 @@ export function MessageBubble({ message, isOwn, contactId }: MessageBubbleProps)
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  // Determine sender display name
+  const senderName = isOwn ? 'You' : 'Contact';
 
   // Load reactions for this message
   useEffect(() => {
@@ -160,18 +167,32 @@ export function MessageBubble({ message, isOwn, contactId }: MessageBubbleProps)
   }, [contactId, message.id]);
 
   return (
-    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-lg backdrop-blur-sm ${
-          isOwn
-            ? 'bg-cosmic-accent text-white rounded-br-sm'
-            : 'bg-cosmic-surface text-cosmic-text rounded-bl-sm'
-        }`}
-        onContextMenu={handleContextMenu}
-      >
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: [0.3, 0, 0, 1] }}
+      className={`flex gap-4 px-2 py-1 rounded hover:bg-discord-bg-modifier-hover group ${
+        isOwn ? 'bg-discord-bg-modifier-hover/30' : ''
+      }`}
+      onContextMenu={handleContextMenu}
+    >
+      {/* Avatar */}
+      <Avatar name={senderName} size="md" />
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        {/* Header: name and timestamp */}
+        <div className="flex items-baseline gap-2">
+          <span className="font-medium text-discord-text-primary">{senderName}</span>
+          <span className="text-xs text-discord-text-muted">{formattedTime}</span>
+          {message.edited && (
+            <span className="text-xs text-discord-text-muted">(edited)</span>
+          )}
+        </div>
+
         {/* Reply indicator */}
         {message.reply_to && (
-          <div className="text-xs opacity-70 border-l-2 border-white/30 pl-2 mb-1">
+          <div className="text-xs text-discord-text-muted border-l-2 border-discord-bg-tertiary pl-2 mb-1">
             Replying to message...
           </div>
         )}
@@ -181,37 +202,39 @@ export function MessageBubble({ message, isOwn, contactId }: MessageBubbleProps)
           // File message - render file component
           <FileMessageWrapper fileId={message.file_id} />
         ) : isEditing ? (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 mt-1">
             <textarea
               ref={editInputRef}
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
               onKeyDown={handleEditKeyDown}
-              className="w-full bg-cosmic-base/50 text-cosmic-text rounded px-2 py-1 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-cosmic-accent"
+              className="w-full bg-discord-bg-tertiary text-discord-text-primary rounded px-2 py-1 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-accent-red"
               rows={2}
             />
             <div className="flex gap-2 text-xs">
               <button
                 type="button"
                 onClick={handleEditSubmit}
-                className="text-cosmic-success hover:underline"
+                className="text-status-online hover:underline"
               >
                 Save
               </button>
               <button
                 type="button"
                 onClick={handleEditCancel}
-                className="text-cosmic-muted hover:underline"
+                className="text-discord-text-muted hover:underline"
               >
                 Cancel
               </button>
-              <span className="text-cosmic-muted opacity-50">
+              <span className="text-discord-text-muted opacity-50">
                 Enter to save, Esc to cancel
               </span>
             </div>
           </div>
         ) : (
-          <p className="break-words whitespace-pre-wrap">{message.body}</p>
+          <p className="text-discord-text-secondary whitespace-pre-wrap break-words">
+            {message.body}
+          </p>
         )}
 
         {/* Reactions */}
@@ -224,8 +247,8 @@ export function MessageBubble({ message, isOwn, contactId }: MessageBubbleProps)
                 onClick={() => handleReact(reaction.emoji)}
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors ${
                   reaction.hasSelf
-                    ? 'bg-cosmic-accent/30 border border-cosmic-accent/50'
-                    : 'bg-cosmic-base/50 hover:bg-cosmic-base/70'
+                    ? 'bg-accent-red/30 border border-accent-red/50'
+                    : 'bg-discord-bg-tertiary hover:bg-discord-bg-modifier-hover'
                 }`}
               >
                 <span>{reaction.emoji}</span>
@@ -234,14 +257,6 @@ export function MessageBubble({ message, isOwn, contactId }: MessageBubbleProps)
             ))}
           </div>
         )}
-
-        {/* Footer: time and edited */}
-        <div className="flex items-center justify-end gap-2 mt-1">
-          {message.edited && (
-            <span className="text-xs opacity-50">(edited)</span>
-          )}
-          <span className="text-xs opacity-50">{formattedTime}</span>
-        </div>
       </div>
 
       {/* Context menu */}
@@ -257,6 +272,6 @@ export function MessageBubble({ message, isOwn, contactId }: MessageBubbleProps)
           onClose={() => setContextMenu(null)}
         />
       )}
-    </div>
+    </motion.div>
   );
 }
