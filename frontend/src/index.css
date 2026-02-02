@@ -1,33 +1,75 @@
 @import "tailwindcss";
 
 @theme {
-  /* Cosmic dark theme colors */
-  --color-cosmic-bg: #0a0a0f;
-  --color-cosmic-surface: #12121a;
-  --color-cosmic-border: #1e1e2e;
-  --color-cosmic-text: #e1e1e6;
-  --color-cosmic-muted: #8b8b9a;
-  --color-cosmic-accent: #6366f1;
-  --color-cosmic-accent-hover: #818cf8;
+  /* ============================================
+   * Discord Dark Theme - Design System
+   * ============================================ */
 
-  /* Animation keyframes */
-  --animate-star-twinkle: twinkle 3s ease-in-out infinite;
+  /* Discord Background Colors (softer dark gray palette) */
+  --color-discord-bg-primary: #1e1f22;
+  --color-discord-bg-secondary: #2b2d31;
+  --color-discord-bg-tertiary: #313338;
+  --color-discord-bg-modifier-hover: #35373c;
+  --color-discord-bg-modifier-active: #3f4147;
 
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
-  }
+  /* Discord Text Colors */
+  --color-discord-text-primary: #f2f3f5;
+  --color-discord-text-secondary: #b5bac1;
+  --color-discord-text-muted: #949ba4;
+  --color-discord-text-link: #00a8fc;
+
+  /* Blood Red Accent (darker, serious, elegant) */
+  --color-accent-red: #991b1b;
+  --color-accent-red-hover: #b91c1c;
+  --color-accent-red-active: #7f1d1d;
+  --color-accent-red-glow: rgba(153, 27, 27, 0.3);
+  --color-accent-red-text: #dc2626;
+
+  /* Status Colors (standard system, accessible) */
+  --color-status-online: #23a55a;
+  --color-status-away: #f0b232;
+  --color-status-busy: #f23f42;
+  --color-status-offline: #80848e;
+
+  /* Focus Ring */
+  --color-focus-ring: #dc2626;
+  --ring-width: 2px;
+  --ring-offset: 2px;
+
+  /* Sidebar/Layout Dimensions */
+  --sidebar-icon-width: 80px;
+  --sidebar-channel-width: 240px;
+
+  /* Z-index Scale */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-modal: 2000;
+  --z-overlay: 3000;
+  --z-toast: 4000;
+
+  /* Animation Easings */
+  --ease-smooth: cubic-bezier(0.3, 0, 0, 1);
+  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Animation Durations */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
 }
 
+/* ============================================
+ * Global Styles
+ * ============================================ */
+
 html {
-  background-color: var(--color-cosmic-bg);
-  color: var(--color-cosmic-text);
+  background-color: var(--color-discord-bg-primary);
+  color: var(--color-discord-text-primary);
 }
 
 body {
   min-height: 100vh;
-  background-color: var(--color-cosmic-bg);
-  color: var(--color-cosmic-text);
+  background-color: var(--color-discord-bg-primary);
+  color: var(--color-discord-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: system-ui, -apple-system, sans-serif;
@@ -40,33 +82,69 @@ body {
   min-height: 100vh;
 }
 
-/* Scrollbar styling for cosmic theme */
+/* ============================================
+ * Scrollbar Styling (Discord-inspired)
+ * ============================================ */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--color-cosmic-bg);
+  background-color: var(--color-discord-bg-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--color-cosmic-border);
+  background-color: var(--color-discord-bg-modifier-active);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-cosmic-muted);
+  background-color: var(--color-discord-text-muted);
 }
 
-/* Starry background */
-.starry-bg {
-  background-image:
-    radial-gradient(2px 2px at 20px 30px, #6366f1, transparent),
-    radial-gradient(2px 2px at 40px 70px, #818cf8, transparent),
-    radial-gradient(1px 1px at 90px 40px, #e1e1e6, transparent),
-    radial-gradient(2px 2px at 130px 80px, #6366f1, transparent),
-    radial-gradient(1px 1px at 160px 120px, #818cf8, transparent);
-  background-repeat: repeat;
-  background-size: 200px 150px;
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-discord-bg-modifier-active) var(--color-discord-bg-primary);
+}
+
+/* ============================================
+ * Focus Styles (Accessibility)
+ * ============================================ */
+
+/* Visible focus ring for keyboard navigation */
+:focus-visible {
+  outline: var(--ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--ring-offset);
+}
+
+/* Hide focus ring for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================
+ * Reduced Motion (Accessibility)
+ * ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+ * Selection Styling
+ * ============================================ */
+
+::selection {
+  background-color: var(--color-accent-red);
+  color: var(--color-discord-text-primary);
 }
