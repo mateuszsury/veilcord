@@ -73,3 +73,24 @@ windows-toasts>=1.3.1
 
 # Secure auto-updater with TUF cryptographic verification
 tufup>=0.10.0
+
+# Phase 9: Audio & Video Effects
+
+# AI-based noise suppression (PESQ 3.5-4.0+)
+deepfilternet>=0.5.6
+
+# Lightweight noise cancellation for CPU fallback (10-20ms latency)
+pyrnnoise>=0.4.3
+
+# Spotify's production audio effects library
+pedalboard>=0.9.21
+
+# Google's face landmarks and segmentation
+mediapipe>=0.10.32
+
+# Optional: PyTorch for DeepFilterNet (CPU-only by default)
+# torch  # User can install torch[cuda] for GPU acceleration
+
+# Optional: GPU/system monitoring
+psutil>=5.9.0
+# GPUtil>=1.4.0  # NVIDIA only, optional
