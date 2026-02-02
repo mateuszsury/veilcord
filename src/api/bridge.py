@@ -34,6 +34,8 @@ from src.network.service import get_network_service
 from src.updates.service import get_update_service
 from src.updates.settings import CURRENT_VERSION
 from src.storage.settings import get_setting, set_setting, Settings
+from src.storage.paths import factory_reset as _factory_reset
+from src.storage.db import close_database
 
 
 class API:
@@ -173,6 +175,24 @@ class API:
             raise ValueError(f"Invalid status: {status}. Must be one of {valid_statuses}")
         service = get_network_service()
         service.set_user_status(status)
+
+    def reconnect(self) -> Dict[str, Any]:
+        """
+        Force reconnect to signaling server.
+
+        Useful after identity creation or network issues.
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.reconnect()
+            return {'success': success}
+        except RuntimeError:
+            return {'success': False, 'error': 'Network not initialized'}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
 
     # ========== Messaging Methods ==========
 
@@ -1358,3 +1378,606 @@ class API:
     def ping(self) -> str:
         """Test method to verify bridge is working."""
         return "pong"
+
+    def factory_reset(self) -> Dict[str, Any]:
+        """
+        Perform factory reset - delete all user data.
+
+        This removes:
+        - Identity (cryptographic keys)
+        - All contacts
+        - All messages and chat history
+        - All files and voice messages
+        - All settings
+
+        Returns:
+            Dict with success status and message
+        """
+        import time
+
+        try:
+            # Stop network service first
+            try:
+                service = get_network_service()
+                if service._loop:
+                    import asyncio
+                    future = asyncio.run_coroutine_threadsafe(
+                        service.stop(),
+                        service._loop
+                    )
+                    future.result(timeout=5.0)
+            except Exception:
+                pass  # Service might not be running
+
+            # Close database connection
+            try:
+                close_database()
+                # Give OS time to release file handles
+                time.sleep(0.5)
+            except Exception:
+                pass  # Database might not be open
+
+            # Perform reset
+            success = _factory_reset()
+
+            if success:
+                return {
+                    'success': True,
+                    'message': 'Factory reset complete. Please restart the application.'
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': 'Factory reset failed. Some files may be in use.'
+                }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    # ========== Discovery Methods ==========
+
+    def is_discovery_enabled(self) -> bool:
+        """Check if discovery mode is enabled."""
+        try:
+            service = get_network_service()
+            return service.is_discovery_enabled()
+        except RuntimeError:
+            return False
+
+    def set_discovery_enabled(self, enabled: bool) -> Dict[str, Any]:
+        """
+        Enable or disable discovery mode.
+
+        When enabled, you become visible to other users who also have
+        discovery enabled. They can see your display name and status.
+
+        Args:
+            enabled: True to enable, False to disable
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            success = service.set_discovery_enabled(enabled)
+            return {'success': success}
+        except RuntimeError:
+            return {'success': False, 'error': 'Network not initialized'}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def get_discovered_users(self) -> List[Dict[str, Any]]:
+        """
+        Get list of users who have discovery enabled.
+
+        Returns:
+            List of dicts with publicKey, displayName, status
+        """
+        try:
+            service = get_network_service()
+            return service.get_discovered_users()
+        except RuntimeError:
+            return []
+        except Exception:
+            return []
+
+    # ========== Effect Control Methods ==========
+
+    def get_hardware_info(self) -> Dict[str, Any]:
+        """
+        Get hardware capabilities for effects processing.
+
+        Returns:
+            Dict with GPU type, VRAM, recommended quality preset
+        """
+        try:
+            from src.effects import get_hardware_detector
+            detector = get_hardware_detector()
+            info = detector.detect()
+
+            return {
+                "hasGpu": info.has_gpu,
+                "gpuName": info.gpu_name,
+                "vramMb": info.vram_mb,
+                "recommendedQuality": info.recommended_quality.value if info.recommended_quality else "low",
+                "cpuCores": info.cpu_cores,
+            }
+        except Exception as e:
+            return {
+                "hasGpu": False,
+                "gpuName": "Unknown",
+                "vramMb": 0,
+                "recommendedQuality": "low",
+                "cpuCores": 1,
+                "error": str(e)
+            }
+
+    def get_available_presets(self) -> List[Dict[str, Any]]:
+        """
+        Get all available effect presets (built-in + user presets).
+
+        Returns:
+            List of preset dicts with name, description, category, tags
+        """
+        try:
+            from src.effects import get_preset_manager, BUILT_IN_PRESETS
+            manager = get_preset_manager()
+
+            presets = []
+
+            # Add built-in presets
+            for name, preset in BUILT_IN_PRESETS.items():
+                presets.append({
+                    "name": name,
+                    "description": preset.description,
+                    "category": preset.category,
+                    "tags": preset.tags,
+                    "isBuiltIn": True,
+                    "isFavorite": manager.is_favorite(name),
+                })
+
+            # Add user presets
+            user_presets = manager.list_presets()
+            for preset in user_presets:
+                if preset.name not in BUILT_IN_PRESETS:
+                    presets.append({
+                        "name": preset.name,
+                        "description": preset.description,
+                        "category": preset.category,
+                        "tags": preset.tags,
+                        "isBuiltIn": False,
+                        "isFavorite": manager.is_favorite(preset.name),
+                    })
+
+            return presets
+        except Exception as e:
+            return []
+
+    def get_active_preset(self) -> Optional[Dict[str, Any]]:
+        """
+        Get currently active effect preset.
+
+        Returns:
+            Dict with preset name and settings, or None if no preset active
+        """
+        try:
+            from src.effects import get_preset_manager
+            manager = get_preset_manager()
+
+            active_name = manager.get_active_preset_name()
+            if not active_name:
+                return None
+
+            preset = manager.get_preset(active_name)
+            if not preset:
+                return None
+
+            return {
+                "name": active_name,
+                "description": preset.description,
+                "category": preset.category,
+                "audioEffects": preset.audio_effects,
+                "videoEffects": preset.video_effects,
+            }
+        except Exception as e:
+            return None
+
+    def get_effect_state(self) -> Dict[str, Any]:
+        """
+        Get current effect state.
+
+        Returns:
+            Dict with audioEnabled, videoEnabled, activePreset, currentEffects
+        """
+        try:
+            service = get_network_service()
+
+            # Get effect state from network service
+            # For now, return default state - this would need implementation in NetworkService
+            return {
+                "audioEffectsEnabled": False,
+                "videoEffectsEnabled": False,
+                "activePreset": None,
+                "audioEffects": [],
+                "videoEffects": [],
+            }
+        except Exception as e:
+            return {
+                "audioEffectsEnabled": False,
+                "videoEffectsEnabled": False,
+                "activePreset": None,
+                "audioEffects": [],
+                "videoEffects": [],
+                "error": str(e)
+            }
+
+    def set_audio_effects_enabled(self, enabled: bool) -> Dict[str, Any]:
+        """
+        Toggle audio effects on/off.
+
+        Args:
+            enabled: True to enable audio effects, False to disable
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            # This would need implementation in NetworkService to toggle audio effects
+            # For now, store in settings
+            set_setting("audio_effects_enabled", "true" if enabled else "false")
+            return {"success": True, "enabled": enabled}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def set_video_effects_enabled(self, enabled: bool) -> Dict[str, Any]:
+        """
+        Toggle video effects on/off.
+
+        Args:
+            enabled: True to enable video effects, False to disable
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            service = get_network_service()
+            # This would need implementation in NetworkService to toggle video effects
+            # For now, store in settings
+            set_setting("video_effects_enabled", "true" if enabled else "false")
+            return {"success": True, "enabled": enabled}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def apply_preset(self, name: str) -> Dict[str, Any]:
+        """
+        Apply effect preset by name.
+
+        Args:
+            name: Preset name (from get_available_presets)
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            from src.effects import get_preset_manager
+            manager = get_preset_manager()
+
+            preset = manager.get_preset(name)
+            if not preset:
+                return {"success": False, "error": f"Preset '{name}' not found"}
+
+            # Mark as active
+            manager.set_active_preset(name)
+
+            # Apply to current call if active
+            service = get_network_service()
+            # This would need implementation in NetworkService to apply effects
+            # For now, just store the active preset
+
+            return {"success": True, "preset": name}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def save_preset(self, name: str, description: str = "", category: str = "custom") -> Dict[str, Any]:
+        """
+        Save current effect settings as new preset.
+
+        Args:
+            name: Preset name
+            description: Optional description
+            category: Preset category (default: "custom")
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            from src.effects import get_preset_manager, EffectPreset
+            manager = get_preset_manager()
+
+            # Get current effect state
+            # This would need to query active effects from NetworkService
+            # For now, create empty preset
+            preset = EffectPreset(
+                name=name,
+                description=description or f"Custom preset: {name}",
+                category=category,
+                audio_effects=[],
+                video_effects=[],
+                tags=["custom"],
+            )
+
+            manager.save_preset(preset)
+            return {"success": True, "preset": name}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def set_noise_cancellation(self, method: str) -> Dict[str, Any]:
+        """
+        Set noise cancellation method.
+
+        Args:
+            method: "none", "rnnoise", or "deepfilter"
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            from src.effects import NoiseCancellationMethod
+
+            valid_methods = ["none", "rnnoise", "deepfilter"]
+            if method not in valid_methods:
+                return {"success": False, "error": f"Invalid method. Must be one of: {valid_methods}"}
+
+            # Store in settings
+            set_setting("noise_cancellation_method", method)
+
+            # Apply to active call if exists
+            service = get_network_service()
+            # This would need implementation in NetworkService to update noise cancellation
+
+            return {"success": True, "method": method}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def set_voice_effect(self, effect: str, intensity: int) -> Dict[str, Any]:
+        """
+        Set voice effect with intensity.
+
+        Args:
+            effect: Effect name ("none", "robot", "helium", "echo", "reverb", "pitch")
+            intensity: 0-100 intensity level
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            valid_effects = ["none", "robot", "helium", "echo", "reverb", "pitch"]
+            if effect not in valid_effects:
+                return {"success": False, "error": f"Invalid effect. Must be one of: {valid_effects}"}
+
+            if not 0 <= intensity <= 100:
+                return {"success": False, "error": "Intensity must be between 0 and 100"}
+
+            # Store in settings
+            set_setting("voice_effect", effect)
+            set_setting("voice_effect_intensity", str(intensity))
+
+            # Apply to active call if exists
+            service = get_network_service()
+            # This would need implementation in NetworkService to update voice effect
+
+            return {"success": True, "effect": effect, "intensity": intensity}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def set_background_mode(self, mode: str, **kwargs) -> Dict[str, Any]:
+        """
+        Set video background mode.
+
+        Args:
+            mode: "none", "blur", "color", or "image"
+            **kwargs: Mode-specific parameters:
+                - blur_strength (0-100) for "blur"
+                - color (hex string) for "color"
+                - image_path (str) for "image"
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            valid_modes = ["none", "blur", "color", "image"]
+            if mode not in valid_modes:
+                return {"success": False, "error": f"Invalid mode. Must be one of: {valid_modes}"}
+
+            # Store in settings
+            set_setting("background_mode", mode)
+
+            if mode == "blur":
+                blur_strength = kwargs.get("blur_strength", 50)
+                set_setting("background_blur_strength", str(blur_strength))
+            elif mode == "color":
+                color = kwargs.get("color", "#00FF00")
+                set_setting("background_color", color)
+            elif mode == "image":
+                image_path = kwargs.get("image_path", "")
+                set_setting("background_image_path", image_path)
+
+            # Apply to active call if exists
+            service = get_network_service()
+            # This would need implementation in NetworkService to update background
+
+            return {"success": True, "mode": mode, **kwargs}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def set_beauty_filter(self, intensity: int) -> Dict[str, Any]:
+        """
+        Set beauty filter intensity.
+
+        Args:
+            intensity: 0-100 (0 = off, 100 = maximum)
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            if not 0 <= intensity <= 100:
+                return {"success": False, "error": "Intensity must be between 0 and 100"}
+
+            # Store in settings
+            set_setting("beauty_filter_intensity", str(intensity))
+
+            # Apply to active call if exists
+            service = get_network_service()
+            # This would need implementation in NetworkService to update beauty filter
+
+            return {"success": True, "intensity": intensity}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def set_ar_overlay(self, overlay: str) -> Dict[str, Any]:
+        """
+        Set AR overlay (glasses, hat, mask, etc.).
+
+        Args:
+            overlay: Overlay name or "none" to disable
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            from src.effects import AR_AVAILABLE
+
+            if not AR_AVAILABLE:
+                return {"success": False, "error": "AR overlays not available (MediaPipe not installed)"}
+
+            # Store in settings
+            set_setting("ar_overlay", overlay)
+
+            # Apply to active call if exists
+            service = get_network_service()
+            # This would need implementation in NetworkService to update AR overlay
+
+            return {"success": True, "overlay": overlay}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_favorite_presets(self) -> List[str]:
+        """
+        Get list of favorite preset names.
+
+        Returns:
+            List of favorite preset names
+        """
+        try:
+            from src.effects import get_preset_manager
+            manager = get_preset_manager()
+            return manager.get_favorites()
+        except Exception:
+            return []
+
+    def set_favorite_presets(self, presets: List[str]) -> Dict[str, Any]:
+        """
+        Set favorite presets list.
+
+        Args:
+            presets: List of preset names to mark as favorites
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            from src.effects import get_preset_manager
+            manager = get_preset_manager()
+
+            # Clear existing favorites and set new ones
+            manager.clear_favorites()
+            for preset in presets:
+                manager.add_favorite(preset)
+
+            return {"success": True, "favorites": presets}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def add_favorite_preset(self, name: str) -> Dict[str, Any]:
+        """
+        Add preset to favorites.
+
+        Args:
+            name: Preset name
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            from src.effects import get_preset_manager
+            manager = get_preset_manager()
+            manager.add_favorite(name)
+            return {"success": True, "preset": name}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def remove_favorite_preset(self, name: str) -> Dict[str, Any]:
+        """
+        Remove preset from favorites.
+
+        Args:
+            name: Preset name
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            from src.effects import get_preset_manager
+            manager = get_preset_manager()
+            manager.remove_favorite(name)
+            return {"success": True, "preset": name}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_resource_usage(self) -> Dict[str, Any]:
+        """
+        Get current resource usage for effects processing.
+
+        Returns:
+            Dict with CPU%, GPU% (if available), estimated latency
+        """
+        try:
+            from src.effects import ResourceMonitor
+            import psutil
+
+            monitor = ResourceMonitor()
+
+            return {
+                "cpuPercent": psutil.cpu_percent(interval=0.1),
+                "memoryPercent": psutil.virtual_memory().percent,
+                "gpuPercent": monitor.get_gpu_usage() if monitor.has_gpu() else 0,
+                "estimatedLatencyMs": monitor.estimate_latency(),
+            }
+        except Exception as e:
+            return {
+                "cpuPercent": 0,
+                "memoryPercent": 0,
+                "gpuPercent": 0,
+                "estimatedLatencyMs": 0,
+                "error": str(e)
+            }
+
+    def set_resource_monitor_visible(self, visible: bool) -> Dict[str, Any]:
+        """
+        Show/hide resource monitor overlay.
+
+        Args:
+            visible: True to show, False to hide
+
+        Returns:
+            Dict with success status
+        """
+        try:
+            set_setting("resource_monitor_visible", "true" if visible else "false")
+            return {"success": True, "visible": visible}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
