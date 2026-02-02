@@ -1,7 +1,7 @@
 # Project State: DiscordOpus
 
 **Current Phase:** Phase 10 - UI/UX Redesign
-**Status:** In progress (2/10 plans complete)
+**Status:** In progress (4/10 plans complete)
 **Last Updated:** 2026-02-02T08:05:00Z
 
 ## Project Reference
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
 | 9 | Audio & Video Effects | COMPLETE | 12/12 | 8 |
-| 10 | UI/UX Redesign | IN PROGRESS | 2/10 | - |
+| 10 | UI/UX Redesign | IN PROGRESS | 4/10 | - |
 
 **Total:** 81/81 core requirements completed (100% - v1.0 complete)
-**Phase 10 Progress:** 2/10 plans completed (10-01 Design System, 10-02 UI Primitives COMPLETE)
+**Phase 10 Progress:** 4/10 plans completed (10-01 Design System, 10-02 UI Primitives, 10-03 IconBar, 10-04 ChannelList COMPLETE)
 
 ## Performance Metrics
 
@@ -217,6 +217,9 @@ See: .planning/PROJECT.md
 | 2026-02-02 | HTMLMotionProps for Button | Extends motion props instead of ButtonHTMLAttributes | Full Framer Motion support while maintaining native button props |
 | 2026-02-02 | StatusBadge border matches parent bg | Uses border-discord-bg-secondary for visual separation | Clear status dots on avatars without floating appearance |
 | 2026-02-02 | Variant/size pattern for Tailwind classes | variantStyles and sizeStyles objects for class composition | Scalable pattern for styled components with multiple variants |
+| 2026-02-02 | AnimatePresence for channel list transitions | Slide animations x: -20 to 0 to 20 when switching sections | Smooth visual feedback for section changes |
+| 2026-02-02 | UserStatus to StatusType mapping | Backend has 6 statuses, UI Badge only supports 4 | invisible/unknown/offline all map to 'offline' |
+| 2026-02-02 | as const for framer-motion ease arrays | TypeScript requires const assertion for tuple types | Proper typing for transition objects |
 
 ### Active TODOs
 
@@ -289,6 +292,8 @@ See: .planning/PROJECT.md
 - [x] Execute 09-12-PLAN.md (final integration and API bridge) - PHASE 9 COMPLETE
 - [x] Execute 10-01-PLAN.md (design system foundation) - Discord theme, red accents, dependencies
 - [x] Execute 10-02-PLAN.md (UI primitives) - Button, Avatar, Badge, Tooltip components
+- [x] Execute 10-03-PLAN.md (IconBar component) - Section navigation with icons
+- [x] Execute 10-04-PLAN.md (ChannelList panel) - ContactList, GroupList, HomePanel with slide transitions
 
 ### Blockers
 
@@ -300,23 +305,22 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-02-02 - Completed 10-02-PLAN.md
+**Last session:** 2026-02-02 - Completed 10-04-PLAN.md
 
 **What we just completed:**
-- 10-02: UI Primitives
-  - Button with primary/secondary/ghost variants and sm/md/lg sizes
-  - Red glow hover effect using Framer Motion boxShadow
-  - Avatar with image loading and initials fallback
-  - StatusBadge with online/away/busy/offline colors
-  - Tooltip with configurable delay and 4 positions
-  - Barrel export from @/components/ui
-  - 3 tasks completed in 5 minutes
-  - **Phase 10 Plan 02 COMPLETE**
+- 10-04: Channel List Panel
+  - ChannelList container with 240px width and AnimatePresence transitions
+  - ContactList with Avatar, status indicators, and selection
+  - GroupList with member counts and create/join buttons
+  - HomePanel with app branding and welcome message
+  - Slide animations (x: -20 to 0 to 20) for section changes
+  - 3 tasks completed in 8 minutes
+  - **Phase 10 Plan 04 COMPLETE**
 
 **What's next:**
-- Execute 10-03-PLAN.md (layout components)
-- Continue Phase 10 UI/UX Redesign plans 03-10
-- All plans can now import Button, Avatar, Badge, Tooltip from @/components/ui
+- Execute 10-05-PLAN.md (AppLayout assembly)
+- Continue Phase 10 UI/UX Redesign plans 05-10
+- ChannelList ready for integration with IconBar in AppLayout
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8, 9 deferred - should be run before production
@@ -387,4 +391,4 @@ See: .planning/PROJECT.md
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-02-02 after completing 09-11*
+*Last updated: 2026-02-02 after completing 10-04*
