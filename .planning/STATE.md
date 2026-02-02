@@ -2,7 +2,7 @@
 
 **Current Phase:** Phase 9 - Audio & Video Effects
 **Status:** v1.1 in progress (v1.0 complete)
-**Last Updated:** 2026-02-02
+**Last Updated:** 2026-02-02T06:12:00Z
 
 ## Project Reference
 
@@ -31,13 +31,13 @@ See: .planning/PROJECT.md
 | 9 | Audio & Video Effects | IN PROGRESS | 5/12 | TBD |
 
 **Total:** 73/73 requirements completed (100% - v1.0 milestone)
-**Phase 9 Progress:** 5/12 plans completed
+**Phase 9 Progress:** 5/12 plans completed (09-01, 09-02, 09-03, 09-04, 09-05 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 55
-- Average plan duration: 5m
+- Plans completed: 56
+- Average plan duration: 12m
 - Estimated completion: TBD (more data needed)
 
 **Quality:**
@@ -185,6 +185,11 @@ See: .planning/PROJECT.md
 | 2026-02-02 | Blur strength mapping for virtual backgrounds | Map 1-100 to Gaussian kernel 15-95 (15 + strength * 0.8) | Intuitive user control with technical precision |
 | 2026-02-02 | AnimatedBackground preloads all frames | GIF/video frames loaded to memory for smooth playback | Prevents I/O latency during real-time processing |
 | 2026-02-02 | Background image caching by frame size | Cache resized backgrounds to avoid repeated cv2.resize | Performance optimization for real-time video |
+| 2026-02-02 | BaseVoiceEffect intensity blending | All voice effects inherit from BaseVoiceEffect with 0.0-1.0 intensity for wet/dry blending | Consistent UX for smooth effect control across all voice transformations |
+| 2026-02-02 | De-esser before compressor | De-esser must come before compressor in signal chain to prevent amplifying sibilance | Professional audio quality following industry best practices |
+| 2026-02-02 | Professional signal chain order | Gate → De-esser → EQ(corrective) → Compressor → EQ(creative) → Effects | Standard vocal processing chain used in studios and broadcasts |
+| 2026-02-02 | EQ presets over raw frequency controls | Provide clarity/warmth/presence presets instead of raw frequency band adjustments | Better UX for non-technical users, custom mode for advanced users |
+| 2026-02-02 | Graceful Pedalboard degradation | Effects check availability, log warnings, bypass processing if unavailable | Robust development without requiring Pedalboard installation |
 
 ### Active TODOs
 
@@ -314,4 +319,4 @@ See: .planning/PROJECT.md
 ---
 
 *State initialized: 2026-01-30*
-*Last updated: 2026-02-02 after completing 09-02*
+*Last updated: 2026-02-02 after completing 09-03*
