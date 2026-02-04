@@ -20,6 +20,7 @@ interface NetworkState {
   loadInitialState: () => Promise<void>;
   updateUserStatus: (status: UserStatus) => Promise<void>;
   updateSignalingServer: (url: string) => Promise<void>;
+  reconnect: () => Promise<boolean>;
 }
 
 export const useNetworkStore = create<NetworkState>((set) => ({
@@ -71,11 +72,25 @@ export const useNetworkStore = create<NetworkState>((set) => ({
       set({ error: String(e) });
     }
   },
+
+  reconnect: async () => {
+    try {
+      set({ error: null });
+      const result = await api.call((a) => a.reconnect());
+      if (!result.success && result.error) {
+        set({ error: result.error });
+      }
+      return result.success;
+    } catch (e) {
+      set({ error: String(e) });
+      return false;
+    }
+  },
 }));
 
 // Set up event listeners for backend events
 if (typeof window !== 'undefined') {
-  window.addEventListener('discordopus:connection', ((e: CustomEvent) => {
+  window.addEventListener('veilcord:connection', ((e: CustomEvent) => {
     useNetworkStore.getState().setConnectionState(e.detail.state);
   }) as EventListener);
 }

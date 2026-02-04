@@ -241,7 +241,7 @@ export const useTransferStore = create<TransfersState>((set, get) => ({
 // Listen for file transfer events
 if (typeof window !== 'undefined') {
   // File progress updates
-  window.addEventListener('discordopus:file_progress', ((event: CustomEvent) => {
+  window.addEventListener('veilcord:file_progress', ((event: CustomEvent) => {
     const { contactId, progress } = event.detail;
 
     if (!contactId || !progress) return;
@@ -274,7 +274,7 @@ if (typeof window !== 'undefined') {
   }) as EventListener);
 
   // File received (metadata)
-  window.addEventListener('discordopus:file_received', ((event: CustomEvent) => {
+  window.addEventListener('veilcord:file_received', ((event: CustomEvent) => {
     const { contactId, file } = event.detail;
 
     if (!contactId || !file) return;
@@ -307,7 +307,7 @@ if (typeof window !== 'undefined') {
   }) as EventListener);
 
   // Transfer complete
-  window.addEventListener('discordopus:transfer_complete', ((event: CustomEvent) => {
+  window.addEventListener('veilcord:transfer_complete', ((event: CustomEvent) => {
     const { transferId } = event.detail;
 
     if (!transferId) return;
@@ -319,7 +319,7 @@ if (typeof window !== 'undefined') {
   }) as EventListener);
 
   // Transfer error
-  window.addEventListener('discordopus:transfer_error', ((event: CustomEvent) => {
+  window.addEventListener('veilcord:transfer_error', ((event: CustomEvent) => {
     const { transferId, error } = event.detail;
 
     if (!transferId) return;

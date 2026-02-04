@@ -234,13 +234,13 @@ export const useCall = create<CallStoreState>((set, get) => ({
 // Initialize event listeners when store is created
 if (typeof window !== 'undefined') {
   // Listen for call state changes
-  window.addEventListener('discordopus:call_state', ((event: CustomEvent) => {
+  window.addEventListener('veilcord:call_state', ((event: CustomEvent) => {
     const { contactId, state } = event.detail;
     useCall.getState().setCallState(state, contactId);
   }) as EventListener);
 
   // Listen for incoming calls
-  window.addEventListener('discordopus:incoming_call', ((event: CustomEvent) => {
+  window.addEventListener('veilcord:incoming_call', ((event: CustomEvent) => {
     const { callId } = event.detail;
     // For incoming calls, the contactId will be provided by the call_state event
     // or we can look it up by fromKey later. For now, use 0 as placeholder.
@@ -248,36 +248,36 @@ if (typeof window !== 'undefined') {
   }) as EventListener);
 
   // Listen for call answered (our outgoing call was accepted)
-  window.addEventListener('discordopus:call_answered', (() => {
+  window.addEventListener('veilcord:call_answered', (() => {
     useCall.getState().setCallState('connecting');
   }) as EventListener);
 
   // Listen for call rejected
-  window.addEventListener('discordopus:call_rejected', (() => {
+  window.addEventListener('veilcord:call_rejected', (() => {
     useCall.getState().reset();
   }) as EventListener);
 
   // Listen for call ended
-  window.addEventListener('discordopus:call_ended', (() => {
+  window.addEventListener('veilcord:call_ended', (() => {
     useCall.getState().reset();
   }) as EventListener);
 
   // Listen for remote mute changes
-  window.addEventListener('discordopus:remote_mute', ((event: CustomEvent) => {
+  window.addEventListener('veilcord:remote_mute', ((event: CustomEvent) => {
     // Remote mute is for display purposes - the remote peer muted/unmuted
     // We could track this in the store if we want to show visual indication
     console.log('Remote peer muted:', event.detail.muted);
   }) as EventListener);
 
   // Listen for video state changes
-  window.addEventListener('discordopus:video_state', ((event: CustomEvent) => {
+  window.addEventListener('veilcord:video_state', ((event: CustomEvent) => {
     const { videoEnabled, videoSource, remoteVideo } = event.detail;
     useCall.getState().setVideoEnabled(videoEnabled, videoSource);
     useCall.getState().setRemoteVideo(remoteVideo);
   }) as EventListener);
 
   // Listen for remote video changes
-  window.addEventListener('discordopus:remote_video_changed', ((event: CustomEvent) => {
+  window.addEventListener('veilcord:remote_video_changed', ((event: CustomEvent) => {
     const { hasVideo } = event.detail;
     useCall.getState().setRemoteVideo(hasVideo);
   }) as EventListener);

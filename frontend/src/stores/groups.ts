@@ -253,27 +253,27 @@ export const useGroupStore = create<GroupState>((set, get) => ({
 
 // Set up event listeners
 if (typeof window !== 'undefined') {
-  window.addEventListener('discordopus:group_created', ((e: CustomEvent) => {
+  window.addEventListener('veilcord:group_created', ((e: CustomEvent) => {
     useGroupStore.getState().handleGroupCreated(e.detail.group);
   }) as EventListener);
 
-  window.addEventListener('discordopus:group_joined', ((e: CustomEvent) => {
+  window.addEventListener('veilcord:group_joined', ((e: CustomEvent) => {
     useGroupStore.getState().handleGroupJoined(e.detail.group);
   }) as EventListener);
 
-  window.addEventListener('discordopus:group_left', ((e: CustomEvent) => {
+  window.addEventListener('veilcord:group_left', ((e: CustomEvent) => {
     useGroupStore.getState().handleGroupLeft(e.detail.group_id);
   }) as EventListener);
 
-  window.addEventListener('discordopus:group_member_added', ((e: CustomEvent) => {
+  window.addEventListener('veilcord:group_member_added', ((e: CustomEvent) => {
     useGroupStore.getState().handleMemberAdded(e.detail.group_id, e.detail.member);
   }) as EventListener);
 
-  window.addEventListener('discordopus:group_member_removed', ((e: CustomEvent) => {
+  window.addEventListener('veilcord:group_member_removed', ((e: CustomEvent) => {
     useGroupStore.getState().handleMemberRemoved(e.detail.group_id, e.detail.public_key);
   }) as EventListener);
 
-  window.addEventListener('discordopus:group_call_state', ((e: CustomEvent) => {
+  window.addEventListener('veilcord:group_call_state', ((e: CustomEvent) => {
     useGroupStore.getState().handleGroupCallState(e.detail.group_id, e.detail.state);
   }) as EventListener);
 }

@@ -179,7 +179,7 @@ export const useMessages = create<MessagesState>((set, get) => ({
 
 // Listen for real-time message events
 if (typeof window !== 'undefined') {
-  window.addEventListener('discordopus:message', ((event: CustomEvent<MessageEventPayload>) => {
+  window.addEventListener('veilcord:message', ((event: CustomEvent<MessageEventPayload>) => {
     const { contactId, message } = event.detail;
 
     if (!contactId || !message) return;

@@ -27,13 +27,13 @@ export function UpdatePrompt() {
       fetchUpdateInfo();
     };
 
-    window.addEventListener('discordopus:update_available', handleUpdateAvailable);
+    window.addEventListener('veilcord:update_available', handleUpdateAvailable);
 
     // Also check on mount (in case event was missed)
     checkForUpdate();
 
     return () => {
-      window.removeEventListener('discordopus:update_available', handleUpdateAvailable);
+      window.removeEventListener('veilcord:update_available', handleUpdateAvailable);
     };
   }, []);
 

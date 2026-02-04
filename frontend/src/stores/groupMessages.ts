@@ -121,7 +121,7 @@ export const useGroupMessagesStore = create<GroupMessagesState>((set, get) => ({
 
 // Event listener for incoming group messages
 if (typeof window !== 'undefined') {
-  window.addEventListener('discordopus:group_message', ((e: CustomEvent) => {
+  window.addEventListener('veilcord:group_message', ((e: CustomEvent) => {
     const { group_id, sender_public_key, message_id, body, timestamp } = e.detail;
     useGroupMessagesStore.getState().handleIncomingMessage(
       group_id,

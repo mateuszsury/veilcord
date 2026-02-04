@@ -34,6 +34,7 @@ export interface PyWebViewAPI {
   set_signaling_server(url: string): Promise<void>;
   get_user_status(): Promise<UserStatus>;
   set_user_status(status: UserStatus): Promise<void>;
+  reconnect(): Promise<ApiResult>;
 
   // Messaging
   initiate_p2p_connection(contact_id: number): Promise<void>;
@@ -114,6 +115,24 @@ export interface PyWebViewAPI {
 
   // System
   ping(): Promise<string>;
+  factory_reset(): Promise<FactoryResetResult>;
+
+  // Discovery
+  is_discovery_enabled(): Promise<boolean>;
+  set_discovery_enabled(enabled: boolean): Promise<ApiResult>;
+  get_discovered_users(): Promise<DiscoveredUser[]>;
+}
+
+export interface FactoryResetResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
+export interface DiscoveredUser {
+  publicKey: string;
+  displayName: string;
+  status: UserStatus;
 }
 
 export interface IdentityResponse {
@@ -461,14 +480,14 @@ export interface RemoteMuteEventPayload {
 }
 
 // Video event payloads
-// discordopus:video_state - Fired when local video state changes
+// veilcord:video_state - Fired when local video state changes
 export interface VideoStateEventPayload {
   videoEnabled: boolean;
   videoSource: VideoSource;
   remoteVideo: boolean;
 }
 
-// discordopus:remote_video_changed - Fired when remote party enables/disables video
+// veilcord:remote_video_changed - Fired when remote party enables/disables video
 export interface RemoteVideoEventPayload {
   hasVideo: boolean;
 }
@@ -521,6 +540,14 @@ export interface OpenChatEventPayload {
   contactId: number;
 }
 
+// Discovery event payloads
+export interface DiscoveryUserEventPayload {
+  action: 'join' | 'leave';
+  publicKey: string;
+  displayName?: string;
+  status?: UserStatus;
+}
+
 // Custom events dispatched by Python backend
 declare global {
   interface Window {
@@ -530,31 +557,32 @@ declare global {
   }
 
   interface WindowEventMap {
-    'discordopus:connection': CustomEvent<{ state: ConnectionState }>;
-    'discordopus:presence': CustomEvent<{ publicKey: string; status: UserStatus }>;
-    'discordopus:message': CustomEvent<MessageEventPayload>;
-    'discordopus:p2p_state': CustomEvent<P2PStateEventPayload>;
-    'discordopus:file_progress': CustomEvent<FileProgressEventPayload>;
-    'discordopus:file_received': CustomEvent<FileReceivedEventPayload>;
-    'discordopus:transfer_complete': CustomEvent<TransferCompleteEventPayload>;
-    'discordopus:transfer_error': CustomEvent<TransferErrorEventPayload>;
-    'discordopus:call_state': CustomEvent<CallStateEventPayload>;
-    'discordopus:incoming_call': CustomEvent<IncomingCallEventPayload>;
-    'discordopus:call_answered': CustomEvent<{ callId: string }>;
-    'discordopus:call_rejected': CustomEvent<CallEndedEventPayload>;
-    'discordopus:call_ended': CustomEvent<CallEndedEventPayload>;
-    'discordopus:remote_mute': CustomEvent<RemoteMuteEventPayload>;
-    'discordopus:video_state': CustomEvent<VideoStateEventPayload>;
-    'discordopus:remote_video_changed': CustomEvent<RemoteVideoEventPayload>;
-    'discordopus:group_created': CustomEvent<GroupCreatedEventPayload>;
-    'discordopus:group_joined': CustomEvent<GroupJoinedEventPayload>;
-    'discordopus:group_left': CustomEvent<GroupLeftEventPayload>;
-    'discordopus:group_member_added': CustomEvent<GroupMemberAddedEventPayload>;
-    'discordopus:group_member_removed': CustomEvent<GroupMemberRemovedEventPayload>;
-    'discordopus:group_call_state': CustomEvent<GroupCallStateEventPayload>;
-    'discordopus:group_message': CustomEvent<GroupMessageEventPayload>;
-    'discordopus:update_available': CustomEvent<UpdateAvailableEventPayload>;
-    'discordopus:open_chat': CustomEvent<OpenChatEventPayload>;
+    'veilcord:connection': CustomEvent<{ state: ConnectionState }>;
+    'veilcord:presence': CustomEvent<{ publicKey: string; status: UserStatus }>;
+    'veilcord:message': CustomEvent<MessageEventPayload>;
+    'veilcord:p2p_state': CustomEvent<P2PStateEventPayload>;
+    'veilcord:file_progress': CustomEvent<FileProgressEventPayload>;
+    'veilcord:file_received': CustomEvent<FileReceivedEventPayload>;
+    'veilcord:transfer_complete': CustomEvent<TransferCompleteEventPayload>;
+    'veilcord:transfer_error': CustomEvent<TransferErrorEventPayload>;
+    'veilcord:call_state': CustomEvent<CallStateEventPayload>;
+    'veilcord:incoming_call': CustomEvent<IncomingCallEventPayload>;
+    'veilcord:call_answered': CustomEvent<{ callId: string }>;
+    'veilcord:call_rejected': CustomEvent<CallEndedEventPayload>;
+    'veilcord:call_ended': CustomEvent<CallEndedEventPayload>;
+    'veilcord:remote_mute': CustomEvent<RemoteMuteEventPayload>;
+    'veilcord:video_state': CustomEvent<VideoStateEventPayload>;
+    'veilcord:remote_video_changed': CustomEvent<RemoteVideoEventPayload>;
+    'veilcord:group_created': CustomEvent<GroupCreatedEventPayload>;
+    'veilcord:group_joined': CustomEvent<GroupJoinedEventPayload>;
+    'veilcord:group_left': CustomEvent<GroupLeftEventPayload>;
+    'veilcord:group_member_added': CustomEvent<GroupMemberAddedEventPayload>;
+    'veilcord:group_member_removed': CustomEvent<GroupMemberRemovedEventPayload>;
+    'veilcord:group_call_state': CustomEvent<GroupCallStateEventPayload>;
+    'veilcord:group_message': CustomEvent<GroupMessageEventPayload>;
+    'veilcord:update_available': CustomEvent<UpdateAvailableEventPayload>;
+    'veilcord:open_chat': CustomEvent<OpenChatEventPayload>;
+    'veilcord:discovery_user': CustomEvent<DiscoveryUserEventPayload>;
   }
 }
 

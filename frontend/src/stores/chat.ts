@@ -109,14 +109,14 @@ export const useChat = create<ChatState>((set) => ({
 
 // Listen for P2P state events
 if (typeof window !== 'undefined') {
-  window.addEventListener('discordopus:p2p_state', ((event: CustomEvent<P2PStateEventPayload>) => {
+  window.addEventListener('veilcord:p2p_state', ((event: CustomEvent<P2PStateEventPayload>) => {
     const { contactId, state } = event.detail;
     if (contactId != null) {
       useChat.getState().setP2PState(contactId, mapP2PState(state));
     }
   }) as EventListener);
 
-  window.addEventListener('discordopus:message', ((event: CustomEvent<MessageEventPayload>) => {
+  window.addEventListener('veilcord:message', ((event: CustomEvent<MessageEventPayload>) => {
     const { contactId, message } = event.detail;
     if (contactId != null && message && 'type' in message && message.type === 'typing') {
       const typingData = message as TypingEventData;

@@ -1,7 +1,7 @@
 /**
  * Dialog for joining a group via invite code.
  *
- * Accepts discordopus://join/... URLs or raw invite codes.
+ * Accepts veilcord://join/... URLs or raw invite codes.
  */
 
 import { useState } from 'react';
@@ -55,7 +55,7 @@ export function JoinGroupDialog({ isOpen, onClose }: Props) {
               type="text"
               value={inviteCode}
               onChange={(e) => setInviteCode(e.target.value)}
-              placeholder="discordopus://join/... or paste code"
+              placeholder="veilcord://join/... or paste code"
               className="w-full px-3 py-2 bg-discord-bg-tertiary border border-discord-bg-modifier-active rounded text-discord-text-primary placeholder-discord-text-muted focus:outline-none focus:border-accent-red font-mono text-sm"
               autoFocus
             />

@@ -54,12 +54,12 @@ export const useContactsStore = create<ContactsState>((set) => ({
 
 // Set up event listener for presence updates from backend
 if (typeof window !== 'undefined') {
-  window.addEventListener('discordopus:presence', ((e: CustomEvent) => {
+  window.addEventListener('veilcord:presence', ((e: CustomEvent) => {
     useContactsStore.getState().updateContactStatus(e.detail.publicKey, e.detail.status);
   }) as EventListener);
 
   // Listen for notification open chat events
-  window.addEventListener('discordopus:open_chat', ((event: CustomEvent<OpenChatEventPayload>) => {
+  window.addEventListener('veilcord:open_chat', ((event: CustomEvent<OpenChatEventPayload>) => {
     const { contactId } = event.detail;
     console.log('Notification: opening chat for contact', contactId);
     useUIStore.getState().setSelectedContact(contactId);
