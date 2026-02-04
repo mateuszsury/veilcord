@@ -1,8 +1,8 @@
-# Project State: DiscordOpus
+# Project State: Veilcord
 
-**Current Phase:** Phase 10 - UI/UX Redesign
-**Status:** Human verification checkpoint (10/10 plans complete, awaiting approval)
-**Last Updated:** 2026-02-02T07:30:00Z
+**Current Phase:** Phase 11 - Branding, Documentation & Release
+**Status:** In progress (1/5 plans complete)
+**Last Updated:** 2026-02-04T14:20:10Z
 
 ## Project Reference
 
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md
 
 **Core value:** Prywatna, w pelni szyfrowana komunikacja P2P bez zaufania do centralnego serwera - uzytkownicy kontroluja swoje dane i tozsamosc.
 
-**Current focus:** Phase 10 UI/UX Redesign - establishing design system foundation.
+**Current focus:** Phase 11 Branding & Documentation - complete rebrand to Veilcord and prepare for release.
 
 ## Progress
 
 ```
-[=========================================================================== ] 100% (v1.0 COMPLETE, Phase 10 awaiting verification)
+[===============================================================================> ] 98% (v1.0 complete, Phase 11 in progress)
 ```
 
 | Phase | Name | Status | Plans | Requirements |
@@ -29,10 +29,11 @@ See: .planning/PROJECT.md
 | 7 | Group Features | COMPLETE | 8/8 | 8 |
 | 8 | Notifications & Polish | COMPLETE | 5/5 | 5 |
 | 9 | Audio & Video Effects | COMPLETE | 12/12 | 8 |
-| 10 | UI/UX Redesign | CHECKPOINT | 10/10 | - |
+| 10 | UI/UX Redesign | COMPLETE | 10/10 | - |
+| 11 | Branding & Documentation | IN PROGRESS | 1/5 | - |
 
 **Total:** 81/81 core requirements completed (100% - v1.0 complete)
-**Phase 10 Progress:** 10/10 plans complete (awaiting human verification)
+**Phase 11 Progress:** 1/5 plans complete (11-01 rebrand complete)
 - 10-01 Design System COMPLETE
 - 10-02 UI Primitives COMPLETE
 - 10-03 IconBar COMPLETE
@@ -47,9 +48,9 @@ See: .planning/PROJECT.md
 ## Performance Metrics
 
 **Velocity:**
-- Plans completed: 76 (10 new in Phase 10)
+- Plans completed: 77 (11-01 rebrand complete)
 - Average plan duration: 9m
-- Project complete: All planned phases finished, Phase 10 redesign at checkpoint
+- Project status: Phase 11 (branding & documentation) in progress
 
 **Quality:**
 - Plans passing first time: N/A
@@ -160,7 +161,7 @@ See: .planning/PROJECT.md
 | 2026-01-31 | Domain separation for sender keys | Unique HKDF info strings (DiscordOpus_SenderKey_*) | Prevents key reuse vulnerabilities |
 | 2026-01-31 | Max 1000 message skip for out-of-order | Limit skipped key cache size | Balance out-of-order tolerance with memory safety |
 | 2026-01-31 | Signature verification before decrypt | Verify Ed25519 signature first in decrypt() | Fail fast on tampered messages |
-| 2026-01-31 | discordopus://join/ URL scheme | Custom protocol for invite codes enables deep linking | Self-contained invite URLs |
+| 2026-01-31 | veilcord://join/ URL scheme | Custom protocol for invite codes enables deep linking | Self-contained invite URLs |
 | 2026-01-31 | Base64 JSON payload in invites | All invite metadata in URL, no server lookup needed | Offline-capable invite validation |
 | 2026-01-31 | 7-day default invite expiry | Balance security with usability | Reasonable time window for joining |
 | 2026-01-31 | 128-bit random token in invites | Use secrets.token_urlsafe(16) for uniqueness | Prevents invite enumeration attacks |
@@ -177,7 +178,7 @@ See: .planning/PROJECT.md
 | 2026-01-31 | Group event listeners at module level | Store registers listeners on load, not in components | Global state updates regardless of mounted components |
 | 2026-01-31 | Admin detection via creator_public_key | Compare group.creator_public_key to identity.publicKey | Simple admin check without role system |
 | 2026-01-31 | InteractableWindowsToaster for notifications | Use InteractableWindowsToaster (not WindowsToaster) for Action Center button callbacks | Callbacks work after notification relegation |
-| 2026-01-31 | Custom AUMID for notifications | "DiscordOpus.SecureMessenger" for consistent notification identification | May need Windows registration for production |
+| 2026-01-31 | Custom AUMID for notifications | "Veilcord.SecureMessenger" for consistent notification identification | May need Windows registration for production |
 | 2026-01-31 | Lazy toaster initialization | Avoid startup delays by creating toaster on first notification | Better app startup time |
 | 2026-01-31 | Callback-based notification responses | on_open_chat, on_accept_call, on_reject_call hooks | NetworkService integration pattern |
 | 2026-01-31 | Lazy tufup client initialization | Avoid startup delays by creating client only when needed | UpdateService doesn't slow app launch |
@@ -185,7 +186,7 @@ See: .planning/PROJECT.md
 | 2026-01-31 | Callback hooks for UpdateService | on_update_available, on_download_progress, on_update_ready, on_error | UI integration points for update notifications |
 | 2026-01-31 | UpdateService singleton pattern | get_update_service() matches other service patterns | Consistent service access pattern |
 | 2026-01-31 | NotificationService init in _async_start | Initialize after messaging service, wire callbacks to NetworkService methods | Clean integration point for notifications |
-| 2026-01-31 | discordopus:open_chat event for notification clicks | Frontend event listener in contacts store routes to UIStore.setSelectedContact | Notification click switches to relevant chat |
+| 2026-01-31 | veilcord:open_chat event for notification clicks | Frontend event listener in contacts store routes to UIStore.setSelectedContact | Notification click switches to relevant chat |
 | 2026-01-31 | 3-second delay before update check | Wait for app to fully initialize before checking updates | Avoids race conditions with frontend loading |
 | 2026-01-31 | UpdatePrompt in AppLayout as global component | Banner appears regardless of active panel | Consistent UX across all views |
 | 2026-01-31 | Session-based dismiss for update banner | User can dismiss, banner returns on restart if update still available | Balance between persistence and user control |
@@ -242,6 +243,8 @@ See: .planning/PROJECT.md
 | 2026-02-02 | useVirtualScroll hook pattern | Wrap TanStack Virtual in reusable hook with scroll helpers | Consistent virtual scrolling across all list components |
 | 2026-02-02 | 80px estimate size for messages | Default message height estimate for virtual scrolling | Typical Discord-style message with avatar and content |
 | 2026-02-02 | MessageList as wrapper vs re-export | Keep wrapper to enable future message preprocessing | Allows date grouping without breaking interface |
+| 2026-02-04 | Preserve crypto protocol identifiers during rebrand | Keep b"DiscordOpus_*" byte strings in src/crypto/ unchanged | Maintains backward compatibility with existing encrypted sessions |
+| 2026-02-04 | Rebrand from DiscordOpus to Veilcord | Update all user-facing identifiers (window title, app data paths, notifications, events) | New brand identity while preserving protocol compatibility |
 
 ### Active TODOs
 
@@ -321,6 +324,8 @@ See: .planning/PROJECT.md
 - [x] Execute 10-07-PLAN.md (Settings panel) - Two-column Discord-style settings with left nav and right content
 - [x] Execute 10-08-PLAN.md (Call UI) - Discord/Zoom-style CallControls, EffectsPanel, overlay redesign
 - [x] Execute 10-09-PLAN.md (Virtual Scrolling) - TanStack Virtual for message lists with 1000+ message support
+- [x] Execute 10-10-PLAN.md (Final Cleanup) - PHASE 10 COMPLETE
+- [x] Execute 11-01-PLAN.md (Application rebrand) - Complete rebrand from DiscordOpus to Veilcord
 
 ### Blockers
 
@@ -332,20 +337,23 @@ See: .planning/PROJECT.md
 
 ## Session Continuity
 
-**Last session:** 2026-02-02 - Completed 10-09-PLAN.md
+**Last session:** 2026-02-04 - Completed 11-01-PLAN.md
 
 **What we just completed:**
-- 10-09: Virtual Scrolling
-  - useVirtualScroll hook wrapping TanStack Virtual with scrollToBottom/scrollToTop helpers
-  - VirtualMessageList with auto-scroll, loading skeletons (Discord colors), and empty state
-  - MessageList updated to use VirtualMessageList for backward compatibility
-  - Only ~20 visible messages rendered regardless of total count
+- 11-01: Application Rebrand
+  - Rebranded from DiscordOpus to Veilcord across all user-facing touchpoints
+  - Updated Python backend: app data path to %APPDATA%/Veilcord/, window title to 'Veilcord', AUMID to "Veilcord.SecureMessenger"
+  - Updated build configuration to produce dist/Veilcord/Veilcord.exe
+  - Updated frontend package name to "veilcord-frontend", HTML title to "Veilcord"
+  - Changed all custom event names from 'discordopus:' to 'veilcord:' namespace (26 events across 12 files)
+  - Updated URL scheme from discordopus://join/ to veilcord://join/
+  - Preserved cryptographic protocol identifiers (b"DiscordOpus_*") for backward compatibility
   - 3 tasks completed in 4 minutes
-  - **Phase 10 Plan 09 COMPLETE**
+  - **Phase 11 Plan 01 COMPLETE**
 
 **What's next:**
-- Execute 10-10-PLAN.md (final plan in Phase 10)
-- Final polish and any remaining modals/dialogs
+- Execute 11-02-PLAN.md (README creation)
+- Comprehensive README with installation, features, security, and usage
 
 **Open questions:**
 - Human verification tests for Phase 6, 7, 8, 9 deferred - should be run before production
@@ -412,6 +420,7 @@ See: .planning/PROJECT.md
 
 - Phase 9 added: Audio & Video Effects (noise cancellation, voice effects, video filters, background blur, local AI processing)
 - Phase 10 added: UI/UX Redesign (Discord-inspired layout, black-red theme, animations, production-grade polish)
+- Phase 11 added: Branding, Documentation & Release (rename DiscordOpus → Veilcord, README, LICENSE, GitHub repo, release)
 
 ---
 
