@@ -20,12 +20,10 @@ project_root = Path(SPECPATH).resolve()
 
 block_cipher = None
 
-# Find PyOgg DLLs
-import sys
-# In venv, site-packages is at .venv/Lib/site-packages, not Scripts/Lib/site-packages
-venv_root = Path(sys.executable).parent.parent
-site_packages = venv_root / 'Lib' / 'site-packages'
-pyogg_dir = site_packages / 'pyogg'
+# Find PyOgg DLLs - use pyogg's actual location
+import pyogg
+import os
+pyogg_dir = Path(os.path.dirname(pyogg.__file__))
 
 # PyOgg DLLs to include
 pyogg_dlls = [
