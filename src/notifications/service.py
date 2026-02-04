@@ -24,7 +24,7 @@ from src.storage.settings import get_setting, Settings
 logger = logging.getLogger(__name__)
 
 # Application User Model ID for notifications
-AUMID = "DiscordOpus.SecureMessenger"
+AUMID = "Veilcord.SecureMessenger"
 
 
 class NotificationService:

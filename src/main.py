@@ -1,5 +1,5 @@
 """
-DiscordOpus - Secure P2P Messenger
+Veilcord - Secure P2P Messenger
 
 Main application entry point.
 """
@@ -31,7 +31,7 @@ def main():
 
     # Create window
     window = webview.create_window(
-        'DiscordOpus',
+        'Veilcord',
         url,
         js_api=api,
         width=1200,
@@ -51,7 +51,7 @@ def main():
             if available:
                 # Notify frontend about available update
                 window.evaluate_js(f'''
-                    window.dispatchEvent(new CustomEvent('discordopus:update_available', {{
+                    window.dispatchEvent(new CustomEvent('veilcord:update_available', {{
                         detail: {{ version: "{available}" }}
                     }}));
                 ''')
