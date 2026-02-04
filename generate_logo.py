@@ -31,12 +31,6 @@ points = [
 # Draw filled shield
 draw.polygon(points, fill=blood_red, outline=None)
 
-# Add inner "veil" pattern - simple diagonal lines suggesting encryption
-line_color = (200, 50, 50, 100)  # Lighter red, semi-transparent
-for i in range(5):
-    offset = i * 80 + 200
-    draw.line([(offset, top_y + 50), (offset - 200, mid_y)], fill=line_color, width=20)
-
 # Save
 os.makedirs('assets', exist_ok=True)
 img.save('assets/logo.png', 'PNG')
