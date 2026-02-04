@@ -1,0 +1,113 @@
+VEILCORD DUAL LICENSE
+
+Copyright (c) 2026 Mateusz Sury
+
+This software is available under two separate licenses, depending on your use case:
+
+================================================================================
+1. PERSONAL USE LICENSE (FREE)
+================================================================================
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use
+the Software for PERSONAL, NON-COMMERCIAL purposes, subject to the following
+conditions:
+
+ALLOWED USES:
+- Personal communication with friends and family
+- Self-hosting for individual, non-commercial use
+- Educational and learning purposes
+- Open-source contributions and modifications (must remain under same license)
+
+PROHIBITED USES:
+- Commercial deployment (business, enterprise, organizational use)
+- Revenue-generating products or services incorporating Veilcord
+- Distribution as part of a paid product or service
+- Use by for-profit entities or organizations
+
+CONDITIONS:
+- The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+- Modifications must be clearly marked and attributed.
+- The Software is provided "AS IS", without warranty of any kind, express or
+  implied, including but not limited to the warranties of merchantability,
+  fitness for a particular purpose and noninfringement.
+
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+
+================================================================================
+2. COMMERCIAL USE LICENSE (PAID)
+================================================================================
+
+For commercial use, a separate paid license is required.
+
+COMMERCIAL USE includes:
+- Deployment in a business, enterprise, or organizational environment
+- Use by for-profit companies or organizations
+- Integration into commercial products or services
+- Any use that generates revenue or business value
+
+LICENSING:
+To obtain a commercial license, please contact:
+
+  Email: [Your contact email]
+  GitHub: https://github.com/mateuszsury/veilcord
+
+Commercial licensing terms are negotiable based on:
+- Number of users
+- Deployment scope (single organization vs. redistribution)
+- Support and maintenance requirements
+- Custom feature development needs
+
+================================================================================
+EXAMPLES
+================================================================================
+
+PERSONAL USE (Free):
+✓ Alice installs Veilcord to chat with friends
+✓ Bob uses Veilcord for educational research on cryptography
+✓ Carol contributes a bug fix to the open-source repository
+✓ Dave self-hosts Veilcord for his family's private communication
+
+COMMERCIAL USE (Paid license required):
+✗ TechCorp deploys Veilcord for internal team communication (50 employees)
+✗ StartupXYZ integrates Veilcord into their SaaS product
+✗ Consulting firm uses Veilcord for client communications
+✗ Nonprofit organization uses Veilcord for organizational communications
+
+If you're uncertain whether your use case requires a commercial license,
+please contact us for clarification.
+
+================================================================================
+THIRD-PARTY LICENSES
+================================================================================
+
+Veilcord incorporates open-source libraries with their own licenses:
+
+- cryptography (Apache License 2.0 / BSD)
+- DoubleRatchet, X3DH (MIT)
+- aiortc (BSD)
+- React, Vite, Tailwind CSS (MIT)
+- DeepFilterNet (MIT)
+- MediaPipe (Apache License 2.0)
+- Pedalboard (GPLv3 with commercial exception)
+- SQLCipher (BSD-style)
+- PyInstaller (GPLv2 with exception for bundled applications)
+
+See each library's LICENSE file for full terms. These libraries' licenses
+apply only to the libraries themselves, not to Veilcord as a whole.
+
+Note: Pedalboard (Spotify) uses GPLv3 with a commercial exception for audio
+plugin hosts. Veilcord's use of Pedalboard as a library falls under this
+exception, but modifications to Pedalboard itself would be subject to GPLv3.
+
+================================================================================
+
+For questions about licensing, contact:
+- Email: [Your contact email]
+- GitHub Issues: https://github.com/mateuszsury/veilcord/issues
+
+Last updated: 2026-02-04
