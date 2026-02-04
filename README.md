@@ -229,7 +229,7 @@ Veilcord.exe
 
 If you discover a security vulnerability, please **DO NOT** open a public issue.
 
-Instead, email security details to: [Your security email here]
+Instead, email security details to: mateuszsury25@gmail.com
 
 We take security seriously and will respond within 48 hours.
 
