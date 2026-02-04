@@ -94,6 +94,10 @@ class NetworkService:
         # Notification service
         self._notifications: Optional[NotificationService] = None
 
+        # Discovery: track discovered users (public_key -> {display_name, status})
+        self._discovered_users: Dict[str, Dict[str, str]] = {}
+        self._discovery_enabled = False
+
     def start(self) -> None:
         """
         Start the network service.
@@ -454,6 +458,35 @@ class NetworkService:
                     'videoSource': self._voice_call.current_call.video_source if self._voice_call.current_call else None,
                     'remoteVideo': self._voice_call.current_call.remote_video if self._voice_call.current_call else False
                 })
+
+        elif msg_type == 'discovery_user':
+            # User discovery update
+            action = message.get('action')
+            public_key = message.get('public_key')
+
+            if action == 'join' and public_key:
+                # New user discovered
+                self._discovered_users[public_key] = {
+                    'display_name': message.get('display_name', 'Anonymous'),
+                    'status': message.get('status', 'online')
+                }
+                logger.info(f"Discovered user: {public_key[:16]}...")
+                self._notify_frontend('discordopus:discovery_user', {
+                    'action': 'join',
+                    'publicKey': public_key,
+                    'displayName': message.get('display_name', 'Anonymous'),
+                    'status': message.get('status', 'online')
+                })
+
+            elif action == 'leave' and public_key:
+                # User left discovery
+                if public_key in self._discovered_users:
+                    del self._discovered_users[public_key]
+                    logger.info(f"User left discovery: {public_key[:16]}...")
+                    self._notify_frontend('discordopus:discovery_user', {
+                        'action': 'leave',
+                        'publicKey': public_key
+                    })
 
         else:
             logger.debug(f"Unhandled message type: {msg_type}")
@@ -924,6 +957,24 @@ class NetworkService:
         )
         await self._signaling.start()
 
+    def reconnect(self) -> bool:
+        """
+        Force reconnect to signaling server.
+
+        Useful after identity creation or network issues.
+
+        Returns:
+            True if reconnect was initiated, False otherwise
+        """
+        url = self.get_signaling_server()
+        if self._loop:
+            asyncio.run_coroutine_threadsafe(
+                self._reconnect(url),
+                self._loop
+            )
+            return True
+        return False
+
     def get_user_status(self) -> str:
         """Get user's presence status."""
         if self._presence:
@@ -961,6 +1012,95 @@ class NetworkService:
                 await self._signaling.send(status_msg)
             except Exception as e:
                 logger.error(f"Failed to send status update: {e}")
+
+    # ========== Discovery Methods ==========
+
+    def is_discovery_enabled(self) -> bool:
+        """Check if discovery is enabled."""
+        return self._discovery_enabled
+
+    def set_discovery_enabled(self, enabled: bool) -> bool:
+        """
+        Enable or disable discovery mode.
+
+        When enabled, this user becomes visible to other users
+        who also have discovery enabled.
+
+        Args:
+            enabled: True to enable discovery, False to disable
+
+        Returns:
+            True if operation was initiated, False otherwise
+        """
+        if enabled == self._discovery_enabled:
+            return True
+
+        self._discovery_enabled = enabled
+
+        # Save to settings
+        set_setting(Settings.DISCOVERY_ENABLED, "true" if enabled else "false")
+
+        # Send to server
+        if self._loop and self._signaling and self._state == ConnectionState.CONNECTED:
+            if enabled:
+                # Get display name from identity
+                display_name = "Anonymous"
+                if self._identity:
+                    display_name = self._identity.display_name or "Anonymous"
+
+                asyncio.run_coroutine_threadsafe(
+                    self._send_discovery_enable(display_name),
+                    self._loop
+                )
+            else:
+                # Clear discovered users when disabling
+                self._discovered_users.clear()
+                asyncio.run_coroutine_threadsafe(
+                    self._send_discovery_disable(),
+                    self._loop
+                )
+            return True
+
+        return False
+
+    async def _send_discovery_enable(self, display_name: str) -> None:
+        """Send discovery enable message to server."""
+        if self._signaling:
+            try:
+                await self._signaling.send({
+                    "type": "discovery_enable",
+                    "display_name": display_name
+                })
+                logger.info(f"Discovery enabled as '{display_name}'")
+            except Exception as e:
+                logger.error(f"Failed to enable discovery: {e}")
+
+    async def _send_discovery_disable(self) -> None:
+        """Send discovery disable message to server."""
+        if self._signaling:
+            try:
+                await self._signaling.send({
+                    "type": "discovery_disable"
+                })
+                logger.info("Discovery disabled")
+            except Exception as e:
+                logger.error(f"Failed to disable discovery: {e}")
+
+    def get_discovered_users(self) -> List[Dict[str, Any]]:
+        """
+        Get list of discovered users.
+
+        Returns:
+            List of dicts with publicKey, displayName, status
+        """
+        return [
+            {
+                'publicKey': pk,
+                'displayName': data['display_name'],
+                'status': data['status']
+            }
+            for pk, data in self._discovered_users.items()
+        ]
 
     def send_message(self, message: dict) -> None:
         """

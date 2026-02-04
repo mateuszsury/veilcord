@@ -43,6 +43,8 @@ class Client:
     authenticated: bool = False
     challenge: bytes = field(default_factory=lambda: secrets.token_bytes(32))
     status: str = "online"
+    discoverable: bool = False  # Whether this client appears in discovery
+    display_name: str = ""  # Display name for discovery
 
 
 class SignalingServer:
@@ -130,6 +132,10 @@ class SignalingServer:
             await self._relay_to_target(client, message)
         elif msg_type == "p2p_answer":
             await self._relay_to_target(client, message)
+        elif msg_type == "discovery_enable":
+            await self._handle_discovery_enable(client, message)
+        elif msg_type == "discovery_disable":
+            await self._handle_discovery_disable(client)
         else:
             logger.debug(f"Unknown message type: {msg_type}")
 
@@ -227,6 +233,75 @@ class SignalingServer:
 
         logger.debug(f"Relayed {message.get('type')} from {client.public_key[:16]}... to {target_key[:16]}...")
 
+    async def _handle_discovery_enable(self, client: Client, message: dict):
+        """Handle client enabling discovery mode."""
+        display_name = message.get("display_name", "Anonymous")
+        client.discoverable = True
+        client.display_name = display_name
+
+        logger.info(f"Discovery enabled: {client.public_key[:16]}... ({display_name})")
+
+        # Send current discoverable users to this client
+        await self._send_discoverable_users(client)
+
+        # Notify other discoverable users about this client
+        await self._broadcast_discovery_join(client)
+
+    async def _handle_discovery_disable(self, client: Client):
+        """Handle client disabling discovery mode."""
+        if not client.discoverable:
+            return
+
+        client.discoverable = False
+        logger.info(f"Discovery disabled: {client.public_key[:16]}...")
+
+        # Notify other discoverable users
+        await self._broadcast_discovery_leave(client)
+
+    async def _send_discoverable_users(self, client: Client):
+        """Send list of discoverable users to a client."""
+        for other in self._clients.values():
+            if other.authenticated and other.discoverable and other.public_key != client.public_key:
+                await client.websocket.send(json.dumps({
+                    "type": "discovery_user",
+                    "action": "join",
+                    "public_key": other.public_key,
+                    "display_name": other.display_name,
+                    "status": other.status
+                }))
+
+    async def _broadcast_discovery_join(self, client: Client):
+        """Broadcast that a client joined discovery to all discoverable users."""
+        msg = json.dumps({
+            "type": "discovery_user",
+            "action": "join",
+            "public_key": client.public_key,
+            "display_name": client.display_name,
+            "status": client.status
+        })
+
+        for other in self._clients.values():
+            if other.authenticated and other.discoverable and other.public_key != client.public_key:
+                try:
+                    await other.websocket.send(msg)
+                except Exception:
+                    pass
+
+    async def _broadcast_discovery_leave(self, client: Client):
+        """Broadcast that a client left discovery to all discoverable users."""
+        msg = json.dumps({
+            "type": "discovery_user",
+            "action": "leave",
+            "public_key": client.public_key
+        })
+
+        for other in self._clients.values():
+            if other.authenticated and other.discoverable and other.public_key != client.public_key:
+                try:
+                    await other.websocket.send(msg)
+                except Exception:
+                    pass
+
     async def _cleanup_client(self, client: Client):
         """Clean up disconnected client."""
         if client.websocket in self._clients:
@@ -234,6 +309,10 @@ class SignalingServer:
 
         if client.public_key and client.public_key in self._clients_by_key:
             del self._clients_by_key[client.public_key]
+
+            # Broadcast discovery leave if discoverable
+            if client.discoverable:
+                await self._broadcast_discovery_leave(client)
 
             # Broadcast offline status
             if client.authenticated:
