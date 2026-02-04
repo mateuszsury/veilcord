@@ -1,4 +1,23 @@
-# DiscordOpus .gitignore
+# Veilcord .gitignore
+
+# =============================================================================
+# Claude / GSD Planning Files (not for public repo)
+# =============================================================================
+.claude/
+.planning/
+**/CLAUDE.md
+CLAUDE.md
+
+# Temp/junk files
+nul
+=1.14.0
+
+# Generated scripts (keep assets, not generators)
+generate_logo.py
+generate_ico.py
+
+# Final distribution folder
+dist_final/
 
 # =============================================================================
 # Python
